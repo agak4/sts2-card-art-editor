@@ -7,6 +7,9 @@ const UI_SETTINGS_PATH := "user://card_art_editor/ui_settings.json"
 const STATUS_READY := "이 카드의 이미지를 수정할 준비가 되었습니다."
 const FILE_DIALOG_MODE_UPLOAD := "upload"
 const FILE_DIALOG_MODE_IMPORT_PACK := "import_pack"
+const FILE_DIALOG_MODE_IMPORT_MOD := "import_mod"
+const EXPORT_DIALOG_MODE_PACK := "pack"
+const EXPORT_DIALOG_MODE_CURRENT_PNG := "current_png"
 const IMAGE_EXTENSIONS := ["png", "jpg", "jpeg", "webp", "gif"]
 const THUMBNAIL_SIZE := Vector2i(120, 90)
 const TRANSLATIONS := {
@@ -49,6 +52,7 @@ const TRANSLATIONS := {
 		"browser_pack_hint": "선택한 아트팩 파일:\n%s",
 		"browser_image_error": "이미지를 미리보기로 불러올 수 없습니다.",
 		"browser_gif_preview": "\nGIF 미리보기",
+		"export_current_png": "PNG\uB85C \uB0B4\uBCF4\uB0B4\uAE30",
 		"toggle_language": "English"
 	},
 	"en": {
@@ -90,6 +94,7 @@ const TRANSLATIONS := {
 		"browser_pack_hint": "Selected art pack file:\n%s",
 		"browser_image_error": "Could not load the image preview.",
 		"browser_gif_preview": "\nGIF preview",
+		"export_current_png": "Save Current Card PNG",
 		"toggle_language": "한국어"
 	}
 }
@@ -108,7 +113,9 @@ const TRANSLATIONS := {
 @onready var _upload_hint_label = _tab_container.get_node("UploadImage/UploadHintLabel")
 @onready var _choose_image_button = %ChooseImageButton
 @onready var _import_pack_button = %ImportPackButton
+@onready var _import_mod_button = %ImportModButton
 @onready var _export_pack_button = %ExportPackButton
+@onready var _export_current_png_button = %ExportCurrentPngButton
 @onready var _selected_file_label = %SelectedFileLabel
 @onready var _restore_button = %RestoreButton
 @onready var _restore_all_button = %RestoreAllButton
@@ -134,6 +141,8 @@ var _pending_request_source_path := ""
 var _selected_upload_path := ""
 var _refresh_accumulator := 0.0
 var _file_dialog_mode := FILE_DIALOG_MODE_UPLOAD
+var _import_mod_label := "Import Mod Images"
+var _export_dialog_mode := EXPORT_DIALOG_MODE_PACK
 var _browser_current_dir := ""
 var _browser_selected_path := ""
 var _browser_selection_is_dir := false
@@ -141,7 +150,9 @@ var _thumbnail_cache := {}
 var _locale := "ko"
 var _language_button: Button
 var _adjust_button: Button
+var _display_mode_button: Button
 var _adjust_panel: PanelContainer
+var _adjust_preview_frame: PanelContainer
 var _adjust_preview: TextureRect
 var _adjust_preview_label: Label
 var _adjust_title_label: Label
@@ -153,7 +164,9 @@ var _adjust_x_slider: HSlider
 var _adjust_y_slider: HSlider
 var _adjust_apply_button: Button
 var _adjust_cancel_button: Button
+var _adjust_reset_button: Button
 var _adjust_source_image = null
+var _adjust_drag_active := false
 
 
 func _manager():
@@ -198,7 +211,10 @@ func _apply_locale() -> void:
 	_upload_hint_label.text = _tr("upload_hint")
 	_choose_image_button.text = _tr("choose_image")
 	_import_pack_button.text = _tr("import_pack")
+	_import_mod_label = "\uBAA8\uB4DC\uD329 \uCD94\uCD9C" if _locale == "ko" else "Import Mod Images"
+	_import_mod_button.text = _import_mod_label
 	_export_pack_button.text = _tr("export_pack")
+	_export_current_png_button.text = _tr("export_current_png")
 	_restore_button.text = _tr("restore_current")
 	_restore_all_button.text = _tr("restore_all")
 	_close_button.text = _tr("close")
@@ -210,13 +226,15 @@ func _apply_locale() -> void:
 	_browser_cancel_button.text = _tr("cancel")
 	_file_browser_title.text = _tr("browser_title_upload") if _file_dialog_mode == FILE_DIALOG_MODE_UPLOAD else _tr("browser_title_pack")
 	_browser_preview_label.text = _tr("browser_preview_default")
-	_export_file_dialog.title = _tr("export_pack")
+	_configure_export_dialog(_export_dialog_mode)
 	_selected_file_label.text = _tr("no_image_selected") if _selected_upload_path == "" else _selected_upload_path.get_file()
 	_tab_container.set_tab_title(1, _tr("upload_tab"))
 	if _language_button != null:
 		_language_button.text = _tr("toggle_language")
 	if _adjust_button != null:
 		_adjust_button.text = _tr("adjust_button")
+	if _display_mode_button != null:
+		_display_mode_button.text = _get_display_mode_button_text()
 	if _adjust_title_label != null:
 		_adjust_title_label.text = _tr("adjust_title")
 	if _adjust_preview_label != null and (_adjust_source_image == null or _adjust_preview.texture == null):
@@ -229,9 +247,19 @@ func _apply_locale() -> void:
 		_adjust_y_label.text = _tr("adjust_offset_y")
 	if _adjust_cancel_button != null:
 		_adjust_cancel_button.text = _tr("cancel")
+	if _adjust_reset_button != null:
+		_adjust_reset_button.text = "Reset"
 	if _adjust_apply_button != null:
 		_adjust_apply_button.text = _tr("apply")
 	_refresh_card_label()
+
+
+func _get_display_mode_button_text() -> String:
+	var manager = _manager()
+	var is_full_art = manager != null and _current_source_path != "" and manager.is_full_art_mode(_current_source_path)
+	if _locale == "en":
+		return "Disable Full Art" if is_full_art else "Enable Full Art"
+	return "풀아트 끄기" if is_full_art else "풀아트 켜기"
 
 
 func _build_adjust_ui() -> void:
@@ -245,12 +273,17 @@ func _build_adjust_ui() -> void:
 	footer_row.add_child(_adjust_button)
 	footer_row.move_child(_adjust_button, 1)
 
+	_display_mode_button = Button.new()
+	_display_mode_button.text = "Enable Full Art"
+	footer_row.add_child(_display_mode_button)
+	footer_row.move_child(_display_mode_button, 2)
+
 	_adjust_panel = PanelContainer.new()
 	_adjust_panel.name = "AdjustPanel"
 	_adjust_panel.visible = false
 	_adjust_panel.top_level = true
 	_adjust_panel.z_as_relative = false
-	_adjust_panel.z_index = 120
+	_adjust_panel.z_index = 1200
 	_adjust_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_adjust_panel.set_anchors_preset(Control.PRESET_CENTER)
 	_adjust_panel.offset_left = -360
@@ -275,15 +308,21 @@ func _build_adjust_ui() -> void:
 	root.add_child(title)
 	_adjust_title_label = title
 
+	_adjust_preview_frame = PanelContainer.new()
+	_adjust_preview_frame.custom_minimum_size = Vector2(520, 260)
+	root.add_child(_adjust_preview_frame)
+
 	_adjust_preview = TextureRect.new()
 	_adjust_preview.custom_minimum_size = Vector2(520, 260)
 	_adjust_preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_adjust_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	root.add_child(_adjust_preview)
+	_adjust_preview.mouse_filter = Control.MOUSE_FILTER_STOP
+	_adjust_preview_frame.add_child(_adjust_preview)
+	_adjust_preview.set_anchors_preset(Control.PRESET_FULL_RECT)
 
 	_adjust_preview_label = Label.new()
 	_adjust_preview_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_adjust_preview_label.text = "현재 적용된 이미지를 다시 배치합니다."
+	_adjust_preview_label.text = "Drag the preview to reposition it. Use zoom to crop tighter."
 	root.add_child(_adjust_preview_label)
 
 	root.add_child(_make_adjust_slider_row("확대", "_adjust_zoom_slider", 100, 300, 1, 100))
@@ -298,6 +337,10 @@ func _build_adjust_ui() -> void:
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button_row.add_child(spacer)
 
+	_adjust_reset_button = Button.new()
+	_adjust_reset_button.text = "Reset"
+	button_row.add_child(_adjust_reset_button)
+
 	_adjust_cancel_button = Button.new()
 	_adjust_cancel_button.text = "취소"
 	button_row.add_child(_adjust_cancel_button)
@@ -309,6 +352,9 @@ func _build_adjust_ui() -> void:
 	_adjust_zoom_label = _adjust_zoom_slider.get_parent().get_child(0) as Label
 	_adjust_x_label = _adjust_x_slider.get_parent().get_child(0) as Label
 	_adjust_y_label = _adjust_y_slider.get_parent().get_child(0) as Label
+	_adjust_zoom_slider.get_parent().visible = false
+	_adjust_x_slider.get_parent().visible = false
+	_adjust_y_slider.get_parent().visible = false
 
 
 func _make_adjust_slider_row(label_text: String, slider_property: String, min_value: float, max_value: float, step: float, default_value: float):
@@ -416,6 +462,15 @@ func _on_import_shared_pressed() -> void:
 	_open_file_browser(FILE_DIALOG_MODE_IMPORT_PACK)
 
 
+func _on_import_mod_pressed() -> void:
+	var manager = _manager()
+	if manager == null:
+		_set_status("The card art manager is not available.", true)
+		return
+	_set_status("Choose a mod PCK or manifest JSON file to import card images.", false)
+	_open_file_browser(FILE_DIALOG_MODE_IMPORT_MOD)
+
+
 func _on_export_override_pressed() -> void:
 	var manager = _manager()
 	if manager == null:
@@ -425,7 +480,22 @@ func _on_export_override_pressed() -> void:
 		_set_status("Apply at least one custom image first, then export the pack.", true)
 		return
 	_set_status("Choose where to save a bundle with all current custom card images.", false)
+	_configure_export_dialog(EXPORT_DIALOG_MODE_PACK)
 	_export_file_dialog.current_file = "card_art_bundle.cardartpack.json"
+	_export_file_dialog.popup_centered_ratio(0.8)
+
+
+func _on_export_current_png_pressed() -> void:
+	var manager = _manager()
+	if manager == null:
+		_set_status("The card art manager is not available.", true)
+		return
+	if _current_source_path == "":
+		_set_status("No card art is selected.", true)
+		return
+	_set_status("Choose where to save the current card image as a PNG.", false)
+	_configure_export_dialog(EXPORT_DIALOG_MODE_CURRENT_PNG)
+	_export_file_dialog.current_file = "%s.png" % _current_source_path.get_file().get_basename()
 	_export_file_dialog.popup_centered_ratio(0.8)
 
 
@@ -437,9 +507,10 @@ func _apply_import_path(path: String) -> void:
 	_selected_upload_path = path
 	_selected_file_label.text = path.get_file()
 	var is_import_pack = _file_dialog_mode == FILE_DIALOG_MODE_IMPORT_PACK
-	var result = manager.import_bundle_from_file(path) if is_import_pack else manager.save_override_from_file(_current_source_path, path)
+	var is_import_mod = _file_dialog_mode == FILE_DIALOG_MODE_IMPORT_MOD
+	var result = manager.import_bundle_from_file(path) if is_import_pack else (manager.import_mod_images_from_path(path) if is_import_mod else manager.save_override_from_file(_current_source_path, path))
 	if bool(result.get("ok", false)):
-		if is_import_pack:
+		if is_import_pack or is_import_mod:
 			manager.refresh_all_portraits()
 		else:
 			var portrait = _get_active_portrait()
@@ -455,8 +526,28 @@ func _on_export_file_selected(path: String) -> void:
 	if manager == null:
 		_set_status("The card art manager is not available.", true)
 		return
-	var result = manager.export_bundle_to_file(path)
+	var result
+	if _export_dialog_mode == EXPORT_DIALOG_MODE_CURRENT_PNG:
+		result = manager.export_source_image_to_png(_current_source_path, path)
+	else:
+		result = manager.export_bundle_to_file(path)
 	_set_status("%s\nFile: %s" % [String(result.get("message", "Unknown export result.")), path.get_file()], !bool(result.get("ok", false)))
+
+
+func _configure_export_dialog(mode: String) -> void:
+	_export_dialog_mode = mode
+	if _export_file_dialog == null:
+		return
+	if mode == EXPORT_DIALOG_MODE_CURRENT_PNG:
+		_export_file_dialog.title = _tr("export_current_png")
+		_export_file_dialog.filters = PackedStringArray([
+			"*.png ; PNG image"
+		])
+		return
+	_export_file_dialog.title = _tr("export_pack")
+	_export_file_dialog.filters = PackedStringArray([
+		"*.cardartpack.json ; Card art bundle"
+	])
 
 
 func _on_export_dialog_canceled() -> void:
@@ -484,9 +575,24 @@ func _on_adjust_pressed() -> void:
 	_adjust_zoom_slider.value = float(adjustment_state.get("zoom", 1.0)) * 100.0
 	_adjust_x_slider.value = float(adjustment_state.get("offset_x", 0.0)) * 100.0
 	_adjust_y_slider.value = float(adjustment_state.get("offset_y", 0.0)) * 100.0
+	_adjust_drag_active = false
+	_apply_adjust_preview_frame_style()
 	_adjust_panel.show()
 	_adjust_panel.move_to_front()
 	_update_adjust_preview()
+
+
+func _on_display_mode_pressed() -> void:
+	var manager = _manager()
+	if manager == null:
+		_set_status("The card art manager is not available.", true)
+		return
+	if _current_source_path == "":
+		_set_status("No card art is selected.", true)
+		return
+	var result = manager.toggle_display_mode(_current_source_path)
+	_set_status(String(result.get("message", "Unknown display mode result.")), !bool(result.get("ok", false)))
+	_update_context(true)
 
 
 func _on_adjust_controls_changed(_value: float) -> void:
@@ -515,20 +621,79 @@ func _on_adjust_cancel_pressed() -> void:
 	_close_adjust_panel()
 
 
+func _on_adjust_reset_pressed() -> void:
+	_adjust_zoom_slider.value = 100.0
+	_adjust_x_slider.value = 0.0
+	_adjust_y_slider.value = 0.0
+	_update_adjust_preview()
+
+
+func _on_adjust_preview_gui_input(event: InputEvent) -> void:
+	if _adjust_panel == null or !_adjust_panel.visible:
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		_adjust_drag_active = event.pressed
+		return
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_adjust_zoom_slider.value = clamp(_adjust_zoom_slider.value + 5.0, _adjust_zoom_slider.min_value, _adjust_zoom_slider.max_value)
+			_update_adjust_preview()
+			return
+		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_adjust_zoom_slider.value = clamp(_adjust_zoom_slider.value - 5.0, _adjust_zoom_slider.min_value, _adjust_zoom_slider.max_value)
+			_update_adjust_preview()
+			return
+	if event is InputEventMouseMotion and _adjust_drag_active:
+		var preview_size = _adjust_preview.size
+		if preview_size.x <= 1.0 or preview_size.y <= 1.0:
+			return
+		var motion = event as InputEventMouseMotion
+		var delta_x = -(motion.relative.x / preview_size.x) * 200.0
+		var delta_y = -(motion.relative.y / preview_size.y) * 200.0
+		_adjust_x_slider.value = clamp(_adjust_x_slider.value + delta_x, _adjust_x_slider.min_value, _adjust_x_slider.max_value)
+		_adjust_y_slider.value = clamp(_adjust_y_slider.value + delta_y, _adjust_y_slider.min_value, _adjust_y_slider.max_value)
+		_update_adjust_preview()
+
+
 func _close_adjust_panel() -> void:
 	if _adjust_panel != null:
 		_adjust_panel.hide()
 	if _adjust_preview != null:
 		_adjust_preview.texture = null
 	if _adjust_preview_label != null:
-		_adjust_preview_label.text = "현재 적용된 이미지를 다시 배치합니다."
+		_adjust_preview_label.text = "Drag the preview to reposition it. Use zoom to crop tighter."
+	_adjust_drag_active = false
 	_adjust_source_image = null
+
+
+func _apply_adjust_preview_frame_style() -> void:
+	if _adjust_preview_frame == null:
+		return
+	var manager = _manager()
+	var is_full_art = manager != null and _current_source_path != "" and manager.is_full_art_mode(_current_source_path)
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.07, 0.07, 0.09, 0.92)
+	style.border_color = Color(0.92, 0.92, 0.96, 0.95)
+	style.border_width_left = 3
+	style.border_width_top = 3
+	style.border_width_right = 3
+	style.border_width_bottom = 3
+	style.corner_radius_top_left = 28 if is_full_art else 8
+	style.corner_radius_top_right = 28 if is_full_art else 8
+	style.corner_radius_bottom_right = 28 if is_full_art else 8
+	style.corner_radius_bottom_left = 28 if is_full_art else 8
+	style.expand_margin_left = 4
+	style.expand_margin_top = 4
+	style.expand_margin_right = 4
+	style.expand_margin_bottom = 4
+	_adjust_preview_frame.add_theme_stylebox_override("panel", style)
 
 
 func _update_adjust_preview() -> void:
 	var manager = _manager()
 	if manager == null or _adjust_source_image == null or _current_source_path == "":
 		return
+	_apply_adjust_preview_frame_style()
 	var preview_image = manager.build_adjusted_preview(
 		_current_source_path,
 		_adjust_source_image,
@@ -541,7 +706,7 @@ func _update_adjust_preview() -> void:
 		_adjust_preview_label.text = "미리보기를 만들지 못했습니다."
 		return
 	_adjust_preview.texture = ImageTexture.create_from_image(preview_image)
-	_adjust_preview_label.text = "확대 %d%% / X %d / Y %d" % [
+	_adjust_preview_label.text = "Drag preview to reposition.\nZoom %d%% / X %d / Y %d" % [
 		int(_adjust_zoom_slider.value),
 		int(_adjust_x_slider.value),
 		int(_adjust_y_slider.value)
@@ -643,7 +808,6 @@ func _on_generate_request_completed(_result, response_code: int, _headers, body:
 	if generated_image == null:
 		_set_busy(false, "The generated image could not be decoded.", true)
 		return
-
 	var manager = _manager()
 	if manager == null:
 		_set_busy(false, "The card art manager is not available.", true)
@@ -662,15 +826,47 @@ func _update_context(force_refresh: bool) -> void:
 		_refresh_card_label()
 		_edit_art_button.disabled = true
 		_restore_button.disabled = true
+		_display_mode_button.disabled = true
 		return
 
-	var portrait = _get_active_portrait()
 	var next_source_path = ""
-	if portrait != null:
-		next_source_path = manager.get_source_path_for_texture_rect(portrait)
+	var model_source_path = ""
+	var card_node_source_path = ""
+	var portrait_source_path = ""
+	var screen = get_parent()
+	if screen != null:
+		var inspect_card = screen.get_node_or_null("Card")
+		if inspect_card != null:
+			var inspect_portrait = inspect_card.get_node_or_null("CardContainer/PortraitCanvasGroup/Portrait")
+			var inspect_ancient_portrait = inspect_card.get_node_or_null("CardContainer/PortraitCanvasGroup/AncientPortrait")
+			if inspect_ancient_portrait is TextureRect and (inspect_ancient_portrait as CanvasItem).visible:
+				portrait_source_path = manager.get_source_path_for_texture_rect(inspect_ancient_portrait)
+				next_source_path = portrait_source_path
+			elif inspect_portrait is TextureRect and (inspect_portrait as CanvasItem).visible:
+				portrait_source_path = manager.get_source_path_for_texture_rect(inspect_portrait)
+				next_source_path = portrait_source_path
+			if next_source_path == "":
+				model_source_path = manager.get_source_path_for_model(inspect_card.get("Model"))
+				next_source_path = model_source_path
+			if next_source_path == "":
+				card_node_source_path = manager.get_source_path_for_card_node(inspect_card)
+				next_source_path = card_node_source_path
+	if next_source_path == "":
+		var portrait = _get_active_portrait()
+		if portrait != null:
+			portrait_source_path = manager.get_source_path_for_texture_rect(portrait)
+			next_source_path = portrait_source_path
 
 	if force_refresh or next_source_path != _current_source_path:
 		var source_changed = next_source_path != _current_source_path
+		print("[CardArtEditorDebug] update_context force=%s model=%s card=%s portrait=%s next=%s current=%s" % [
+			str(force_refresh),
+			model_source_path,
+			card_node_source_path,
+			portrait_source_path,
+			next_source_path,
+			_current_source_path
+		])
 		_current_source_path = next_source_path
 		_current_target_size = manager.get_target_size_for_source_path(_current_source_path) if _current_source_path != "" else Vector2i.ZERO
 		if source_changed:
@@ -682,8 +878,12 @@ func _update_context(force_refresh: bool) -> void:
 	_edit_art_button.disabled = _current_source_path == ""
 	_restore_button.disabled = _current_source_path == "" or !manager.has_override(_current_source_path)
 	_adjust_button.disabled = _current_source_path == "" or !manager.can_adjust_override(_current_source_path)
+	_display_mode_button.disabled = _current_source_path == "" or !manager.has_override(_current_source_path) or !manager.can_toggle_full_art(_current_source_path)
+	_display_mode_button.text = _get_display_mode_button_text()
 	_export_pack_button.disabled = manager.get_override_count() == 0
+	_export_current_png_button.disabled = _current_source_path == ""
 	_import_pack_button.disabled = false
+	_import_mod_button.disabled = false
 	_restore_all_button.disabled = manager.get_override_count() == 0
 
 
@@ -705,52 +905,73 @@ func _get_active_portrait():
 	if screen == null:
 		return null
 
-	var candidates: Array = []
-	_collect_portrait_candidates(screen, candidates)
-	if candidates.is_empty():
+	var inspect_card = screen.get_node_or_null("Card")
+	if inspect_card != null:
+		var portrait = inspect_card.get_node_or_null("CardContainer/PortraitCanvasGroup/Portrait")
+		var ancient_portrait = inspect_card.get_node_or_null("CardContainer/PortraitCanvasGroup/AncientPortrait")
+		var manager = _manager()
+		if ancient_portrait is TextureRect and manager != null and manager.get_source_path_for_texture_rect(ancient_portrait) != "":
+			return ancient_portrait
+		if portrait is TextureRect and manager != null and manager.get_source_path_for_texture_rect(portrait) != "":
+			return portrait
+		if ancient_portrait is TextureRect and ancient_portrait.visible:
+			return ancient_portrait
+		if portrait is TextureRect and portrait.visible:
+			return portrait
+		if portrait is TextureRect:
+			return portrait
+		if ancient_portrait is TextureRect:
+			return ancient_portrait
+
+	var card_roots: Array = []
+	_collect_card_roots(screen, card_roots)
+	if card_roots.is_empty():
 		return null
 
 	var manager = _manager()
-	var best_visible_with_source = null
-	var best_visible_with_source_score = INF
-	var best_visible = null
-	var best_visible_score = INF
-	var best_with_source = null
-	var best_with_source_score = INF
-	var best_any = null
-	var best_any_score = INF
+	var best_root = null
+	var best_root_score = INF
+	for card_root in card_roots:
+		var root_control = card_root as Control
+		if root_control == null:
+			continue
+		var portrait = card_root.get_node_or_null("PortraitCanvasGroup/Portrait")
+		var ancient_portrait = card_root.get_node_or_null("PortraitCanvasGroup/AncientPortrait")
+		var has_source = false
+		if manager != null:
+			if portrait is TextureRect:
+				has_source = manager.get_source_path_for_texture_rect(portrait) != ""
+			if !has_source and ancient_portrait is TextureRect:
+				has_source = manager.get_source_path_for_texture_rect(ancient_portrait) != ""
+		var is_visible = _is_control_visible_in_tree(root_control)
+		if !is_visible and !has_source:
+			continue
+		var root_score = _get_card_root_score(root_control)
+		if root_score < best_root_score:
+			best_root = card_root
+			best_root_score = root_score
 
-	for candidate in candidates:
-		var candidate_score = _get_portrait_candidate_score(candidate)
-		var is_visible = _is_control_visible_in_tree(candidate)
-		var has_source = manager != null and manager.get_source_path_for_texture_rect(candidate) != ""
+	if best_root == null:
+		return null
 
-		if candidate_score < best_any_score:
-			best_any = candidate
-			best_any_score = candidate_score
-
-		if is_visible and candidate_score < best_visible_score:
-			best_visible = candidate
-			best_visible_score = candidate_score
-
-		if has_source and candidate_score < best_with_source_score:
-			best_with_source = candidate
-			best_with_source_score = candidate_score
-
-		if is_visible and has_source and candidate_score < best_visible_with_source_score:
-			best_visible_with_source = candidate
-			best_visible_with_source_score = candidate_score
-
-	if best_visible_with_source != null:
-		return best_visible_with_source
-	if best_visible != null:
-		return best_visible
-	if best_with_source != null:
-		return best_with_source
-	return best_any
+	var best_ancient = best_root.get_node_or_null("PortraitCanvasGroup/AncientPortrait")
+	if best_ancient is TextureRect and manager != null and manager.get_source_path_for_texture_rect(best_ancient) != "":
+		return best_ancient
+	var best_portrait = best_root.get_node_or_null("PortraitCanvasGroup/Portrait")
+	if best_portrait is TextureRect and manager != null and manager.get_source_path_for_texture_rect(best_portrait) != "":
+		return best_portrait
+	if best_ancient is TextureRect and best_ancient.visible:
+		return best_ancient
+	if best_portrait is TextureRect and best_portrait.visible:
+		return best_portrait
+	if best_portrait is TextureRect:
+		return best_portrait
+	if best_ancient is TextureRect:
+		return best_ancient
+	return null
 
 
-func _get_portrait_candidate_score(control: Control) -> float:
+func _get_card_root_score(control: Control) -> float:
 	var candidate_rect = control.get_global_rect()
 	var candidate_center = candidate_rect.position + (candidate_rect.size * 0.5)
 	var anchor_rect = _edit_art_button.get_global_rect()
@@ -760,13 +981,11 @@ func _get_portrait_candidate_score(control: Control) -> float:
 	return center_distance - min(area / 100000.0, 50.0)
 
 
-func _collect_portrait_candidates(node, candidates: Array) -> void:
+func _collect_card_roots(node, candidates: Array) -> void:
 	for child in node.get_children():
-		if child is TextureRect:
-			var child_name = String(child.name)
-			if (child_name == "Portrait" or child_name == "AncientPortrait") and child.texture != null:
-				candidates.append(child)
-		_collect_portrait_candidates(child, candidates)
+		if child is Control and String(child.name) == "CardContainer":
+			candidates.append(child)
+		_collect_card_roots(child, candidates)
 
 
 func _is_control_visible_in_tree(control: Control) -> bool:
@@ -790,9 +1009,7 @@ func _configure_quality_options() -> void:
 func _configure_file_dialog() -> void:
 	_export_file_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
 	_export_file_dialog.access = FileDialog.ACCESS_FILESYSTEM
-	_export_file_dialog.filters = PackedStringArray([
-		"*.cardartpack.json ; Card art bundle"
-	])
+	_configure_export_dialog(EXPORT_DIALOG_MODE_PACK)
 	_editor_popup.top_level = true
 	_editor_popup.z_as_relative = false
 	_editor_popup.z_index = 1000
@@ -808,9 +1025,12 @@ func _bind_signals() -> void:
 	_restore_button.pressed.connect(_on_restore_pressed)
 	_restore_all_button.pressed.connect(_on_restore_all_pressed)
 	_adjust_button.pressed.connect(_on_adjust_pressed)
+	_display_mode_button.pressed.connect(_on_display_mode_pressed)
 	_choose_image_button.pressed.connect(_on_choose_image_pressed)
 	_import_pack_button.pressed.connect(_on_import_shared_pressed)
+	_import_mod_button.pressed.connect(_on_import_mod_pressed)
 	_export_pack_button.pressed.connect(_on_export_override_pressed)
+	_export_current_png_button.pressed.connect(_on_export_current_png_pressed)
 	_generate_button.pressed.connect(_on_generate_pressed)
 	_export_file_dialog.file_selected.connect(_on_export_file_selected)
 	_export_file_dialog.canceled.connect(_on_export_dialog_canceled)
@@ -825,7 +1045,9 @@ func _bind_signals() -> void:
 	_adjust_zoom_slider.value_changed.connect(_on_adjust_controls_changed)
 	_adjust_x_slider.value_changed.connect(_on_adjust_controls_changed)
 	_adjust_y_slider.value_changed.connect(_on_adjust_controls_changed)
+	_adjust_preview.gui_input.connect(_on_adjust_preview_gui_input)
 	_adjust_apply_button.pressed.connect(_on_adjust_apply_pressed)
+	_adjust_reset_button.pressed.connect(_on_adjust_reset_pressed)
 	_adjust_cancel_button.pressed.connect(_on_adjust_cancel_pressed)
 
 
@@ -834,9 +1056,12 @@ func _set_busy(is_busy: bool, message: String, is_error: bool = false) -> void:
 	_generate_button.disabled = is_busy
 	_choose_image_button.disabled = is_busy
 	_import_pack_button.disabled = is_busy
+	_import_mod_button.disabled = is_busy
 	_export_pack_button.disabled = is_busy or manager == null or manager.get_override_count() == 0
+	_export_current_png_button.disabled = is_busy or _current_source_path == ""
 	_restore_button.disabled = is_busy or _current_source_path == "" or manager == null or !manager.has_override(_current_source_path)
 	_adjust_button.disabled = is_busy or _current_source_path == "" or manager == null or !manager.can_adjust_override(_current_source_path)
+	_display_mode_button.disabled = is_busy or _current_source_path == "" or manager == null or !manager.has_override(_current_source_path) or !manager.can_toggle_full_art(_current_source_path)
 	_restore_all_button.disabled = is_busy or manager == null or manager.get_override_count() == 0
 	_close_button.disabled = is_busy
 	_edit_art_button.disabled = is_busy or _current_source_path == ""
@@ -869,7 +1094,12 @@ func _open_file_browser(mode: String) -> void:
 	_browser_preview_label.text = "미리보기를 표시할 파일을 선택하세요."
 	_file_browser_title.text = "이미지 파일 선택" if mode == FILE_DIALOG_MODE_UPLOAD else "아트팩 파일 선택"
 	_browser_preview_label.text = _tr("browser_preview_default")
-	_file_browser_title.text = _tr("browser_title_upload") if mode == FILE_DIALOG_MODE_UPLOAD else _tr("browser_title_pack")
+	if mode == FILE_DIALOG_MODE_UPLOAD:
+		_file_browser_title.text = _tr("browser_title_upload")
+	elif mode == FILE_DIALOG_MODE_IMPORT_PACK:
+		_file_browser_title.text = _tr("browser_title_pack")
+	else:
+		_file_browser_title.text = "Choose Mod PCK or Manifest"
 	_file_browser_panel.show()
 	_file_browser_panel.move_to_front()
 	_refresh_file_browser(_resolve_browser_start_dir())
@@ -958,6 +1188,8 @@ func _is_browser_supported_file(file_name: String) -> bool:
 	var lower_name = file_name.to_lower()
 	if _file_dialog_mode == FILE_DIALOG_MODE_IMPORT_PACK:
 		return lower_name.ends_with(".cardartpack.json")
+	if _file_dialog_mode == FILE_DIALOG_MODE_IMPORT_MOD:
+		return lower_name.ends_with(".json") or lower_name.ends_with(".pck")
 	return IMAGE_EXTENSIONS.has(file_name.get_extension().to_lower())
 
 
@@ -1018,6 +1250,8 @@ func _on_browser_path_submitted(new_text: String) -> void:
 
 
 func _on_browser_item_selected(index: int) -> void:
+	_handle_browser_item_selected(index)
+	return
 	var entry = _browser_item_list.get_item_metadata(index)
 	if !(entry is Dictionary):
 		return
@@ -1041,6 +1275,43 @@ func _on_browser_item_selected(index: int) -> void:
 	if image == null:
 		_browser_preview.texture = null
 		_browser_preview_label.text = "이미지를 미리보기로 불러올 수 없습니다."
+		return
+	_browser_preview.texture = ImageTexture.create_from_image(image)
+	_browser_preview_label.text = "%s\n%d x %d%s" % [
+		_browser_selected_path.get_file(),
+		image.get_width(),
+		image.get_height(),
+		_tr("browser_gif_preview") if extension == "gif" else ""
+	]
+
+
+func _handle_browser_item_selected(index: int) -> void:
+	var entry = _browser_item_list.get_item_metadata(index)
+	if !(entry is Dictionary):
+		return
+	_browser_selected_path = String(entry.get("path", ""))
+	_browser_selection_is_dir = bool(entry.get("is_dir", false))
+	_browser_open_button.disabled = _browser_selected_path == ""
+	if _browser_selection_is_dir:
+		_browser_preview.texture = null
+		_browser_preview_label.text = "Open this folder or select a file inside it.\n%s" % _browser_selected_path
+		return
+	if _file_dialog_mode == FILE_DIALOG_MODE_IMPORT_PACK:
+		_browser_preview.texture = null
+		_browser_preview_label.text = "Selected art pack:\n%s" % _browser_selected_path.get_file()
+		return
+	if _file_dialog_mode == FILE_DIALOG_MODE_IMPORT_MOD:
+		_browser_preview.texture = null
+		_browser_preview_label.text = "Selected mod file:\n%s" % _browser_selected_path.get_file()
+		return
+	var manager = _manager()
+	if manager == null:
+		return
+	var extension = _browser_selected_path.get_extension().to_lower()
+	var image = manager.load_first_gif_frame(_browser_selected_path) if extension == "gif" else manager.load_image_from_file(_browser_selected_path)
+	if image == null:
+		_browser_preview.texture = null
+		_browser_preview_label.text = "Could not load the image preview."
 		return
 	_browser_preview.texture = ImageTexture.create_from_image(image)
 	_browser_preview_label.text = "%s\n%d x %d%s" % [

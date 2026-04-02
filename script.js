@@ -131,8 +131,8 @@ function initDom() {
         searchInput: $('searchInput'),
         cardCountEl: $('cardCount'),
         exportBtn: $('exportBtn'),
-        addCardBtn: $('addCardBtn'),
         importBtn: $('importBtn'),
+        unloadBtn: $('unloadBtn'),
         appLoading: $('appLoading'),
         editModal: $('editModal'),
         cardLargePreview: $('cardLargePreview'),
@@ -168,15 +168,54 @@ function getCardAssets(character, cardType, rarity) {
     const p = FRAME_PREFIX;
     const rarityMap = { Starter: 'Common', Common: 'Common', Uncommon: 'Uncommon', Rare: 'Rare', Ancient: 'Rare', Misc: 'Uncommon' };
     const r = rarityMap[rarity] || 'Common';
+    const t = ['Attack', 'Skill', 'Power'].includes(cardType) ? cardType : 'Skill';
 
-    if (SPECIAL_CHARACTERS.has(character)) {
-        const t = character === 'Status' ? 'Status' : character === 'Curse' ? 'Curse' : 'Quest';
-        const bgFile = character === 'Status' ? `${p}BgSkillColorless.png` : `${p}Bg${t}.png`;
-        return { bg: bgFile, frame: `${p}Frame${t}.png`, banner: `${p}Banner${t}.png`, orb: '', type: `${p}Type${r}.png` };
+    if (character === 'Status' || rarity === 'Status') {
+        return { bg: `${p}BgSkillColorless.png`, frame: `${p}FrameStatus.png`, banner: `${p}BannerStatus.png`, orb: '', type: `${p}TypeStatus.png` };
+    }
+
+    if (character === 'Curse' || rarity === 'Curse') {
+        return { bg: `${p}BgCurse.png`, frame: `${p}FrameCurse.png`, banner: `${p}BannerCurse.png`, orb: '', type: `${p}TypeCurse.png` };
+    }
+
+    if (character === 'Event' || rarity === 'Event') {
+        const c = character === 'Event' ? 'Colorless' : character;
+        return {
+            bg: `${p}Bg${t}${c}.png`,
+            frame: `${p}Frame${t}Event.png`,
+            banner: `${p}BannerEvent.png`,
+            orb: `${p}Card${c}Orb.png`,
+            type: `${p}TypeEvent.png`
+        };
+    }
+
+    if (character === 'Quest' || rarity === 'Quest') {
+        return { bg: `${p}BgQuest.png`, frame: `${p}FrameQuest.png`, banner: `${p}BannerQuest.png`, orb: '', type: `${p}Type${r}.png` };
+    }
+
+    if (character === 'Token' || rarity === 'Token') {
+        const c = 'Colorless';
+        return {
+            bg: `${p}Bg${t}${c}.png`,
+            frame: `${p}Frame${t}${r}.png`,
+            banner: `${p}Banner${r}.png`,
+            orb: `${p}Card${c}Orb.png`,
+            type: `${p}Type${r}.png`
+        };
+    }
+
+    if (rarity === 'Ancient') {
+        const c = character === 'Ancient' ? 'Colorless' : character;
+        return {
+            bg: `${p}AncientCardHighlight.png`,
+            frame: `${p}AncientTextBg${t}.png`,
+            banner: `${p}BannerAncient.png`,
+            type: `${p}TypeAncient.png`,
+            orb: `${p}Card${c}Orb.png`,
+        };
     }
 
     const c = character === 'Ancient' ? 'Colorless' : character;
-    const t = ['Attack', 'Skill', 'Power'].includes(cardType) ? cardType : 'Skill';
     return {
         bg: `${p}Bg${t}${c}.png`,
         frame: `${p}Frame${t}${r}.png`,
@@ -186,15 +225,41 @@ function getCardAssets(character, cardType, rarity) {
     };
 }
 
-/** 카드 아트 이미지 src 반환 (커스텀 base64 우선) */
+/** 카드 아트 이미지 src 반환 (커스텀 Blob URL 우선) */
 function getCardArtSrc(card) {
-    if (card?.png_base64) return `data:image/png;base64,${card.png_base64}`;
+    if (card?.blobUrl) return card.blobUrl;
+    if (card?.png_base64 && !card.blobUrl) {
+        // 백오프: 직접 호출되지 않았더라도 비상시를 위해 업데이트 시도 (드문 경우)
+        updateCardBlobUrl(card);
+        if (card.blobUrl) return card.blobUrl;
+    }
     const character = (card?.character || 'colorless').toLowerCase();
     const nameEn = (card?.name_en || '').toLowerCase().replace(/ /g, '_');
     if (character === 'ancient' && nameEn === 'apparition') {
         return 'source/img/card_images/silent_apparition.webp';
     }
     return `source/img/card_images/${character}_${nameEn}.webp`;
+}
+
+/** base64 문자열을 Blob 객체로 변환 */
+function base64ToBlob(base64, type = 'image/png') {
+    if (!base64) return null;
+    const binary = atob(base64);
+    const array = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
+    return new Blob([array], { type });
+}
+
+/** 카드 객체의 Blob URL 갱신 및 관리 */
+function updateCardBlobUrl(card) {
+    if (card.blobUrl) {
+        URL.revokeObjectURL(card.blobUrl);
+        card.blobUrl = null;
+    }
+    if (card.png_base64) {
+        const blob = base64ToBlob(card.png_base64);
+        if (blob) card.blobUrl = URL.createObjectURL(blob);
+    }
 }
 
 // ================================================================
@@ -243,20 +308,24 @@ function getBaseSourcePath(card) {
 }
 
 function initAllCards() {
-    state.cards = CARDS_DB.map(card => ({
-        source_path: getBaseSourcePath(card),
-        type: 'static',
-        artType: 'static',
-        no: card.no,
-        name_kr: card.name_kr,
-        name_en: card.name_en,
-        character: card.character,
-        cardType: card.cardType,
-        rarity: card.rarity,
-        width: 1000,
-        height: 760,
-        png_base64: '',
-    }));
+    state.cards = CARDS_DB.map(card => {
+        const isAncient = card.rarity === 'Ancient';
+        return {
+            source_path: getBaseSourcePath(card),
+            type: 'static',
+            artType: 'static',
+            no: card.no,
+            name_kr: card.name_kr,
+            name_en: card.name_en,
+            character: card.character,
+            cardType: card.cardType,
+            rarity: card.rarity,
+            width: isAncient ? 606 : 1000,
+            height: isAncient ? 852 : 760,
+            png_base64: '',
+            blobUrl: null,
+        };
+    });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -274,10 +343,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         state.originalData = saved.originalData;
         if (saved.cards) {
             saved.cards.forEach(savedCard => {
-                const target = state.cards.find(c => c.source_path === savedCard.source_path);
+                let target = state.cards.find(c => c.source_path === savedCard.source_path);
+                if (!target && savedCard.name_en) {
+                    target = state.cards.find(c => c.name_en === savedCard.name_en);
+                }
                 if (target && savedCard.png_base64) {
                     target.png_base64 = savedCard.png_base64;
                     target.updated_at = savedCard.updated_at;
+                    updateCardBlobUrl(target);
                 }
             });
         }
@@ -319,7 +392,7 @@ function bindEvents() {
     });
 
     dom.importBtn.onclick = () => dom.fileInput.click();
-    dom.addCardBtn.onclick = addNewCard;
+    dom.unloadBtn.onclick = unloadArtPack;
     dom.exportBtn.onclick = exportJSON;
 
     dom.searchInput.addEventListener('input', filterCards);
@@ -372,18 +445,21 @@ async function handleFileUpload(file) {
         state.originalData = data;
         (data.overrides || []).forEach(ov => {
             const fileCard = enrichCard(ov);
-            const target = state.cards.find(c => c.source_path === fileCard.source_path);
+            let target = state.cards.find(c => c.source_path === fileCard.source_path);
+            if (!target && fileCard.name_en) {
+                target = state.cards.find(c => c.name_en === fileCard.name_en);
+            }
             if (target) {
                 target.png_base64 = fileCard.png_base64;
                 target.updated_at = fileCard.updated_at;
                 target.artType = fileCard.artType;
-            } else {
-                state.cards.push(fileCard);
+                updateCardBlobUrl(target);
             }
         });
 
         state.isDirty = false;
         await saveToDB({ originalData: state.originalData, cards: state.cards });
+        dom.cardGrid.innerHTML = '';
         renderUI();
     } catch (err) {
         console.error('파일 업로드 오류:', err);
@@ -396,6 +472,7 @@ async function handleFileUpload(file) {
 /** artpack 카드 객체에 DB 메타데이터를 병합 */
 function enrichCard(raw) {
     const meta = findCardMeta(raw.source_path || '');
+    const isAncient = meta?.rarity === 'Ancient';
     return {
         ...raw,
         artType: raw.type || 'static',
@@ -405,6 +482,8 @@ function enrichCard(raw) {
         character: meta?.character ?? inferCharacterFromPath(raw.source_path),
         cardType: meta?.cardType ?? inferTypeFromPath(raw.source_path),
         rarity: meta?.rarity ?? 'Common',
+        width: raw.width ?? (isAncient ? 606 : 1000),
+        height: raw.height ?? (isAncient ? 852 : 760),
     };
 }
 
@@ -441,7 +520,7 @@ function readFileAsText(file) {
 function renderUI() {
     dom.editorSection.classList.remove('hidden');
     dom.exportBtn.disabled = false;
-    dom.addCardBtn.disabled = false;
+    dom.unloadBtn.disabled = !state.originalData;
     updateStats();
     renderCardGrid();
     lucide.createIcons();
@@ -485,9 +564,10 @@ function createCardElement(card) {
     const artSrc = getCardArtSrc(card);
     const fallback = 'source/img/card_frame/273px-StS2_AncientCardHighlight.png';
     const artContent = `<img src="${artSrc}" alt="${card.name_en || card.name_kr}" onerror="this.onerror=null;this.src='${fallback}'">`;
+    const rarityClass = card.rarity ? `rarity-${card.rarity.toLowerCase()}` : '';
 
     const cardEl = document.createElement('div');
-    cardEl.className = 'sts2-card';
+    cardEl.className = `sts2-card ${rarityClass}`;
     cardEl.innerHTML = buildCardFrameHTML(assets, artContent) + buildCardTextHTML(card);
 
     if (card.png_base64) {
@@ -522,8 +602,9 @@ function filterCards() {
 
     state.cards.forEach(card => {
         const matchChar = character === 'all' ? true
-            : character === 'special' ? SPECIAL_CHARACTERS.has(card.character)
-                : card.character === character;
+            : character === 'Ancient' ? card.rarity === 'Ancient'
+                : character === 'special' ? (SPECIAL_CHARACTERS.has(card.character) || card.rarity === 'Event')
+                    : (card.character === character && card.rarity !== 'Event');
 
         const matchType = type === 'all' ? true
             : type === 'special' ? SPECIAL_TYPES.has(card.cardType)
@@ -545,31 +626,40 @@ function filterCards() {
 }
 
 // ================================================================
-// 카드 추가
+// 아트팩 해제
 // ================================================================
-function addNewCard() {
-    const path = prompt('추가할 카드의 원본 경로를 입력하세요:', 'res://images/packed/card_portraits/colorless/');
-    if (!path) return;
+async function unloadArtPack() {
+    if (!confirm('현재 로드된 아트팩을 해제하고 초기 상태로 되돌리시겠습니까?')) return;
 
-    const newCard = enrichCard({
-        source_path: path,
-        width: 1000,
-        height: 760,
-        updated_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
-        type: 'static',
-        png_base64: '',
-    });
+    showLoading(true);
+    try {
+        // 모든 Blob URL 해제
+        state.cards.forEach(c => {
+            if (c.blobUrl) URL.revokeObjectURL(c.blobUrl);
+            c.blobUrl = null;
+        });
 
-    state.cards.push(newCard);
-    state.isDirty = true;
-    saveToDB({ originalData: state.originalData, cards: state.cards });
+        state.originalData = null;
+        state.isDirty = false;
 
-    newCard.domNode = createCardElement(newCard);
-    dom.cardGrid.appendChild(newCard.domNode);
+        // 초기 카드로 리셋
+        initAllCards();
 
-    filterCards();
-    updateStats();
-    openEditor(state.cards.length - 1);
+        // DB 캐시 초기화
+        const db = await openDB();
+        const tx = db.transaction('AppData', 'readwrite');
+        tx.objectStore('AppData').delete('currentState');
+
+        await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
+
+        // 그리드 초기화 (기존 DOM 노드 제거 후 다시 렌더링)
+        dom.cardGrid.innerHTML = '';
+        renderUI();
+    } catch (err) {
+        console.error('아트팩 해제 오류:', err);
+    } finally {
+        showLoading(false);
+    }
 }
 
 // ================================================================
@@ -631,6 +721,9 @@ function openEditor(cardIndex) {
     dom.modalPreviewOriginal.classList.add('hidden');
     dom.toggleOriginalBtn.innerHTML = `${SVG_EYE} 원본(Original) 대상 보기`;
 
+    // 희귀도 클래스 적용
+    dom.cardLargePreview.querySelector('.sts2-card').className = `sts2-card ${card.rarity ? `rarity-${card.rarity.toLowerCase()}` : ''}`;
+
     requestAnimationFrame(() => {
         dom.editModal.classList.remove('hidden');
     });
@@ -680,6 +773,7 @@ function saveChanges() {
         card.png_base64 = src.split(',')[1];
         card.updated_at = new Date().toISOString().slice(0, 19).replace('T', ' ');
         state.isDirty = true;
+        updateCardBlobUrl(card);
         saveToDB({ originalData: state.originalData, cards: state.cards });
         replaceCardDOM(card);
         updateStats();
@@ -692,6 +786,7 @@ function resetCurrentCard() {
     const card = state.cards[state.editingCardIndex];
     if (!card) return;
     card.png_base64 = '';
+    updateCardBlobUrl(card);
     state.isDirty = true;
     saveToDB({ originalData: state.originalData, cards: state.cards });
     replaceCardDOM(card);

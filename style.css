@@ -55,60 +55,9 @@ body {
     overflow-x: hidden;
 }
 
-/* ── 헤더 ── */
-.app-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 72px;
-    background: var(--bg-header);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-    z-index: 100;
-}
-
-.header-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.logo-icon {
-    color: var(--gold);
-    width: 28px;
-    height: 28px;
-}
-
-.logo h1 {
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-}
-
-.logo h1 span {
-    color: var(--gold);
-    font-weight: 300;
-}
-
-.header-nav {
-    display: flex;
-    gap: 12px;
-}
-
 /* ── 메인 ── */
 .app-main {
-    padding-top: 72px;
+    padding-top: 0;
     min-height: 100vh;
     display: flex;
 }
@@ -117,7 +66,7 @@ body {
     display: flex;
     flex-direction: row;
     width: 100%;
-    min-height: calc(100vh - 72px);
+    min-height: 100vh;
     align-items: flex-start;
 }
 
@@ -126,15 +75,44 @@ body {
     width: 300px;
     flex-shrink: 0;
     position: sticky;
-    top: 72px;
-    height: calc(100vh - 72px);
+    top: 0;
+    height: 100vh;
     overflow-y: auto;
     background: var(--bg-card);
     border-right: 1px solid var(--border);
-    padding: 20px 16px;
+    padding: 32px 20px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 28px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 8px;
+}
+
+.logo-icon {
+    color: var(--gold);
+    width: 24px;
+    height: 24px;
+}
+
+.logo h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+}
+
+.logo h1 span {
+    display: block;
+    font-size: 11px;
+    color: var(--gold);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .filter-sidebar::-webkit-scrollbar {
@@ -252,7 +230,7 @@ body {
     font-size: 12px;
     font-weight: 600;
     color: var(--text-muted);
-    padding: 8px 0;
+    padding: 16px 0;
     border-top: 1px solid var(--border);
     margin-top: auto;
 }
@@ -260,6 +238,14 @@ body {
 .stats span {
     color: var(--gold);
     font-size: 15px;
+}
+
+.sidebar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
 }
 
 /* ── 카드 그리드 (5열 고정) ── */
@@ -333,6 +319,40 @@ body {
     overflow: hidden;
 }
 
+/* 고대(Ancient) 카드 전용 레이아웃 (세로형 일러스트) */
+.sts2-card.rarity-ancient .layer-art {
+    top: 10%;
+    left: 10.5%;
+    width: 79%;
+    height: 80%;
+    border-radius: 20px;
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 5px 1px rgba(255, 255, 255, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.sts2-card.rarity-ancient .layer-art::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 8px 1px rgba(255, 255, 255, 0.7);
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* 고대(Ancient) 카드 확대 상태 (모달) 전용 스타일 */
+#editModal .sts2-card.rarity-ancient .layer-art {
+    border-width: 3px;
+    border-radius: 30px;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 1);
+}
+
+#editModal .sts2-card.rarity-ancient .layer-art::after {
+    box-shadow: inset 0 0 10px 1px rgba(255, 255, 255, 1);
+}
+
 .sts2-card .layer-art img {
     width: 100%;
     height: 100%;
@@ -340,6 +360,11 @@ body {
     position: relative;
     top: 0;
     left: 0;
+}
+
+/* 고대(Ancient) 카드 전용 배경 투명도 */
+.sts2-card.rarity-ancient .layer-bg {
+    opacity: 0.3;
 }
 
 .sts2-card .layer-frame {
@@ -370,7 +395,7 @@ body {
     color: white;
     text-shadow: -1px -1px 0 #4D4B40, 1px -1px 0 #4d4b40, -1px 1px 0 #4D4B40, 1px 1px 0 #4D4B40, 2.5px 2.5px 0px #878686;
     position: absolute;
-    top: 11.5%;
+    top: 12%;
     width: 100%;
     text-align: center;
 }
@@ -382,19 +407,19 @@ body {
     color: white;
     text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 1px 3px rgba(0, 0, 0, 0.8);
     position: absolute;
-    top: 50.5%;
+    top: 51%;
     width: 100%;
     text-align: center;
 }
 
 .badge {
     position: absolute;
-    top: 25px;
+    top: 27px;
     right: 8px;
-    padding: 3px 8px;
+    padding: 4px 8px;
     background: var(--accent);
     color: white;
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 700;
     border-radius: 4px;
     z-index: 10;
@@ -423,14 +448,12 @@ body {
 
 .modal-container {
     position: relative;
-    width: 95%;
     max-width: 1400px;
     background: transparent;
     border-radius: 0;
     border: none;
     display: flex;
     flex-direction: column;
-    max-height: 95vh;
     overflow: visible;
     box-shadow: none;
 }

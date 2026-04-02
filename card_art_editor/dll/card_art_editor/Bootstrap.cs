@@ -27,9 +27,9 @@ namespace CardArtEditorBootstrap
 			}
 			catch (Exception ex)
 			{
-				string str = "Init failed: ";
+				string text = "Init failed: ";
 				Exception ex2 = ex;
-				Bootstrap.Log(str + ((ex2 != null) ? ex2.ToString() : null));
+				Bootstrap.Log(text + ((ex2 != null) ? ex2.ToString() : null));
 				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler;
 				defaultInterpolatedStringHandler..ctor(33, 1);
 				defaultInterpolatedStringHandler.AppendLiteral("CardArtEditor: bootstrap failed: ");
@@ -61,9 +61,9 @@ namespace CardArtEditorBootstrap
 			}
 			catch (Exception ex)
 			{
-				string str = "OnInspectCardScreenReady failed: ";
+				string text = "OnInspectCardScreenReady failed: ";
 				Exception ex2 = ex;
-				Bootstrap.Log(str + ((ex2 != null) ? ex2.ToString() : null));
+				Bootstrap.Log(text + ((ex2 != null) ? ex2.ToString() : null));
 			}
 		}
 

@@ -24,27 +24,6 @@
 
 <body class="theme-dark">
 
-    <!-- 헤더 -->
-    <header class="app-header">
-        <div class="header-container">
-            <div class="logo">
-                <i data-lucide="sparkles" class="logo-icon"></i>
-                <h1>STS2 <span>Card Art Editor</span></h1>
-            </div>
-            <nav class="header-nav">
-                <button id="importBtn" class="btn btn-primary">
-                    <i data-lucide="upload"></i> 아트팩 불러오기
-                </button>
-                <button id="addCardBtn" class="btn btn-secondary" disabled>
-                    <i data-lucide="plus"></i> 카드 추가
-                </button>
-                <button id="exportBtn" class="btn btn-secondary" disabled>
-                    <i data-lucide="download"></i> 내보내기 (.json)
-                </button>
-            </nav>
-        </div>
-    </header>
-
     <main class="app-main">
         <input type="file" id="fileInput" accept=".json" hidden>
 
@@ -53,6 +32,11 @@
 
             <!-- 좌측 고정 필터 사이드바 -->
             <aside class="filter-sidebar" id="filterRail">
+
+                <div class="logo">
+                    <i data-lucide="sparkles" class="logo-icon"></i>
+                    <h1>STS2 <span>Card Art Editor</span></h1>
+                </div>
 
                 <div class="search-box">
                     <i data-lucide="search"></i>
@@ -101,6 +85,18 @@
 
                 <div class="stats">
                     수정된 카드: <span id="cardCount">0</span>개
+                </div>
+
+                <div class="sidebar-actions">
+                    <button id="importBtn" class="btn btn-primary btn-full">
+                        <i data-lucide="upload"></i> 아트팩 불러오기
+                    </button>
+                    <button id="unloadBtn" class="btn btn-danger btn-full" disabled>
+                        <i data-lucide="trash-2"></i> 아트팩 해제
+                    </button>
+                    <button id="exportBtn" class="btn btn-secondary btn-full" disabled>
+                        <i data-lucide="download"></i> 내보내기 (.json)
+                    </button>
                 </div>
 
             </aside>

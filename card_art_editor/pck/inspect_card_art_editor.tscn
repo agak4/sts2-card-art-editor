@@ -147,10 +147,20 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "아트팩 불러오기"
 
+[node name="ImportModButton" type="Button" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/UploadImage"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Import Mod Images"
+
 [node name="ExportPackButton" type="Button" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/UploadImage"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "아트팩 내보내기"
+
+[node name="ExportCurrentPngButton" type="Button" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/UploadImage"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Save Current Card PNG"
 
 [node name="SelectedFileLabel" type="Label" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/UploadImage"]
 unique_name_in_owner = true

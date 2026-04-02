@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{BF024529-3C67-455A-B390-B896400CD4EC}</ProjectGuid>
+    <ProjectGuid>{B8C59740-9D67-4FBA-800F-65AB09A97CD0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>CardArtEditorBootstrap</RootNamespace>
     <AssemblyName>card_art_editor</AssemblyName>
@@ -34,9 +34,7 @@
     <Reference Include="0Harmony" />
     <Reference Include="GodotSharp" />
     <Reference Include="sts2" />
-    <Reference Include="System.Private.CoreLib">
-      <HintPath>..\..\..\..\..\Users\ljk13\Downloads\dnSpy-net-win64\bin\System.Private.CoreLib.dll</HintPath>
-    </Reference>
+    <Reference Include="System.Private.CoreLib" />
   </ItemGroup>
   <ItemGroup>
     <AppDesigner Include="Properties\" />
