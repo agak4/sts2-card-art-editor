@@ -147,6 +147,9 @@ function initDom() {
         zoomSlider: $('zoomSlider'),
         offsetXSlider: $('offsetXSlider'),
         offsetYSlider: $('offsetYSlider'),
+        zoomVal: $('zoomVal'),
+        offsetXVal: $('offsetXVal'),
+        offsetYVal: $('offsetYVal'),
         imageInput: $('imageInput'),
         toggleOriginalBtn: $('toggleOriginalBtn'),
     };
@@ -224,17 +227,15 @@ async function preloadAllAssets() {
         const assets = getCardAssets(card.character, card.cardType, card.rarity);
         Object.values(assets).forEach(url => { if (url) uniqueUrls.add(url); });
 
-        let charPrefix = (card.character || '').toLowerCase();
-        let imgFileName = `${charPrefix}_${(card.name_en || '').toLowerCase().replace(/ /g, '_')}.webp`;
-        let artSrc = card.png_base64 ? `data:image/png;base64,${card.png_base64}` : `source/img/card_images/${imgFileName}`;
-        uniqueUrls.add(artSrc);
+        uniqueUrls.add(getCardArtSrc(card));
+        uniqueUrls.add(getCardArtSrc({ ...card, png_base64: '' }));
     });
 
     const promises = Array.from(uniqueUrls).map(url => {
         return new Promise(resolve => {
             const img = new Image();
             img.onload = resolve;
-            img.onerror = resolve; // 실패해도 진행
+            img.onerror = resolve;
             img.src = url;
         });
     });
@@ -264,7 +265,6 @@ function bindEvents() {
                 chips.forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
                 state.filters[groupName] = chip.dataset.filterValue;
-                // 희귀도 필터 비활성화 처리
                 if (groupName === 'character') syncRarityFilterState();
                 filterCards();
             };
@@ -447,11 +447,7 @@ function createCardElement(card, index) {
     const { character, cardType, rarity, name_kr, name_en, no } = card;
     const assets = getCardAssets(character, cardType, rarity);
 
-    let charPrefix = (character || '').toLowerCase();
-    let imgFileName = `${charPrefix}_${(name_en || '').toLowerCase().replace(/ /g, '_')}.webp`;
-    let artSrc = card.png_base64
-        ? `data:image/png;base64,${card.png_base64}`
-        : `source/img/card_images/${imgFileName}`;
+    let artSrc = getCardArtSrc(card);
 
     const CARD_TYPE_KO = {
         'Attack': '공격',
@@ -464,11 +460,11 @@ function createCardElement(card, index) {
 
     div.innerHTML = `
     <div class="sts2-card">
-      <div class="layer layer-bg" style="background-image:url('${assets.bg}')"></div>
-      <div class="layer layer-frame" style="background-image:url('${assets.frame}')"></div>
-      <div class="layer layer-banner" style="background-image:url('${assets.banner}')"></div>
-      <div class="layer layer-type" style="background-image:url('${assets.type}')"></div>
-      ${assets.orb ? `<div class="layer layer-orb" style="background-image:url('${assets.orb}')"></div>` : ''}
+      <img src="${assets.bg}" class="layer layer-bg">
+      <img src="${assets.frame}" class="layer layer-frame">
+      <img src="${assets.banner}" class="layer layer-banner">
+      <img src="${assets.type}" class="layer layer-type">
+      ${assets.orb ? `<img src="${assets.orb}" class="layer layer-orb">` : ''}
       <div class="layer layer-art">
         <img src="${artSrc}" alt="${name_en || name_kr}"
              onerror="this.onerror=null;this.src='source/img/card_frame/273px-StS2_AncientCardHighlight.png'">
@@ -502,7 +498,8 @@ function getCardAssets(character, cardType, rarity) {
 
     if (isMisc) {
         const t = character === 'Status' ? 'Status' : character === 'Curse' ? 'Curse' : 'Quest';
-        return { bg: `${p}Bg${t}.png`, frame: `${p}Frame${t}.png`, banner: `${p}Banner${t}.png`, orb: '', type: `${p}Type${r}.png` };
+        const bgFile = character === 'Status' ? `${p}BgSkillColorless.png` : `${p}Bg${t}.png`;
+        return { bg: bgFile, frame: `${p}Frame${t}.png`, banner: `${p}Banner${t}.png`, orb: '', type: `${p}Type${r}.png` };
     }
 
     const c = character === 'Ancient' ? 'Colorless' : character;
@@ -649,11 +646,11 @@ function openEditor(cardIndex) {
 
     dom.cardLargePreview.innerHTML = `
       <div class="sts2-card">
-        <div class="layer layer-bg" style="background-image:url('${assets.bg}')"></div>
-        <div class="layer layer-frame" style="background-image:url('${assets.frame}')"></div>
-        <div class="layer layer-banner" style="background-image:url('${assets.banner}')"></div>
-        <div class="layer layer-type" style="background-image:url('${assets.type}')"></div>
-        ${assets.orb ? `<div class="layer layer-orb" style="background-image:url('${assets.orb}')"></div>` : ''}
+        <img src="${assets.bg}" class="layer layer-bg">
+        <img src="${assets.frame}" class="layer layer-frame">
+        <img src="${assets.banner}" class="layer layer-banner">
+        <img src="${assets.type}" class="layer layer-type">
+        ${assets.orb ? `<img src="${assets.orb}" class="layer layer-orb">` : ''}
         <div class="layer layer-art">
           <img id="modalPreviewOriginal" class="hidden" src="${defaultArtSrc}" onerror="this.onerror=null;this.src='${fallbackSrc}'" style="position:absolute; width:100%; height:100%; object-fit:cover;">
           <img id="modalPreview" src="${artSrc}" onerror="this.onerror=null;this.src='${fallbackSrc}'" style="position:absolute; width:100%; height:100%; object-fit:cover;">
@@ -678,6 +675,7 @@ function openEditor(cardIndex) {
     dom.zoomSlider.value = 100;
     dom.offsetXSlider.value = 0;
     dom.offsetYSlider.value = 0;
+    updateModalPreviewTransform(); // 초기 값 표시 동기화
     dom.modalPreview.style.transform = '';
 
     // Reset toggle state
@@ -705,10 +703,15 @@ function handleImageUpload(e) {
 }
 
 function updateModalPreviewTransform() {
-    const zoom = dom.zoomSlider.value / 100;
+    const zoom = dom.zoomSlider.value;
     const x = dom.offsetXSlider.value;
     const y = dom.offsetYSlider.value;
-    dom.modalPreview.style.transform = `scale(${zoom}) translate(${x}px, ${y}px)`;
+    
+    dom.zoomVal.setAttribute('data-value', `${zoom}%`);
+    dom.offsetXVal.setAttribute('data-value', `${x}px`);
+    dom.offsetYVal.setAttribute('data-value', `${y}px`);
+    
+    dom.modalPreview.style.transform = `scale(${zoom / 100}) translate(${x}px, ${y}px)`;
 }
 
 function saveChanges() {
@@ -787,11 +790,41 @@ function openDB() {
     });
 }
 
+/**
+ * 카드의 아트 이미지 소스 경로를 반환합니다.
+ */
+function getCardArtSrc(card) {
+    if (card && card.png_base64) return `data:image/png;base64,${card.png_base64}`;
+
+    const character = (card && card.character) || 'colorless';
+    const nameEn = (card && card.name_en) || '';
+    const fileName = nameEn.toLowerCase().replace(/ /g, '_');
+
+    // Ancient 카드는 종종 다른 캐릭터 배경 이미지나 Colorless를 사용함
+    // 영체화(Apparition)는 사일런트 이미지를 사용함
+    if (character === 'Ancient' && fileName === 'apparition') {
+        return `source/img/card_images/silent_apparition.webp`;
+    }
+
+    const charPrefix = character.toLowerCase();
+    return `source/img/card_images/${charPrefix}_${fileName}.webp`;
+}
+
 async function saveToDB(value) {
     try {
         const db = await openDB();
         const tx = db.transaction('AppData', 'readwrite');
-        tx.objectStore('AppData').put(value, 'currentState');
+
+        // domNode는 IndexedDB에 저장할 수 없으므로 제외 (복제 오류 방지)
+        const safeValue = {
+            ...value,
+            cards: (value.cards || []).map(c => {
+                const { domNode, ...rest } = c;
+                return rest;
+            })
+        };
+
+        tx.objectStore('AppData').put(safeValue, 'currentState');
         return new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
     } catch (e) { console.warn('IndexedDB 저장 실패:', e); }
 }

@@ -43,82 +43,71 @@
         <!-- 에디터 섹션 -->
         <section id="editorSection" class="editor-section">
 
-            <div class="toolbar">
-                <div class="filter-rail" id="filterRail">
+            <!-- 좌측 고정 필터 사이드바 -->
+            <aside class="filter-sidebar" id="filterRail">
 
-                    <!-- 캐릭터 필터 -->
-                    <div class="filter-group character-group">
-                        <p class="filter-group-label">캐릭터</p>
-                        <div class="chip-list" data-filter-group="character">
-                            <button class="filter-chip active" data-filter-value="all">전체</button>
-                            <button class="filter-chip" data-filter-value="Ironclad">
-                                <img src="source/img/card_frame/273px-StS2_CardIroncladOrb.png" alt=""> 아이언클래드
-                            </button>
-                            <button class="filter-chip" data-filter-value="Silent">
-                                <img src="source/img/card_frame/273px-StS2_CardSilentOrb.png" alt=""> 사일런트
-                            </button>
-                            <button class="filter-chip" data-filter-value="Regent">
-                                <img src="source/img/card_frame/273px-StS2_CardRegentOrb.png" alt=""> 리젠트
-                            </button>
-                            <button class="filter-chip" data-filter-value="Necrobinder">
-                                <img src="source/img/card_frame/273px-StS2_CardNecrobinderOrb.png" alt=""> 네크로바인더
-                            </button>
-                            <button class="filter-chip" data-filter-value="Defect">
-                                <img src="source/img/card_frame/273px-StS2_CardDefectOrb.png" alt=""> 디펙트
-                            </button>
-                            <button class="filter-chip" data-filter-value="Colorless">
-                                <img src="source/img/card_frame/273px-StS2_CardColorlessOrb.png" alt=""> 무색
-                            </button>
-                            <button class="filter-chip" data-filter-value="Ancient">고대의 존재</button>
-                            <button class="filter-chip" data-filter-value="misc">기타</button>
-                        </div>
-                    </div>
-
-                    <!-- 타입 필터 -->
-                    <div class="filter-group type-group">
-                        <p class="filter-group-label">타입</p>
-                        <div class="chip-list" data-filter-group="type">
-                            <button class="filter-chip active" data-filter-value="all">전체</button>
-                            <button class="filter-chip" data-filter-value="Attack">공격</button>
-                            <button class="filter-chip" data-filter-value="Skill">스킬</button>
-                            <button class="filter-chip" data-filter-value="Power">파워</button>
-                            <button class="filter-chip" data-filter-value="misc">기타</button>
-                        </div>
-                    </div>
-
-                    <!-- 희귀도 필터 -->
-                    <div class="filter-group rarity-group">
-                        <p class="filter-group-label">희귀도</p>
-                        <div class="chip-list" data-filter-group="rarity">
-                            <button class="filter-chip active" data-filter-value="all">전체</button>
-                            <button class="filter-chip" data-filter-value="Common">일반</button>
-                            <button class="filter-chip" data-filter-value="Uncommon">고급</button>
-                            <button class="filter-chip" data-filter-value="Rare">희귀</button>
-                            <button class="filter-chip" data-filter-value="misc">기타</button>
-                        </div>
-                    </div>
-
+                <div class="search-box">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="searchInput" placeholder="카드 검색...">
                 </div>
 
-                <div class="toolbar-bottom">
-                    <div class="search-box">
-                        <i data-lucide="search"></i>
-                        <input type="text" id="searchInput" placeholder="카드 이름 또는 경로로 검색...">
-                    </div>
-                    <div class="stats">
-                        수정된 카드: <span id="cardCount">0</span>개
+                <!-- 캐릭터 필터 -->
+                <div class="filter-group character-group">
+                    <p class="filter-group-label">캐릭터</p>
+                    <div class="chip-list" data-filter-group="character">
+                        <button class="filter-chip active" data-filter-value="all">전체</button>
+                        <button class="filter-chip" data-filter-value="Ironclad">아이언클래드</button>
+                        <button class="filter-chip" data-filter-value="Silent">사일런트</button>
+                        <button class="filter-chip" data-filter-value="Regent">리젠트</button>
+                        <button class="filter-chip" data-filter-value="Necrobinder">네크로바인더</button>
+                        <button class="filter-chip" data-filter-value="Defect">디펙트</button>
+                        <button class="filter-chip" data-filter-value="Colorless">무색</button>
+                        <button class="filter-chip" data-filter-value="Ancient">고대의 존재</button>
+                        <button class="filter-chip" data-filter-value="misc">기타</button>
                     </div>
                 </div>
-            </div>
 
-            <div class="grid-wrapper">
-                <div id="cardGrid" class="card-grid"></div>
+                <!-- 타입 필터 -->
+                <div class="filter-group type-group">
+                    <p class="filter-group-label">타입</p>
+                    <div class="chip-list" data-filter-group="type">
+                        <button class="filter-chip active" data-filter-value="all">전체</button>
+                        <button class="filter-chip" data-filter-value="Attack">공격</button>
+                        <button class="filter-chip" data-filter-value="Skill">스킬</button>
+                        <button class="filter-chip" data-filter-value="Power">파워</button>
+                        <button class="filter-chip" data-filter-value="misc">기타</button>
+                    </div>
+                </div>
 
-                <!-- 전체 로딩 레이어 -->
-                <div id="appLoading" class="app-loading hidden">
-                    <div class="loader-content">
-                        <div class="skeleton-loader"></div>
-                        <p>에셋 로딩 중...</p>
+                <!-- 희귀도 필터 -->
+                <div class="filter-group rarity-group">
+                    <p class="filter-group-label">희귀도</p>
+                    <div class="chip-list" data-filter-group="rarity">
+                        <button class="filter-chip active" data-filter-value="all">전체</button>
+                        <button class="filter-chip" data-filter-value="Common">일반</button>
+                        <button class="filter-chip" data-filter-value="Uncommon">고급</button>
+                        <button class="filter-chip" data-filter-value="Rare">희귀</button>
+                        <button class="filter-chip" data-filter-value="misc">기타</button>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    수정된 카드: <span id="cardCount">0</span>개
+                </div>
+
+            </aside>
+
+            <!-- 카드 그리드 영역 -->
+            <div class="content-area">
+                <div class="grid-wrapper">
+                    <div id="cardGrid" class="card-grid"></div>
+
+                    <!-- 전체 로딩 레이어 -->
+                    <div id="appLoading" class="app-loading hidden">
+                        <div class="loader-content">
+                            <div class="skeleton-loader"></div>
+                            <p>에셋 로딩 중...</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -130,25 +119,27 @@
     <div id="editModal" class="modal hidden">
         <div class="modal-overlay"></div>
         <div class="modal-container">
-            <div class="modal-header">
-                <div>
-                    <h3>카드 이미지 수정</h3>
-                    <p id="modalNameKr" class="modal-card-name"></p>
-                </div>
-                <button class="btn-close" id="closeModal"><i data-lucide="x"></i></button>
-            </div>
             <div class="modal-body">
-                <div class="card-large-preview" id="cardLargePreview">
-                </div>
+                <div class="card-large-preview" id="cardLargePreview"></div>
                 <div class="card-info">
+                    <div class="modal-header">
+                        <div>
+                            <h3>카드 이미지 수정</h3>
+                            <p id="modalNameKr" class="modal-card-name"></p>
+                        </div>
+                        <button class="btn-close" id="closeModal"><i data-lucide="x"></i></button>
+                    </div>
+
                     <div class="info-group">
                         <label>원본 경로</label>
                         <div id="modalPath" class="path-display">res://images/...</div>
                     </div>
+
                     <div class="info-group">
                         <label>이미지 규격</label>
                         <div id="modalSize" class="size-display">1000 × 760</div>
                     </div>
+
                     <div class="action-group">
                         <input type="file" id="imageInput" accept="image/*" hidden>
                         <button class="btn btn-primary btn-full" id="uploadImageBtn">
@@ -161,26 +152,28 @@
                             <i data-lucide="rotate-ccw"></i> 커스텀 이미지 제거
                         </button>
                     </div>
+
                     <div class="adjustment-group">
                         <h4>이미지 미세 조정 (미리보기)</h4>
                         <div class="slider-row">
-                            <span>줌</span>
+                            <span id="zoomVal" data-value="100%">줌</span>
                             <input type="range" id="zoomSlider" min="100" max="300" value="100">
                         </div>
                         <div class="slider-row">
-                            <span>X 이동</span>
+                            <span id="offsetXVal" data-value="0px">X 이동</span>
                             <input type="range" id="offsetXSlider" min="-100" max="100" value="0">
                         </div>
                         <div class="slider-row">
-                            <span>Y 이동</span>
+                            <span id="offsetYVal" data-value="0px">Y 이동</span>
                             <input type="range" id="offsetYSlider" min="-100" max="100" value="0">
                         </div>
                     </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="saveEdit">저장 및 적용</button>
+                        <button class="btn btn-secondary" id="cancelEdit">취소</button>
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelEdit">취소</button>
-                <button class="btn btn-primary" id="saveEdit">저장 및 적용</button>
             </div>
         </div>
     </div>
