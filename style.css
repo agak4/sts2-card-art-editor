@@ -80,8 +80,15 @@ body {
 .logo {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: space-between;
     padding-bottom: 8px;
+    width: 100%;
+}
+
+.logo-text {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .logo-icon {
@@ -106,6 +113,26 @@ body {
     letter-spacing: 1px;
 }
 
+/* 넥서스 모드 링크 버튼 */
+.nexus-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.nexus-link img {
+    display: block;
+    width: 50px;
+    height: 50px;
+    border-radius: 4px;
+}
+
+.nexus-link:hover {
+    transform: scale(1.15) rotate(5deg);
+    filter: drop-shadow(0 0 8px rgba(251, 146, 60, 0.5));
+}
+
 .filter-sidebar::-webkit-scrollbar {
     width: 4px;
 }
@@ -126,6 +153,7 @@ body {
 .content-area {
     flex: 1;
     min-width: 0;
+    padding: 50px 100px 50px 50px;
     height: 100vh;
     overflow-y: auto;
     scrollbar-width: none;
@@ -330,9 +358,6 @@ body.dragging {
     align-items: center;
     margin: -20px -12px;
     isolation: isolate;
-    /* 성능 최적화: 화면 밖 요소 렌더링 생략 */
-    content-visibility: auto;
-    contain-intrinsic-size: 200px 300px;
 }
 
 .sts2-card {
@@ -345,7 +370,8 @@ body.dragging {
     aspect-ratio: 273 / 380;
     transform-style: preserve-3d;
     transform: translateZ(0);
-    transition: transform var(--transition);
+    transition: transform 0.5s cubic-bezier(0.075, 0.82, 0.165, 1);
+    overflow: visible;
 }
 
 .sts2-card.rarity-common,
@@ -405,8 +431,8 @@ body.dragging {
 }
 
 .card-item:hover .sts2-card {
-    transform: scale(1.2) translateZ(0);
-    transition: none;
+    transform: scale(1.25) translateZ(0);
+    transition: 0.05s;
 }
 
 .sts2-card .layer {
@@ -1015,6 +1041,150 @@ body.select-mode .card-item {
         transform: scale(1.1);
         opacity: 1;
     }
+}
+
+
+/* 모달 내부 헤더 아이콘 */
+.header-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.text-gold {
+    color: var(--gold);
+}
+
+.mini-modal {
+    max-width: 450px !important;
+    background: var(--bg-card);
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    padding: 32px;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9);
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.modal-body p {
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.vertical-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 20px;
+}
+
+.btn-full {
+    width: 100%;
+    justify-content: flex-start;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-danger {
+    background: rgba(255, 82, 82, 0.1);
+    color: var(--danger);
+    border: 1px solid rgba(255, 82, 82, 0.2);
+}
+
+.btn-danger:hover {
+    background: rgba(255, 82, 82, 0.2);
+    border-color: var(--danger);
+}
+
+.checkerboard {
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.05) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.05) 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    background-color: var(--bg-main);
+}
+
+
+/* 배경색 선택 UI */
+.color-palette-container {
+    padding: 8px 0;
+}
+
+.palette-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.color-chip {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    padding: 0;
+}
+
+.color-chip:hover {
+    transform: scale(1.15);
+    border-color: var(--gold);
+}
+
+.color-chip.active {
+    border-color: var(--gold);
+    box-shadow: 0 0 10px var(--gold);
+}
+
+.color-chip.active::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border: 2px solid var(--bg-card);
+    border-radius: 50%;
+}
+
+.color-chip.transparent {
+    background: linear-gradient(45deg, #ccc 25%, transparent 25%),
+        linear-gradient(-45deg, #ccc 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #ccc 75%),
+        linear-gradient(-45deg, transparent 75%, #ccc 75%);
+    background-size: 8px 8px;
+    background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+    background-color: white;
+}
+
+.color-picker-input {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.color-picker-input::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.color-picker-input::-webkit-color-swatch {
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
 }
 
 /* ── 반응형 ── */
