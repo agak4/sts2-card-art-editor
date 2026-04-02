@@ -4,9 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STS2 Card Art Editor | Slay the Spire 2 Art Mod Tool</title>
-    <meta name="description"
-        content="Slay the Spire 2 모드의 카드 이미지를 편리하게 관리하고 편집할 수 있는 웹 기반 에디터입니다. JSON 번들 가져오기/내보내기를 완벽하게 지원합니다.">
+    <title>STS2 Card Art Editor</title>
+    <meta name="description" content="Slay the Spire 2 카드 이미지 아트팩 편집기">
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,6 +15,8 @@
 </head>
 
 <body class="theme-dark">
+
+    <!-- 헤더 -->
     <header class="app-header">
         <div class="header-container">
             <div class="logo">
@@ -37,6 +38,8 @@
     </header>
 
     <main class="app-main">
+
+        <!-- 업로드 드롭존 -->
         <section id="dropZone" class="upload-section">
             <div class="drop-content">
                 <i data-lucide="file-json" class="drop-icon"></i>
@@ -48,10 +51,13 @@
             </div>
         </section>
 
+        <!-- 에디터 섹션 -->
         <section id="editorSection" class="editor-section hidden">
+
             <div class="toolbar">
                 <div class="filter-rail" id="filterRail">
-                    <!-- Character Filter -->
+
+                    <!-- 캐릭터 필터 -->
                     <div class="filter-group character-group">
                         <p class="filter-group-label">캐릭터</p>
                         <div class="chip-list" data-filter-group="character">
@@ -74,12 +80,12 @@
                             <button class="filter-chip" data-filter-value="Colorless">
                                 <img src="source/img/card_base/273px-StS2_CardColorlessOrb.png" alt=""> 무색
                             </button>
-                            <button class="filter-chip" data-filter-value="Ancient">고대의존재</button>
+                            <button class="filter-chip" data-filter-value="Ancient">고대의 존재</button>
                             <button class="filter-chip" data-filter-value="misc">기타</button>
                         </div>
                     </div>
 
-                    <!-- Type Filter -->
+                    <!-- 타입 필터 -->
                     <div class="filter-group type-group">
                         <p class="filter-group-label">타입</p>
                         <div class="chip-list" data-filter-group="type">
@@ -91,7 +97,7 @@
                         </div>
                     </div>
 
-                    <!-- Rarity Filter -->
+                    <!-- 희귀도 필터 -->
                     <div class="filter-group rarity-group">
                         <p class="filter-group-label">희귀도</p>
                         <div class="chip-list" data-filter-group="rarity">
@@ -102,7 +108,9 @@
                             <button class="filter-chip" data-filter-value="misc">기타</button>
                         </div>
                     </div>
+
                 </div>
+
                 <div class="toolbar-bottom">
                     <div class="search-box">
                         <i data-lucide="search"></i>
@@ -114,9 +122,8 @@
                 </div>
             </div>
 
-            <div id="cardGrid" class="card-grid">
-                <!-- 카드 이터레이션 -->
-            </div>
+            <div id="cardGrid" class="card-grid"></div>
+
         </section>
     </main>
 
@@ -125,17 +132,15 @@
         <div class="modal-overlay"></div>
         <div class="modal-container">
             <div class="modal-header">
-                <h3>카드 이미지 수정</h3>
-                <button class="btn-close" id="closeModal">
-                    <i data-lucide="x"></i>
-                </button>
+                <div>
+                    <h3>카드 이미지 수정</h3>
+                    <p id="modalNameKr" class="modal-card-name"></p>
+                </div>
+                <button class="btn-close" id="closeModal"><i data-lucide="x"></i></button>
             </div>
             <div class="modal-body">
                 <div class="card-large-preview">
                     <img id="modalPreview" alt="Card Preview">
-                    <div id="modalLoading" class="preview-loading hidden">
-                        <i data-lucide="loader" class="spin"></i>
-                    </div>
                 </div>
                 <div class="card-info">
                     <div class="info-group">
@@ -144,7 +149,7 @@
                     </div>
                     <div class="info-group">
                         <label>이미지 규격</label>
-                        <div id="modalSize" class="size-display">1000 x 760</div>
+                        <div id="modalSize" class="size-display">1000 × 760</div>
                     </div>
                     <div class="action-group">
                         <input type="file" id="imageInput" accept="image/*" hidden>
@@ -152,11 +157,11 @@
                             <i data-lucide="image-plus"></i> 새 이미지 업로드
                         </button>
                         <button id="resetCardBtn" class="btn btn-danger btn-full">
-                            <i data-lucide="rotate-ccw"></i> 원본으로 복원
+                            <i data-lucide="rotate-ccw"></i> 커스텀 이미지 제거
                         </button>
                     </div>
                     <div class="adjustment-group">
-                        <h4>이미지 미세 조정</h4>
+                        <h4>이미지 미세 조정 (미리보기)</h4>
                         <div class="slider-row">
                             <span>줌</span>
                             <input type="range" id="zoomSlider" min="100" max="300" value="100">
@@ -179,19 +184,16 @@
         </div>
     </div>
 
-    <!-- 로딩 스피너 -->
+    <!-- 전체 로딩 레이어 -->
     <div id="appLoading" class="app-loading hidden">
         <div class="loader-content">
             <div class="skeleton-loader"></div>
-            <p>대용량 데이터를 처리 중입니다... 잠시만 기다려 주세요.</p>
+            <p>데이터를 처리 중입니다...</p>
         </div>
     </div>
 
     <script src="script.js"></script>
-    <script>
-        // Init Lucide
-        lucide.createIcons();
-    </script>
+    <script>lucide.createIcons();</script>
 </body>
 
 </html>

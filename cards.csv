@@ -82,10 +82,10 @@ no,name_kr,name_en,character,type,rarity
 81,지옥검무,Juggernaut,Ironclad,Power,Rare
 82,바리케이드,Barricade,Ironclad,Power,Rare
 83,악마의 형상,Demon Form,Ironclad,Power,Rare
-84,박살,Break,Ironclad,Attack,Misc
-85,타락,Corruption,Ironclad,Power,Misc
-86,악마의 방패,Demonic Shield,Ironclad,Skill,Misc
-87,탱커,Tank,Ironclad,Power,Misc
+84,박살,Break,Ironclad,Attack,Ancient
+85,타락,Corruption,Ironclad,Power,Ancient
+86,악마의 방패,Demonic Shield,Ironclad,Skill,Uncommon
+87,탱커,Tank,Ironclad,Power,Rare
 
 88,무력화,Neutralize,Silent,Attack,Starter
 89,타격,Strike,Silent,Attack,Starter
@@ -171,10 +171,10 @@ no,name_kr,name_en,character,type,rarity
 169,칼날 부채,Fan of Knives,Silent,Power,Rare
 170,구렁이의 형상,Serpent Form,Silent,Power,Rare
 171,연마,Abrasive,Silent,Power,Rare
-172,제압,Suppress,Silent,Power,Misc
-173,유령의 형상,Wraith Form,Silent,Power,Misc
-174,측면 공격,Flanking,Silent,Power,Misc
-175,비열함,Sneaky,Silent,Power,Misc
+172,제압,Suppress,Silent,Attack,Ancient
+173,유령의 형상,Wraith Form,Silent,Power,Ancient
+174,측면 공격,Flanking,Silent,Skill,Uncommon
+175,비열함,Sneaky,Silent,Power,Rare
 
 176,별똥별,Falling Star,Regent,Attack,Starter
 177,타격,Strike,Regent,Attack,Starter
@@ -260,10 +260,10 @@ no,name_kr,name_en,character,type,rarity
 257,창세,Genesis,Regent,Power,Rare
 258,공허의 형상,Void Form,Regent,Power,Rare
 259,군주의 시선,Monarch's Gaze,Regent,Power,Rare
-260,유성우,Meteor Shower,Regent,Power,Misc
-261,봉인된 왕좌,The Sealed Throne,Regent,Power,Misc
-262,하사,Largesse,Regent,Power,Misc
-263,망치질 시간,Hammer Time,Regent,Power,Misc
+260,유성우,Meteor Shower,Regent,Attack,Ancient
+261,봉인된 왕좌,The Sealed Throne,Regent,Power,Ancient
+262,하사,Largesse,Regent,Skill,Uncommon
+263,망치질 시간,Hammer Time,Regent,Power,Rare
 
 264,타격,Strike,Necrobinder,Attack,Starter
 265,풀어놓기,Unleash,Necrobinder,Attack,Starter
@@ -349,10 +349,10 @@ no,name_kr,name_en,character,type,rarity
 345,경계 태세,Sentry Mode,Necrobinder,Power,Rare
 346,권역,Demesne,Necrobinder,Power,Rare
 347,사신의 형상,Reaper Form,Necrobinder,Power,Rare
-348,파수꾼,Protector,Necrobinder,Power,Misc
-349,금지된 마도서,Forbidden Grimoire,Necrobinder,Power,Misc
-350,해골 군단,Legion of Bone,Necrobinder,Power,Misc
-351,경계 엿보기,Glimpse Beyond,Necrobinder,Power,Misc
+348,파수꾼,Protector,Necrobinder,Attack,Ancient
+349,금지된 마도서,Forbidden Grimoire,Necrobinder,Power,Ancient
+350,해골 군단,Legion of Bone,Necrobinder,Skill,Uncommon
+351,경계 엿보기,Glimpse Beyond,Necrobinder,Skill,Rare
 
 352,타격,Strike,Defect,Attack,Starter
 353,수비,Defend,Defect,Skill,Starter
@@ -437,10 +437,10 @@ no,name_kr,name_en,character,type,rarity
 432,그림자 소모,Consuming Shadow,Defect,Power,Rare
 433,버퍼,Buffer,Defect,Power,Rare
 434,메아리의 형상,Echo Form,Defect,Power,Rare
-435,사중 시전,Quadcast,Defect,Power,Misc
-436,인지 편향,Biased Cognition,Defect,Power,Misc
-437,에너지 폭주,Energy Surge,Defect,Power,Misc
-438,점화,Ignition,Defect,Power,Misc
+435,사중 시전,Quadcast,Defect,Skill,Ancient
+436,인지 편향,Biased Cognition,Defect,Power,Ancient
+437,에너지 폭주,Energy Surge,Defect,Skill,Uncommon
+438,점화,Ignition,Defect,Skill,Rare
 
 439,강철의 섬광,Flash of Steel,Colorless,Attack,Uncommon
 440,극적인 입장,Dramatic Entrance,Colorless,Attack,Uncommon
@@ -450,10 +450,10 @@ no,name_kr,name_en,character,type,rarity
 444,궁극의 타격,Ultimate Strike,Colorless,Attack,Uncommon
 445,정신 공격,Mind Blast,Colorless,Attack,Uncommon
 446,주먹다짐,Fisticuffs,Colorless,Attack,Uncommon
-447,집단 공격,Gang Up,Colorless,Attack,Misc
+447,집단 공격,Gang Up,Colorless,Attack,Uncommon
 448,탐색 타격,Seeker Strike,Colorless,Attack,Uncommon
-449,태그 팀,Tag Team,Colorless,Attack,Misc
-450,너만 믿는다,Believe in You,Colorless,Skill,Misc
+449,태그 팀,Tag Team,Colorless,Attack,Uncommon
+450,너만 믿는다,Believe in You,Colorless,Skill,Uncommon
 451,능숙,Finesse,Colorless,Skill,Uncommon
 452,미래 예지,Thinking Ahead,Colorless,Skill,Uncommon
 453,비상 단추,Panic Button,Colorless,Skill,Uncommon
@@ -464,13 +464,13 @@ no,name_kr,name_en,character,type,rarity
 458,연장,Prolong,Colorless,Skill,Uncommon
 459,초조함,Restlessness,Colorless,Skill,Uncommon
 460,팔방미인,Jack of All Trades,Colorless,Skill,Uncommon
-461,가로막기,Intercept,Colorless,Skill,Misc
+461,가로막기,Intercept,Colorless,Skill,Uncommon
 462,궁극의 수비,Ultimate Defend,Colorless,Skill,Uncommon
-463,똘똘 뭉치기,Huddle Up,Colorless,Skill,Misc
+463,똘똘 뭉치기,Huddle Up,Colorless,Skill,Uncommon
 464,발견,Discovery,Colorless,Skill,Uncommon
-465,부양,Lift,Colorless,Skill,Misc
+465,부양,Lift,Colorless,Skill,Uncommon
 466,착수,The Gambit,Colorless,Skill,Uncommon
-467,협력,Coordinate,Colorless,Skill,Misc
+467,협력,Coordinate,Colorless,Skill,Uncommon
 468,재난,Calamity,Colorless,Skill,Uncommon
 469,충격파,Shockwave,Colorless,Skill,Uncommon
 470,평형,Equilibrium,Colorless,Skill,Uncommon
@@ -486,7 +486,7 @@ no,name_kr,name_en,character,type,rarity
 480,황금 도끼,Gold Axe,Colorless,Attack,Rare
 481,쥐어뜯기,Rend,Colorless,Attack,Rare
 482,탐욕의 손,Hand of Greed,Colorless,Attack,Rare
-483,때려눕히기,Knockdown,Colorless,Attack,Misc
+483,때려눕히기,Knockdown,Colorless,Attack,Rare
 484,잭팟,Jackpot,Colorless,Attack,Rare
 485,비밀 기술,Secret Technique,Colorless,Skill,Rare
 486,비밀 병기,Secret Weapon,Colorless,Skill,Rare
@@ -496,12 +496,12 @@ no,name_kr,name_en,character,type,rarity
 490,연금,Alchemize,Colorless,Skill,Rare
 491,임명,Anointed,Colorless,Skill,Rare
 492,휘갈김,Scrawl,Colorless,Skill,Rare
-493,흉내내기,Mimic,Colorless,Skill,Misc
-494,단결,Rally,Colorless,Skill,Misc
+493,흉내내기,Mimic,Colorless,Skill,Rare
+494,단결,Rally,Colorless,Skill,Rare
 495,두들겨 패기,Beat Down,Colorless,Skill,Rare
 496,엔트로피,Entropy,Colorless,Power,Rare
 497,향수,Nostalgia,Colorless,Power,Rare
-498,희망의 등불,Beacon of Hope,Colorless,Power,Misc
+498,희망의 등불,Beacon of Hope,Colorless,Power,Rare
 499,대혼란,Mayhem,Colorless,Power,Rare
 500,굴러가는 바위,Rolling Boulder,Colorless,Power,Rare
 501,영원의 갑옷,Eternal Armor,Colorless,Power,Rare

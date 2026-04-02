@@ -1,11 +1,10 @@
 :root {
     --bg-dark: #0f111a;
     --bg-card: #1a1c2b;
-    --bg-header: rgba(15, 17, 26, 0.8);
+    --bg-header: rgba(15, 17, 26, 0.88);
     --gold: #d4af37;
     --gold-light: #f1e5ac;
     --accent: #7c4dff;
-    --accent-dark: #5e35b1;
     --text-main: #e0e0e0;
     --text-muted: #9e9e9e;
     --danger: #ff5252;
@@ -29,7 +28,7 @@ body {
     overflow-x: hidden;
 }
 
-/* Header */
+/* ── 헤더 ── */
 .app-header {
     position: fixed;
     top: 0;
@@ -80,7 +79,7 @@ body {
     gap: 12px;
 }
 
-/* Main */
+/* ── 메인 ── */
 .app-main {
     padding: 100px 24px 40px;
     max-width: 1400px;
@@ -88,7 +87,7 @@ body {
     min-height: 100vh;
 }
 
-/* Upload Section */
+/* ── 업로드 드롭존 ── */
 .upload-section {
     height: 60vh;
     display: flex;
@@ -100,6 +99,7 @@ body {
     transition: var(--transition);
 }
 
+.upload-section.drag-over,
 .upload-section:hover {
     border-color: var(--accent);
     background: rgba(124, 77, 255, 0.05);
@@ -131,13 +131,7 @@ body {
     margin-bottom: 32px;
 }
 
-/* Editor Section */
-.editor-section {
-    opacity: 1;
-    transform: translateY(0);
-    transition: var(--transition);
-}
-
+/* ── 툴바 ── */
 .toolbar {
     display: flex;
     flex-direction: column;
@@ -211,22 +205,23 @@ body {
     box-shadow: 0 4px 12px rgba(124, 77, 255, 0.3);
 }
 
-/* 필터 잠금 상태 */
+/* 희귀도 필터 잠금 (고대의존재·기타 선택 시) */
 .filter-locked {
     position: relative;
-    opacity: 0.5;
+    opacity: 0.4;
     pointer-events: none;
     user-select: none;
 }
 
 .filter-locked::after {
-    content: "캐릭터를 먼저 선택하세요";
+    content: "캐릭터 필터에 의해 비활성화됨";
     position: absolute;
     right: 0;
     top: 0;
     font-size: 10px;
     color: var(--gold);
     font-weight: 700;
+    pointer-events: none;
 }
 
 .toolbar-bottom {
@@ -279,7 +274,7 @@ body {
     font-size: 18px;
 }
 
-/* Card Grid - Fixed 5 Columns */
+/* ── 카드 그리드 (5열 고정) ── */
 .card-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -287,6 +282,7 @@ body {
     padding-bottom: 40px;
 }
 
+/* ── STS2 카드 ── */
 .card-item {
     background: transparent;
     border-radius: 12px;
@@ -296,14 +292,12 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    border: none;
 }
 
-/* Complex STS2 Card UI */
 .sts2-card {
     position: relative;
     width: 100%;
-    aspect-ratio: 273 / 380; /* Standard STS2 card proportion */
+    aspect-ratio: 273 / 380;
     transform-style: preserve-3d;
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -321,7 +315,9 @@ body {
     background-position: center;
 }
 
-.sts2-card .layer-bg { z-index: 1; }
+.sts2-card .layer-bg {
+    z-index: 1;
+}
 
 .sts2-card .layer-art {
     z-index: 2;
@@ -338,8 +334,14 @@ body {
     left: 10%;
 }
 
-.sts2-card .layer-frame { z-index: 3; }
-.sts2-card .layer-banner { z-index: 4; }
+.sts2-card .layer-frame {
+    z-index: 3;
+}
+
+.sts2-card .layer-banner {
+    z-index: 4;
+}
+
 .sts2-card .layer-orb {
     z-index: 5;
     left: -8%;
@@ -353,12 +355,11 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
-    padding-bottom: 12%;
+    justify-content: flex-start;
 }
 
 .card-name-overlay {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     color: white;
     text-shadow: 0 1px 4px black;
@@ -368,70 +369,11 @@ body {
     text-align: center;
 }
 
-.card-type-overlay {
-    background: #4a4a4a;
-    padding: 2px 12px;
-    border-radius: 4px;
-    font-size: 11px;
-    color: #e0e0e0;
-    font-weight: 700;
-    margin-bottom: 38%;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transform: translateY(50%);
-}
-
-.card-item:hover {
-    transform: translateY(-8px);
-    border-color: var(--gold);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-}
-
-.card-thumbnail {
-    width: 100%;
-    aspect-ratio: 1000 / 760;
-    overflow: hidden;
-    background: #000;
-    position: relative;
-}
-
-.card-thumbnail img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: var(--transition);
-}
-
-.card-item:hover .card-thumbnail img {
-    transform: scale(1.05);
-}
-
-.card-meta {
-    padding: 16px;
-}
-
-.card-name {
-    font-weight: 700;
-    font-size: 16px;
-    margin-bottom: 4px;
-    color: var(--gold-light);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.card-path {
-    font-family: 'Roboto Mono', monospace;
-    font-size: 11px;
-    color: var(--text-muted);
-    word-break: break-all;
-}
-
 .badge {
     position: absolute;
-    top: 12px;
-    right: 12px;
-    padding: 4px 8px;
+    top: 8px;
+    right: 8px;
+    padding: 3px 8px;
     background: var(--accent);
     color: white;
     font-size: 10px;
@@ -440,13 +382,44 @@ body {
     z-index: 10;
 }
 
-/* Modal */
+.card-item:hover {
+    transform: translateY(-4px);
+}
+
+.card-meta {
+    padding: 10px 4px;
+    width: 100%;
+}
+
+.card-name {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 2px;
+    color: var(--gold-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-no {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 400;
+}
+
+.card-path {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── 모달 ── */
 .modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -455,8 +428,7 @@ body {
 
 .modal-overlay {
     position: absolute;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     background: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(8px);
 }
@@ -464,7 +436,7 @@ body {
 .modal-container {
     position: relative;
     width: 90%;
-    max-width: 1000px;
+    max-width: 960px;
     background: var(--bg-card);
     border-radius: 16px;
     border: 1px solid var(--border);
@@ -479,12 +451,18 @@ body {
     padding: 20px 24px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     border-bottom: 1px solid var(--border);
 }
 
 .modal-header h3 {
-    font-size: 20px;
+    font-size: 18px;
+}
+
+.modal-card-name {
+    font-size: 13px;
+    color: var(--gold);
+    margin-top: 2px;
 }
 
 .btn-close {
@@ -502,10 +480,10 @@ body {
 }
 
 .modal-body {
-    padding: 32px;
+    padding: 28px 32px;
     display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 32px;
+    grid-template-columns: 1fr 300px;
+    gap: 28px;
     overflow-y: auto;
 }
 
@@ -515,43 +493,37 @@ body {
     background: #000;
     border-radius: var(--radius);
     overflow: hidden;
-    position: relative;
     border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .card-large-preview img {
     width: 100%;
     height: 100%;
     object-fit: contain;
-}
-
-.preview-loading {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,0.5);
+    transition: transform 0.2s;
 }
 
 .card-info {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
 }
 
 .info-group label {
     display: block;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     color: var(--text-muted);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .path-display {
     font-family: 'Roboto Mono', monospace;
-    font-size: 12px;
+    font-size: 11px;
     padding: 8px;
     background: #000;
     border-radius: 4px;
@@ -559,27 +531,33 @@ body {
     word-break: break-all;
 }
 
+.size-display {
+    font-size: 14px;
+    color: var(--text-main);
+}
+
 .action-group {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
 .adjustment-group h4 {
-    font-size: 14px;
-    margin-bottom: 16px;
+    font-size: 13px;
+    margin-bottom: 12px;
     padding-top: 16px;
     border-top: 1px solid var(--border);
 }
 
 .slider-row {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .slider-row span {
     display: block;
     font-size: 12px;
-    margin-bottom: 8px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
 }
 
 .slider-row input {
@@ -587,14 +565,14 @@ body {
 }
 
 .modal-footer {
-    padding: 20px 32px;
+    padding: 16px 32px;
     border-top: 1px solid var(--border);
     display: flex;
     justify-content: flex-end;
     gap: 12px;
 }
 
-/* Buttons */
+/* ── 버튼 ── */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -660,7 +638,7 @@ body {
     cursor: not-allowed;
 }
 
-/* Helpers */
+/* ── 유틸 ── */
 .hidden {
     display: none !important;
 }
@@ -670,10 +648,12 @@ body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-/* App Loading Layer */
+/* ── 앱 로딩 ── */
 .app-loading {
     position: fixed;
     inset: 0;
@@ -698,17 +678,32 @@ body {
 }
 
 @keyframes pulse {
-    0% { transform: scale(0.8); opacity: 0.5; }
-    50% { transform: scale(1.1); opacity: 1; }
-    100% { transform: scale(0.8); opacity: 0.5; }
+
+    0%,
+    100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
 }
 
-/* Responsive */
+/* ── 반응형 ── */
 @media (max-width: 1000px) {
     .modal-body {
         grid-template-columns: 1fr;
     }
-    .card-info {
-        height: auto;
+
+    .card-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .card-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
