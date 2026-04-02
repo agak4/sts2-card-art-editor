@@ -189,9 +189,14 @@
 
                     <div class="action-group">
                         <input type="file" id="imageInput" accept="image/*" hidden>
-                        <button class="btn btn-primary btn-full" id="uploadImageBtn">
-                            <i data-lucide="image-plus"></i> 새 이미지 업로드
-                        </button>
+                        <div class="button-group">
+                            <button class="btn btn-primary" id="uploadImageBtn">
+                                <i data-lucide="image-plus"></i> 새 이미지 업로드
+                            </button>
+                            <button class="btn btn-secondary" id="downloadImageBtn" title="현재 편집된 이미지 다운로드">
+                                <i data-lucide="download"></i> 이미지 다운로드
+                            </button>
+                        </div>
 
                         <button id="resetCardBtn" class="btn btn-danger btn-full">
                             <i data-lucide="rotate-ccw"></i> 커스텀 이미지 제거

@@ -798,6 +798,16 @@ body.dragging {
     gap: 12px;
 }
 
+.button-group {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.button-group .btn {
+    flex: 1;
+}
+
 .adjustment-group h4 {
     font-size: 13px;
     margin-bottom: 12px;
@@ -869,6 +879,7 @@ body.dragging {
     transition: var(--transition);
     border: none;
     font-size: 14px;
+    white-space: nowrap;
 }
 
 .btn-primary {

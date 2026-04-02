@@ -181,6 +181,7 @@ function initDom() {
         importMergeBtn: $('importMergeBtn'),
         importResetBtn: $('importResetBtn'),
         cancelImportBtn: $('cancelImportBtn'),
+        downloadImageBtn: $('downloadImageBtn'),
     };
 }
 
@@ -267,7 +268,7 @@ function getCardArtSrc(card) {
 }
 
 /** base64 문자열을 Blob 객체로 변환 */
-function base64ToBlob(base64, type = 'image/png') {
+function base64ToBlob(base64, type = 'image/webp') {
     if (!base64) return null;
     const binary = atob(base64);
     const array = new Uint8Array(binary.length);
@@ -288,13 +289,14 @@ function updateCardBlobUrl(card) {
 
     if (card.artType === 'gif' && card.gif_frames && card.gif_frames.length > 0) {
         card.frameBlobUrls = card.gif_frames.map(f => {
-            const blob = base64ToBlob(f.png_base64, 'image/png');
+            const blob = base64ToBlob(f.png_base64, 'image/webp');
             return URL.createObjectURL(blob);
         });
         card.blobUrl = card.frameBlobUrls[0];
     } else if (card.png_base64) {
-        let actualMime = card.art_mime || 'image/png';
+        let actualMime = card.art_mime || 'image/webp';
         if (card.png_base64.startsWith('iVBORw0KGgo')) actualMime = 'image/png';
+        else if (card.png_base64.startsWith('UklGR')) actualMime = 'image/webp';
         else if (card.png_base64.startsWith('R0lGOD')) actualMime = 'image/gif';
 
         card.art_mime = actualMime;
@@ -471,7 +473,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     target.display_mode = savedCard.display_mode || 'default';
                     target.updated_at = savedCard.updated_at;
                     target.artType = savedCard.artType || 'static';
-                    target.art_mime = savedCard.art_mime || (target.artType === 'gif' ? 'image/gif' : 'image/png');
+                    target.art_mime = savedCard.art_mime || (target.artType === 'gif' ? 'image/gif' : 'image/webp');
                     target.gif_frames = savedCard.gif_frames || null;
                     updateCardBlobUrl(target);
                 }
@@ -557,6 +559,7 @@ function bindEvents() {
     $('uploadImageBtn').onclick = () => dom.imageInput.click();
     dom.imageInput.addEventListener('change', handleImageUpload);
     dom.toggleOriginalBtn.onclick = toggleOriginalView;
+    dom.downloadImageBtn.onclick = downloadCustomImage;
     dom.resetAdjustBtn.onclick = resetAdjustValues;
 
     // 배경색 이벤트
@@ -649,7 +652,7 @@ async function processImport(data, isMerge = true) {
                     target.display_mode = fileCard.display_mode || 'default';
                     target.updated_at = fileCard.updated_at;
                     target.artType = fileCard.artType;
-                    target.art_mime = fileCard.art_mime || (fileCard.artType === 'gif' ? 'image/gif' : 'image/png');
+                    target.art_mime = fileCard.art_mime || (fileCard.artType === 'gif' ? 'image/gif' : 'image/webp');
                     target.gif_frames = fileCard.gif_frames || null;
                     updateCardBlobUrl(target);
                 }
@@ -1097,6 +1100,35 @@ function handleImageUpload(e) {
     reader.readAsDataURL(file);
 }
 
+/** 현재 편집된 이미지의 원본 소스를 다운로드 (줌/오프셋 미반영) */
+function downloadCustomImage() {
+    const card = state.cards[state.editingCardIndex];
+    if (!card) return;
+
+    const dataUrl = state.adjustState.sourceDataUrl;
+    if (!dataUrl) {
+        alert('다운로드할 이미지 데이터가 없습니다.');
+        return;
+    }
+
+    // MIME 타입에 따른 확장자 결정
+    let ext = 'webp';
+    if (dataUrl.includes('image/gif')) ext = 'gif';
+    else if (dataUrl.includes('image/png')) ext = 'png';
+    else if (dataUrl.includes('image/jpeg')) ext = 'jpg';
+    else if (dataUrl.includes('image/webp')) ext = 'webp';
+
+    const name = card.name_en || 'card';
+    const filename = `${name.toLowerCase().replace(/ /g, '_')}_art.${ext}`;
+
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
 function updateBackgroundColor(color, markDirty = true) {
     state.adjustState.backgroundColor = color;
     const isTransparent = color === 'transparent';
@@ -1239,7 +1271,7 @@ async function renderCardToPngBase64(card) {
                 ctx.fillRect(0, 0, targetW, targetH);
             }
             ctx.drawImage(img, -cropX, -cropY, resizedW, resizedH);
-            resolve(canvas.toDataURL('image/png').split(',')[1]);
+            resolve(canvas.toDataURL('image/webp').split(',')[1]);
         };
         img.onerror = () => resolve('');
         img.src = dataUrl;
@@ -1265,10 +1297,10 @@ async function saveChanges() {
             card.gif_frames = null;
         }
     } else {
-        const src = dom.modalPreview.toDataURL('image/png');
+        const src = dom.modalPreview.toDataURL('image/webp');
         card.png_base64 = src.split(',')[1];
         card.artType = 'static';
-        card.art_mime = 'image/png';
+        card.art_mime = 'image/webp';
         card.gif_frames = null;
     }
 
@@ -1597,7 +1629,7 @@ async function buildGifFrames(card) {
 
             for (let i = 0; i < card.gif_frames.length; i++) {
                 const f = card.gif_frames[i];
-                const img = await loadSourceImage(`data:image/png;base64,${f.png_base64}`);
+                const img = await loadSourceImage(`data:image/webp;base64,${f.png_base64}`);
 
                 const scaleX = targetW / img.naturalWidth;
                 const scaleY = targetH / img.naturalHeight;
@@ -1619,7 +1651,7 @@ async function buildGifFrames(card) {
                 outCtx.drawImage(img, -cropX, -cropY, resizedW, resizedH);
 
                 resultFrames.push({
-                    png_base64: outCanvas.toDataURL('image/png').split(',')[1],
+                    png_base64: outCanvas.toDataURL('image/webp').split(',')[1],
                     delay: f.delay
                 });
             }
