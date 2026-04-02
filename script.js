@@ -281,9 +281,24 @@ function updateCardBlobUrl(card) {
         URL.revokeObjectURL(card.blobUrl);
         card.blobUrl = null;
     }
-    if (card.png_base64) {
-        const mimeType = card.art_mime || (card.artType === 'gif' ? 'image/gif' : 'image/png');
-        const blob = base64ToBlob(card.png_base64, mimeType);
+    if (card.frameBlobUrls) {
+        card.frameBlobUrls.forEach(url => URL.revokeObjectURL(url));
+        card.frameBlobUrls = null;
+    }
+
+    if (card.artType === 'gif' && card.gif_frames && card.gif_frames.length > 0) {
+        card.frameBlobUrls = card.gif_frames.map(f => {
+            const blob = base64ToBlob(f.png_base64, 'image/png');
+            return URL.createObjectURL(blob);
+        });
+        card.blobUrl = card.frameBlobUrls[0];
+    } else if (card.png_base64) {
+        let actualMime = card.art_mime || 'image/png';
+        if (card.png_base64.startsWith('iVBORw0KGgo')) actualMime = 'image/png';
+        else if (card.png_base64.startsWith('R0lGOD')) actualMime = 'image/gif';
+
+        card.art_mime = actualMime;
+        const blob = base64ToBlob(card.png_base64, actualMime);
         if (blob) card.blobUrl = URL.createObjectURL(blob);
     }
 }
@@ -361,6 +376,71 @@ function initAllCards() {
     });
 }
 
+const animationState = {
+    lastTime: 0,
+    cards: new Map(),
+    rafId: null
+};
+
+function startGlobalAnimationLoop() {
+    if (animationState.rafId) cancelAnimationFrame(animationState.rafId);
+    animationState.lastTime = performance.now();
+
+    function loop(time) {
+        const delta = (time - animationState.lastTime) / 1000;
+        animationState.lastTime = time;
+
+        state.cards.forEach((card, index) => {
+            if (card.artType === 'gif' && card.frameBlobUrls && card.frameBlobUrls.length > 1) {
+                if (card.domNode && card.domNode.style.display !== 'none') {
+                    let anim = animationState.cards.get(index);
+                    if (!anim) {
+                        anim = { currentFrame: 0, timeElapsed: 0 };
+                        animationState.cards.set(index, anim);
+                    }
+
+                    anim.timeElapsed += delta;
+                    const currentDelay = card.gif_frames[anim.currentFrame].delay || 0.1;
+
+                    if (anim.timeElapsed >= currentDelay) {
+                        anim.timeElapsed -= currentDelay;
+                        anim.currentFrame = (anim.currentFrame + 1) % card.gif_frames.length;
+
+                        const imgEl = document.getElementById(`art-img-${index}`);
+                        if (imgEl && imgEl.src !== card.frameBlobUrls[anim.currentFrame]) {
+                            imgEl.src = card.frameBlobUrls[anim.currentFrame];
+                        }
+                    }
+                }
+            }
+        });
+
+        if (state.editingCardIndex !== -1) {
+            const card = state.cards[state.editingCardIndex];
+            if (state.adjustState.isFrameBased && card.frameBlobUrls && card.frameBlobUrls.length > 1) {
+                let anim = animationState.cards.get('modal');
+                if (!anim) {
+                    anim = { currentFrame: 0, timeElapsed: 0 };
+                    animationState.cards.set('modal', anim);
+                }
+
+                anim.timeElapsed += delta;
+                const currentDelay = card.gif_frames[anim.currentFrame].delay || 0.1;
+                if (anim.timeElapsed >= currentDelay) {
+                    anim.timeElapsed -= currentDelay;
+                    anim.currentFrame = (anim.currentFrame + 1) % card.gif_frames.length;
+                    if (dom.modalPreviewAnimated.src !== card.frameBlobUrls[anim.currentFrame]) {
+                        dom.modalPreviewAnimated.src = card.frameBlobUrls[anim.currentFrame];
+                    }
+                }
+            }
+        }
+
+        animationState.rafId = requestAnimationFrame(loop);
+    }
+    animationState.rafId = requestAnimationFrame(loop);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     initDom();
     bindEvents();
@@ -399,11 +479,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // 이미지 전체 사전 로딩 (lazy 로딩 미사용)
     await preloadAllAssets();
 
     dom.appLoading.classList.add('hidden');
     renderUI();
+    startGlobalAnimationLoop();
 });
 
 /** 모든 카드 에셋과 아트 이미지를 미리 로드 */
@@ -615,14 +695,19 @@ async function resetToCleanState() {
 function enrichCard(raw) {
     const meta = findCardMeta(raw.source_path || '');
     const isAncient = meta?.rarity === 'Ancient';
-    const detectedArtType = raw.type || 'static';
+
     const hasGifFrames = raw.frames && raw.frames.length > 0;
-    // GIF 번들: frames 배열의 첫 번째 PNG를 표시용으로, frames 전체를 재추출용으로 보존
-    const displayPng = hasGifFrames ? raw.frames[0].png_base64 : raw.png_base64;
+    const detectedArtType = raw.type === 'gif' || hasGifFrames ? 'gif' : 'static';
+
+    let restoredBase64 = raw.png_base64;
+    if (!restoredBase64 && hasGifFrames) {
+        restoredBase64 = raw.frames[0].png_base64;
+    }
+
     return {
         ...raw,
         artType: detectedArtType,
-        art_mime: hasGifFrames ? 'image/gif' : 'image/png',
+        art_mime: 'image/png',
         gif_frames: hasGifFrames ? raw.frames : null,
         no: meta?.no ?? 9999,
         name_kr: meta?.name_kr ?? extractFallbackName(raw.source_path),
@@ -632,8 +717,8 @@ function enrichCard(raw) {
         rarity: meta?.rarity ?? 'Common',
         width: raw.width ?? (isAncient ? 606 : 1000),
         height: raw.height ?? (isAncient ? 852 : 760),
-        source_png_base64: raw.source_png_base64 || displayPng || '',
-        png_base64: displayPng || '',
+        source_png_base64: raw.source_png_base64 || restoredBase64 || '',
+        png_base64: restoredBase64 || '',
         adjust_zoom: raw.adjust_zoom ?? 1.0,
         adjust_offset_x: raw.adjust_offset_x ?? 0.0,
         adjust_offset_y: raw.adjust_offset_y ?? 0.0,
@@ -726,7 +811,6 @@ function createCardElement(card) {
     const index = state.cards.indexOf(card);
     div.className = 'card-item' + (state.selectedCards.has(index) ? ' selected' : '');
 
-    // 단순 클릭(Click) 대신 마우스 이벤트를 조합하여 드래그 선택 구현
     div.addEventListener('mousedown', (e) => handleCardMouseDown(index, e));
     div.addEventListener('mouseenter', () => handleCardMouseEnter(index));
     div.addEventListener('click', (e) => {
@@ -742,9 +826,7 @@ function createCardElement(card) {
     const artSrc = getCardArtSrc(card);
     const fallback = 'source/img/card_frame/273px-StS2_AncientCardHighlight.png';
 
-    // 배경색 처리 (투명 보호)
     const bgColor = card.background_color && card.background_color !== 'transparent' ? card.background_color : '';
-
     const zoom = card.adjust_zoom || 1.0;
     const offX = card.adjust_offset_x || 0.0;
     const offY = card.adjust_offset_y || 0.0;
@@ -760,9 +842,10 @@ function createCardElement(card) {
         transform-origin: center;
     `;
 
+    const artImgId = `art-img-${index}`;
     const artContent = `
         <div class="layer-art-container" style="width:100%;height:100%;position:relative;background-color:${bgColor};overflow:hidden;">
-            <img src="${artSrc}" alt="${card.name_en || card.name_kr}" 
+            <img id="${artImgId}" src="${artSrc}" alt="${card.name_en || card.name_kr}" 
                  style="${artStyle}"
                  onerror="this.onerror=null;this.src='${fallback}'">
         </div>
@@ -890,13 +973,15 @@ function openEditor(cardIndex) {
     const charPrefix = (card.character || '').toLowerCase();
     const defaultArtSrc = `source/img/card_images/${charPrefix}_${(card.name_en || '').toLowerCase().replace(/ /g, '_')}.webp`;
 
-    // 소스 이미지: source_png_base64(원본 미조정 이미지) 우선 사용
-    // GIF 카드의 경우 저장된 MIME 타입으로 올바른 data URL 재구성
+    const isFrameBased = card.artType === 'gif' && card.frameBlobUrls && card.frameBlobUrls.length > 0 && (!card.png_base64 || !card.png_base64.startsWith('R0lGOD'));
     const sourceBase64 = card.source_png_base64 || card.png_base64;
-    const artMime = card.art_mime || (card.artType === 'gif' ? 'image/gif' : 'image/png');
-    const sourceSrc = sourceBase64 ? `data:${artMime};base64,${sourceBase64}` : defaultArtSrc;
+    const artMime = card.art_mime || 'image/png';
 
-    // adjustState 초기화: 카드에 저장된 조정값 복원
+    let sourceSrc = sourceBase64 ? `data:${artMime};base64,${sourceBase64}` : defaultArtSrc;
+    if (isFrameBased) {
+        sourceSrc = card.frameBlobUrls[0];
+    }
+
     state.adjustState = {
         zoom: card.adjust_zoom ?? 1.0,
         offsetX: card.adjust_offset_x ?? 0.0,
@@ -904,15 +989,13 @@ function openEditor(cardIndex) {
         sourceDataUrl: sourceSrc,
         backgroundColor: card.background_color || 'transparent',
         isAnimated: card.artType === 'gif',
+        isFrameBased: isFrameBased
     };
 
-    // UI 반영
     updateBackgroundColor(state.adjustState.backgroundColor, false);
-    // ...나머지 기존 로직은 아래에서 계속
 
     const assets = getCardAssets(card.character, card.cardType, card.rarity);
 
-    // 이미지 경로 업데이트 (src가 다를 때만 업데이트하여 캐시 활용 극대화)
     const updateSrc = (img, src) => {
         if (!src) { img.src = ''; return; }
         const absSrc = new URL(src, window.location.href).href;
@@ -936,7 +1019,6 @@ function openEditor(cardIndex) {
 
     updateSrc(dom.modalPreviewOriginal, defaultArtSrc);
 
-    // 텍스트 업데이트
     const name = card.name_kr || card.name_en;
     dom.modalTextName.innerText = name;
     dom.modalTextName.setAttribute('data-text', name);
@@ -945,28 +1027,23 @@ function openEditor(cardIndex) {
     dom.modalSize.textContent = `${card.width || 1000} × ${card.height || 760}`;
     dom.modalNameKr.textContent = card.name_kr ? `${card.name_kr} (${card.name_en || ''})` : (card.name_en || '');
 
-    // 슬라이더: 저장된 조정값으로 초기화 (zoom: 1.0→100, offset: -1.0~1.0→-100~100)
     dom.zoomSlider.value = Math.round((card.adjust_zoom ?? 1.0) * 100);
     dom.offsetXSlider.value = Math.round((card.adjust_offset_x ?? 0.0) * 100);
     dom.offsetYSlider.value = Math.round((card.adjust_offset_y ?? 0.0) * 100);
 
-    // 토글 버튼 초기 상태
     dom.modalPreview.classList.remove('hidden');
     dom.modalPreviewOriginal.classList.add('hidden');
     dom.toggleOriginalBtn.innerHTML = `${SVG_EYE} 원본(Original) 대상 보기`;
 
-    // 희귀도 클래스 적용
     dom.cardLargePreview.querySelector('.sts2-card').className = `sts2-card ${card.rarity ? `rarity-${card.rarity.toLowerCase()}` : ''}`;
 
     requestAnimationFrame(async () => {
         dom.editModal.classList.remove('hidden');
-        // 소스 이미지 로드 후 메모리에 캐싱하여 실시간 렌더링 시 점멸 방지
         try {
             state.adjustState.sourceDataUrl = sourceSrc;
             state.adjustState.sourceImage = await loadSourceImage(sourceSrc);
             updateModalPreviewTransform();
         } catch (err) {
-            console.warn('소스 이미지 로드 실패, 기본 이미지 사용:', err);
             state.adjustState.sourceDataUrl = defaultArtSrc;
             state.adjustState.sourceImage = await loadSourceImage(defaultArtSrc);
             updateModalPreviewTransform();
@@ -997,9 +1074,9 @@ function handleImageUpload(e) {
         const dataUrl = ev.target.result;
         const isAnimated = file.type === 'image/gif' || file.type === 'image/webp' || file.name.toLowerCase().endsWith('.gif');
 
-        // 새 이미지 업로드 시 조정값을 초기화하고 원본 소스를 메모리에 캐싱
         state.adjustState.sourceDataUrl = dataUrl;
         state.adjustState.isAnimated = isAnimated;
+        state.adjustState.isFrameBased = false;
         state.adjustState.sourceImage = await loadSourceImage(dataUrl);
         state.adjustState.zoom = 1.0;
         state.adjustState.offsetX = 0.0;
@@ -1008,7 +1085,6 @@ function handleImageUpload(e) {
         dom.offsetXSlider.value = 0;
         dom.offsetYSlider.value = 0;
         state.isDirty = true;
-        // 캐싱된 이미지를 사용하여 즉시 미리보기 갱신
         updateModalPreviewTransform();
     };
     reader.readAsDataURL(file);
@@ -1168,17 +1244,19 @@ async function saveChanges() {
     if (!card) return;
 
     if (state.adjustState.isAnimated) {
-        const sourceDataUrl = state.adjustState.sourceDataUrl;
-        const colonIdx = sourceDataUrl.indexOf(':');
-        const semicolonIdx = sourceDataUrl.indexOf(';');
-        const gifMime = (colonIdx !== -1 && semicolonIdx !== -1 && semicolonIdx > colonIdx)
-            ? sourceDataUrl.slice(colonIdx + 1, semicolonIdx)
-            : 'image/gif';
-        card.png_base64 = sourceDataUrl.split(',')[1];
-        card.art_mime = gifMime;
-        card.artType = 'gif';
+        if (!state.adjustState.isFrameBased || state.adjustState.sourceDataUrl.startsWith('data:')) {
+            const sourceDataUrl = state.adjustState.sourceDataUrl;
+            const colonIdx = sourceDataUrl.indexOf(':');
+            const semicolonIdx = sourceDataUrl.indexOf(';');
+            const gifMime = (colonIdx !== -1 && semicolonIdx !== -1 && semicolonIdx > colonIdx)
+                ? sourceDataUrl.slice(colonIdx + 1, semicolonIdx)
+                : 'image/gif';
 
-        card.gif_frames = null;
+            card.png_base64 = sourceDataUrl.split(',')[1];
+            card.art_mime = gifMime;
+            card.artType = 'gif';
+            card.gif_frames = null;
+        }
     } else {
         const src = dom.modalPreview.toDataURL('image/png');
         card.png_base64 = src.split(',')[1];
@@ -1401,117 +1479,155 @@ function updateSelectionUI() {
  * GIF 카드의 frames 배열을 구성:
  */
 async function buildGifFrames(card) {
-
-    if (card.gif_frames && card.gif_frames.length > 0) {
+    if (card.gif_frames && card.gif_frames.length > 0 && !state.isDirty) {
         return card.gif_frames;
     }
 
     try {
-        const safeParseGIF = window.parseGIF || window.gifuct?.parseGIF;
-        const safeDecompressFrames = window.decompressFrames || window.gifuct?.decompressFrames;
-
-        if (!safeParseGIF || !safeDecompressFrames) {
-            throw new Error("gifuct-js 라이브러리가 로드되지 않았습니다. index.html에 스크립트 태그가 있는지 확인하세요.");
-        }
-
-        const binary = atob(card.png_base64);
-        const array = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
-
-        const gif = safeParseGIF(array.buffer);
-
-        const frames = safeDecompressFrames(gif, true);
-
-        if (!frames || frames.length === 0) throw new Error("추출된 프레임이 없습니다.");
-
+        const isNativeGif = card.png_base64 && card.png_base64.startsWith('R0lGOD');
         const targetW = card.width || 1000;
         const targetH = card.height || 760;
         const zoom = card.adjust_zoom || 1.0;
         const offsetX = card.adjust_offset_x || 0.0;
         const offsetY = card.adjust_offset_y || 0.0;
 
-        const gifW = frames[0].dims.width;
-        const gifH = frames[0].dims.height;
+        if (isNativeGif) {
+            const safeParseGIF = window.parseGIF || window.gifuct?.parseGIF;
+            const safeDecompressFrames = window.decompressFrames || window.gifuct?.decompressFrames;
+            if (!safeParseGIF || !safeDecompressFrames) throw new Error("gifuct-js 라이브러리가 로드되지 않았습니다.");
 
-        const rawCanvas = document.createElement('canvas');
-        rawCanvas.width = gifW;
-        rawCanvas.height = gifH;
-        const rawCtx = rawCanvas.getContext('2d', { willReadFrequently: true });
+            const binary = atob(card.png_base64);
+            const array = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
 
-        const outCanvas = document.createElement('canvas');
-        outCanvas.width = targetW;
-        outCanvas.height = targetH;
-        const outCtx = outCanvas.getContext('2d', { alpha: true });
+            const gif = safeParseGIF(array.buffer);
+            const frames = safeDecompressFrames(gif, true);
 
-        const scaleX = targetW / gifW;
-        const scaleY = targetH / gifH;
-        const scaleFactor = Math.max(scaleX, scaleY) * zoom;
-        const resizedW = Math.round(gifW * scaleFactor);
-        const resizedH = Math.round(gifH * scaleFactor);
-        const extraW = resizedW - targetW;
-        const extraH = resizedH - targetH;
-        const clampedOffX = Math.max(-1.0, Math.min(1.0, offsetX));
-        const clampedOffY = Math.max(-1.0, Math.min(1.0, offsetY));
-        const cropX = Math.round(extraW * 0.5 + clampedOffX * extraW * 0.5);
-        const cropY = Math.round(extraH * 0.5 + clampedOffY * extraH * 0.5);
+            if (!frames || frames.length === 0) throw new Error("추출된 프레임이 없습니다.");
 
-        const resultFrames = [];
-        let previousImageData = null;
+            const gifW = frames[0].dims.width;
+            const gifH = frames[0].dims.height;
 
-        for (let i = 0; i < frames.length; i++) {
-            const frame = frames[i];
+            const rawCanvas = document.createElement('canvas');
+            rawCanvas.width = gifW;
+            rawCanvas.height = gifH;
+            const rawCtx = rawCanvas.getContext('2d', { willReadFrequently: true });
 
-            if (i > 0 && frames[i - 1].disposalType === 2) {
-                rawCtx.clearRect(
-                    frames[i - 1].dims.left, frames[i - 1].dims.top,
-                    frames[i - 1].dims.width, frames[i - 1].dims.height
+            const outCanvas = document.createElement('canvas');
+            outCanvas.width = targetW;
+            outCanvas.height = targetH;
+            const outCtx = outCanvas.getContext('2d', { alpha: true });
+
+            const scaleX = targetW / gifW;
+            const scaleY = targetH / gifH;
+            const scaleFactor = Math.max(scaleX, scaleY) * zoom;
+            const resizedW = Math.round(gifW * scaleFactor);
+            const resizedH = Math.round(gifH * scaleFactor);
+            const extraW = resizedW - targetW;
+            const extraH = resizedH - targetH;
+            const clampedOffX = Math.max(-1.0, Math.min(1.0, offsetX));
+            const clampedOffY = Math.max(-1.0, Math.min(1.0, offsetY));
+            const cropX = Math.round(extraW * 0.5 + clampedOffX * extraW * 0.5);
+            const cropY = Math.round(extraH * 0.5 + clampedOffY * extraH * 0.5);
+
+            const resultFrames = [];
+            let previousImageData = null;
+
+            for (let i = 0; i < frames.length; i++) {
+                const frame = frames[i];
+
+                if (i > 0 && frames[i - 1].disposalType === 2) {
+                    rawCtx.clearRect(
+                        frames[i - 1].dims.left, frames[i - 1].dims.top,
+                        frames[i - 1].dims.width, frames[i - 1].dims.height
+                    );
+                }
+                if (i > 0 && frames[i - 1].disposalType === 3 && previousImageData) {
+                    rawCtx.putImageData(previousImageData, 0, 0);
+                } else {
+                    previousImageData = rawCtx.getImageData(0, 0, gifW, gifH);
+                }
+
+                const patchImageData = new ImageData(
+                    new Uint8ClampedArray(frame.patch),
+                    frame.dims.width,
+                    frame.dims.height
                 );
+                const patchCanvas = document.createElement('canvas');
+                patchCanvas.width = frame.dims.width;
+                patchCanvas.height = frame.dims.height;
+                patchCanvas.getContext('2d').putImageData(patchImageData, 0, 0);
+
+                rawCtx.drawImage(patchCanvas, frame.dims.left, frame.dims.top);
+
+                outCtx.clearRect(0, 0, targetW, targetH);
+                if (card.background_color && card.background_color !== 'transparent') {
+                    outCtx.fillStyle = card.background_color;
+                    outCtx.fillRect(0, 0, targetW, targetH);
+                }
+
+                outCtx.drawImage(rawCanvas, -cropX, -cropY, resizedW, resizedH);
+
+                const pngBase64 = outCanvas.toDataURL('image/png').split(',')[1];
+                const delaySec = Math.max(0.01, (frame.delay || 100) / 1000);
+
+                resultFrames.push({
+                    png_base64: pngBase64,
+                    delay: delaySec
+                });
             }
-            if (i > 0 && frames[i - 1].disposalType === 3 && previousImageData) {
-                rawCtx.putImageData(previousImageData, 0, 0);
-            } else {
-                previousImageData = rawCtx.getImageData(0, 0, gifW, gifH);
+
+            card.gif_frames = resultFrames;
+            return resultFrames;
+
+        } else if (card.gif_frames && card.gif_frames.length > 0) {
+            const outCanvas = document.createElement('canvas');
+            outCanvas.width = targetW;
+            outCanvas.height = targetH;
+            const outCtx = outCanvas.getContext('2d', { alpha: true });
+
+            const resultFrames = [];
+
+            for (let i = 0; i < card.gif_frames.length; i++) {
+                const f = card.gif_frames[i];
+                const img = await loadSourceImage(`data:image/png;base64,${f.png_base64}`);
+
+                const scaleX = targetW / img.naturalWidth;
+                const scaleY = targetH / img.naturalHeight;
+                const scaleFactor = Math.max(scaleX, scaleY) * zoom;
+                const resizedW = Math.round(img.naturalWidth * scaleFactor);
+                const resizedH = Math.round(img.naturalHeight * scaleFactor);
+                const extraW = resizedW - targetW;
+                const extraH = resizedH - targetH;
+                const clampedOffX = Math.max(-1.0, Math.min(1.0, offsetX));
+                const clampedOffY = Math.max(-1.0, Math.min(1.0, offsetY));
+                const cropX = Math.round(extraW * 0.5 + clampedOffX * extraW * 0.5);
+                const cropY = Math.round(extraH * 0.5 + clampedOffY * extraH * 0.5);
+
+                outCtx.clearRect(0, 0, targetW, targetH);
+                if (card.background_color && card.background_color !== 'transparent') {
+                    outCtx.fillStyle = card.background_color;
+                    outCtx.fillRect(0, 0, targetW, targetH);
+                }
+                outCtx.drawImage(img, -cropX, -cropY, resizedW, resizedH);
+
+                resultFrames.push({
+                    png_base64: outCanvas.toDataURL('image/png').split(',')[1],
+                    delay: f.delay
+                });
             }
 
-            const patchImageData = new ImageData(
-                new Uint8ClampedArray(frame.patch),
-                frame.dims.width,
-                frame.dims.height
-            );
-            const patchCanvas = document.createElement('canvas');
-            patchCanvas.width = frame.dims.width;
-            patchCanvas.height = frame.dims.height;
-            patchCanvas.getContext('2d').putImageData(patchImageData, 0, 0);
-
-            rawCtx.drawImage(patchCanvas, frame.dims.left, frame.dims.top);
-
-            outCtx.clearRect(0, 0, targetW, targetH);
-            if (card.background_color && card.background_color !== 'transparent') {
-                outCtx.fillStyle = card.background_color;
-                outCtx.fillRect(0, 0, targetW, targetH);
-            }
-
-            outCtx.drawImage(rawCanvas, -cropX, -cropY, resizedW, resizedH);
-
-            const pngBase64 = outCanvas.toDataURL('image/png').split(',')[1];
-            const delaySec = Math.max(0.01, (frame.delay || 100) / 1000);
-
-            resultFrames.push({
-                png_base64: pngBase64,
-                delay: delaySec
-            });
+            card.gif_frames = resultFrames;
+            return resultFrames;
+        } else {
+            throw new Error("No GIF data or frames available.");
         }
 
-        card.gif_frames = resultFrames;
-        return resultFrames;
-
     } catch (e) {
-        console.error('[buildGifFrames] error:', e);
         try {
             const pngBase64 = await renderCardToPngBase64(card);
             return pngBase64 ? [{ png_base64: pngBase64, delay: 0.1 }] : [];
         } catch (errFallback) {
-            console.error('[buildGifFrames] fallback error:', errFallback);
             return [];
         }
     }
@@ -1538,32 +1654,27 @@ async function exportJSON(selectedOnly = false) {
         const overrides = await Promise.all(modifiedCards.map(async c => {
             const obj = {
                 source_path: c.source_path,
-                width: c.width,
-                height: c.height,
-                updated_at: c.updated_at || new Date().toISOString().slice(0, 19),
                 type: c.artType || 'static',
                 display_mode: c.display_mode || 'default',
+                updated_at: c.updated_at || new Date().toISOString().slice(0, 19),
             };
 
             if (c.artType === 'gif') {
-                const frames = await buildGifFrames(c);
-                if (frames.length > 0) {
+                let frames = c.gif_frames;
+                if (!frames || c.png_base64.startsWith('R0lGOD') || state.isDirty) {
+                    frames = await buildGifFrames(c);
+                }
+
+                if (frames && frames.length > 0) {
                     obj.frames = frames;
                 } else {
                     obj.png_base64 = c.png_base64;
+                    obj.type = 'static';
                 }
             } else {
                 obj.png_base64 = c.png_base64;
             }
 
-            if (c.source_png_base64) obj.source_png_base64 = c.source_png_base64;
-            if (c.art_mime) obj.art_mime = c.art_mime;
-            if (c.adjust_zoom !== undefined) obj.adjust_zoom = c.adjust_zoom;
-            if (c.adjust_offset_x !== undefined) obj.adjust_offset_x = c.adjust_offset_x;
-            if (c.adjust_offset_y !== undefined) obj.adjust_offset_y = c.adjust_offset_y;
-            if (c.background_color && c.background_color !== 'transparent') {
-                obj.background_color = c.background_color;
-            }
             return obj;
         }));
 
@@ -1596,7 +1707,6 @@ async function exportJSON(selectedOnly = false) {
         URL.revokeObjectURL(url);
 
     } catch (e) {
-        console.error('[exportJSON] error:', e);
         alert('내보내기 중 오류가 발생했습니다.');
     } finally {
         showLoading(false);
