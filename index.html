@@ -176,8 +176,15 @@
                     </div>
 
                     <div class="info-group">
-                        <label>이미지 규격</label>
-                        <div id="modalSize" class="size-display">1000 × 760</div>
+                        <div class="info-group-text">
+                            <label>이미지 규격</label>
+                            <div id="modalSize" class="size-display">1000 × 760</div>
+                        </div>
+                        <div class="image-toggle" id="toggleOriginalBtn" title="커스텀/원본 이미지 전환">
+                            <div class="toggle-slider"></div>
+                            <div class="toggle-option left active" data-type="custom">커스텀</div>
+                            <div class="toggle-option right" data-type="original">원본</div>
+                        </div>
                     </div>
 
                     <div class="action-group">
@@ -185,9 +192,7 @@
                         <button class="btn btn-primary btn-full" id="uploadImageBtn">
                             <i data-lucide="image-plus"></i> 새 이미지 업로드
                         </button>
-                        <button class="btn btn-secondary btn-full" id="toggleOriginalBtn">
-                            <i data-lucide="eye"></i> 원본(Original) 대상 보기
-                        </button>
+
                         <button id="resetCardBtn" class="btn btn-danger btn-full">
                             <i data-lucide="rotate-ccw"></i> 커스텀 이미지 제거
                         </button>

@@ -1033,7 +1033,12 @@ function openEditor(cardIndex) {
 
     dom.modalPreview.classList.remove('hidden');
     dom.modalPreviewOriginal.classList.add('hidden');
-    dom.toggleOriginalBtn.innerHTML = `${SVG_EYE} 원본(Original) 대상 보기`;
+
+    // 토글 스위치 초기화 (커스텀 활성화)
+    dom.toggleOriginalBtn.classList.remove('is-original');
+    dom.toggleOriginalBtn.querySelectorAll('.toggle-option').forEach(opt => {
+        opt.classList.toggle('active', opt.classList.contains('left'));
+    });
 
     dom.cardLargePreview.querySelector('.sts2-card').className = `sts2-card ${card.rarity ? `rarity-${card.rarity.toLowerCase()}` : ''}`;
 
@@ -1056,14 +1061,16 @@ function closeModal() {
     dom.imageInput.value = '';
 }
 
-/** 원본/커스텀 이미지 토글 */
 function toggleOriginalView() {
     const isShowingCustom = !dom.modalPreview.classList.contains('hidden');
     dom.modalPreview.classList.toggle('hidden', isShowingCustom);
     dom.modalPreviewOriginal.classList.toggle('hidden', !isShowingCustom);
-    dom.toggleOriginalBtn.innerHTML = isShowingCustom
-        ? `${SVG_IMAGE} 커스텀 대상 보기`
-        : `${SVG_EYE} 원본(Original) 대상 보기`;
+
+    // UI 상태 업데이트
+    dom.toggleOriginalBtn.classList.toggle('is-original', isShowingCustom);
+    dom.toggleOriginalBtn.querySelectorAll('.toggle-option').forEach(opt => {
+        opt.classList.toggle('active');
+    });
 }
 
 function handleImageUpload(e) {
