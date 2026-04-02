@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STS2 Card Art Editor | Slay the Spire 2 Art Mod Tool</title>
-    <meta name="description" content="Slay the Spire 2 모드의 카드 이미지를 편리하게 관리하고 편집할 수 있는 웹 기반 에디터입니다. JSON 번들 가져오기/내보내기를 완벽하게 지원합니다.">
+    <meta name="description"
+        content="Slay the Spire 2 모드의 카드 이미지를 편리하게 관리하고 편집할 수 있는 웹 기반 에디터입니다. JSON 번들 가져오기/내보내기를 완벽하게 지원합니다.">
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Roboto+Mono&display=swap"
+        rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body class="theme-dark">
     <header class="app-header">
         <div class="header-container">
@@ -39,18 +43,74 @@
                 <h2>시작하려면 <span>.cardartpack.json</span> 파일을 업로드하세요</h2>
                 <p>파일을 여기에 끌어다 놓거나 아래 버튼을 클릭하여 선택하세요.</p>
                 <input type="file" id="fileInput" accept=".json" hidden>
-                <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">파일 브라우저 열기</button>
+                <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">파일 브라우저
+                    열기</button>
             </div>
         </section>
 
         <section id="editorSection" class="editor-section hidden">
             <div class="toolbar">
-                <div class="search-box">
-                    <i data-lucide="search"></i>
-                    <input type="text" id="searchInput" placeholder="카드 이름 또는 경로로 검색...">
+                <div class="filter-rail" id="filterRail">
+                    <!-- Character Filter -->
+                    <div class="filter-group character-group">
+                        <p class="filter-group-label">캐릭터</p>
+                        <div class="chip-list" data-filter-group="character">
+                            <button class="filter-chip active" data-filter-value="all">전체</button>
+                            <button class="filter-chip" data-filter-value="Ironclad">
+                                <img src="source/img/card_base/273px-StS2_CardIroncladOrb.png" alt=""> 아이언클래드
+                            </button>
+                            <button class="filter-chip" data-filter-value="Silent">
+                                <img src="source/img/card_base/273px-StS2_CardSilentOrb.png" alt=""> 사일런트
+                            </button>
+                            <button class="filter-chip" data-filter-value="Regent">
+                                <img src="source/img/card_base/273px-StS2_CardRegentOrb.png" alt=""> 리젠트
+                            </button>
+                            <button class="filter-chip" data-filter-value="Necrobinder">
+                                <img src="source/img/card_base/273px-StS2_CardNecrobinderOrb.png" alt=""> 네크로바인더
+                            </button>
+                            <button class="filter-chip" data-filter-value="Defect">
+                                <img src="source/img/card_base/273px-StS2_CardDefectOrb.png" alt=""> 디펙트
+                            </button>
+                            <button class="filter-chip" data-filter-value="Colorless">
+                                <img src="source/img/card_base/273px-StS2_CardColorlessOrb.png" alt=""> 무색
+                            </button>
+                            <button class="filter-chip" data-filter-value="Ancient">고대의존재</button>
+                            <button class="filter-chip" data-filter-value="misc">기타</button>
+                        </div>
+                    </div>
+
+                    <!-- Type Filter -->
+                    <div class="filter-group type-group">
+                        <p class="filter-group-label">타입</p>
+                        <div class="chip-list" data-filter-group="type">
+                            <button class="filter-chip active" data-filter-value="all">전체</button>
+                            <button class="filter-chip" data-filter-value="Attack">공격</button>
+                            <button class="filter-chip" data-filter-value="Skill">스킬</button>
+                            <button class="filter-chip" data-filter-value="Power">파워</button>
+                            <button class="filter-chip" data-filter-value="misc">기타</button>
+                        </div>
+                    </div>
+
+                    <!-- Rarity Filter -->
+                    <div class="filter-group rarity-group">
+                        <p class="filter-group-label">희귀도</p>
+                        <div class="chip-list" data-filter-group="rarity">
+                            <button class="filter-chip active" data-filter-value="all">전체</button>
+                            <button class="filter-chip" data-filter-value="Common">일반</button>
+                            <button class="filter-chip" data-filter-value="Uncommon">고급</button>
+                            <button class="filter-chip" data-filter-value="Rare">희귀</button>
+                            <button class="filter-chip" data-filter-value="misc">기타</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="stats">
-                    수정된 카드: <span id="cardCount">0</span>개
+                <div class="toolbar-bottom">
+                    <div class="search-box">
+                        <i data-lucide="search"></i>
+                        <input type="text" id="searchInput" placeholder="카드 이름 또는 경로로 검색...">
+                    </div>
+                    <div class="stats">
+                        수정된 카드: <span id="cardCount">0</span>개
+                    </div>
                 </div>
             </div>
 
@@ -133,4 +193,5 @@
         lucide.createIcons();
     </script>
 </body>
+
 </html>

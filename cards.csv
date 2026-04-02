@@ -1,0 +1,595 @@
+no,name_kr,name_en,character,type,rarity
+1,타격,Strike,Ironclad,Attack,Starter
+2,강타,Bash,Ironclad,Attack,Starter
+3,수비,Defend,Ironclad,Skill,Starter
+4,분노,Anger,Ironclad,Attack,Common
+5,녹아내리는 주먹,Molten Fist,Ironclad,Attack,Common
+6,몸통 박치기,Body Slam,Ironclad,Attack,Common
+7,박치기,Headbutt,Ironclad,Attack,Common
+8,부메랑 칼날,Sword Boomerang,Ironclad,Attack,Common
+9,사전 타격,Setup Strike,Ironclad,Attack,Common
+10,이중 타격,Twin Strike,Ironclad,Attack,Common
+11,정면 돌파,Breakthrough,Ironclad,Attack,Common
+12,천둥,Thunderclap,Ironclad,Attack,Common
+13,철의 파동,Iron wave,Ironclad,Attack,Common
+14,폼멜 타격,Pommel Strike,Ironclad,Attack,Common
+15,완벽한 타격,Perfected Strike,Ironclad,Attack,Common
+16,잿불,Cinder,Ironclad,Attack,Common
+17,사혈,Bloodletting,Ironclad,Skill,Common
+18,떨림,Tremble,Ironclad,Skill,Common
+19,전투장비,Armaments,Ironclad,Skill,Common
+20,진정한 끈기,True Grit,Ironclad,Skill,Common
+21,파괴,Havoc,Ironclad,Skill,Common
+22,흘려보내기,Shrug It Off,Ironclad,Skill,Common
+23,피의 벽,Blood Wall,Ironclad,Skill,Common
+24,소용돌이,Whirlwind,Ironclad,Attack,Uncommon
+25,악의,Spite,Ironclad,Attack,Uncommon
+26,협박,Bully,Ironclad,Attack,Uncommon
+27,갈취,Pillage,Ironclad,Attack,Uncommon
+28,광란,Rampage,Ironclad,Attack,Uncommon
+29,그래플링,Grapple,Ironclad,Attack,Uncommon
+30,잿빛 타격,Ashen Strike,Ironclad,Attack,Uncommon
+31,해체,Dismantle,Ironclad,Attack,Uncommon
+32,혈류,Hemokinesis,Ironclad,Attack,Uncommon
+33,덤벼라!,Fight Me!,Ironclad,Attack,Uncommon
+34,무자비,Unrelenting,Ironclad,Attack,Uncommon
+35,어퍼컷,Uppercut,Ironclad,Attack,Uncommon
+36,몽둥이질,Bludgeon,Ironclad,Attack,Uncommon
+37,저편의 울음소리,Howl from Beyond,Ironclad,Attack,Uncommon
+38,짓밟기,Stomp,Ironclad,Attack,Uncommon
+39,격노,Rage,Ironclad,Skill,Uncommon
+40,전투 최면,Battle Trance,Ironclad,Skill,Uncommon
+41,기사회생,Second Wind,Ironclad,Skill,Uncommon
+42,도발,Taunt,Ironclad,Skill,Uncommon
+43,불타는 조약,Burning Pact,Ironclad,Skill,Uncommon
+44,악마의 눈,Evil Eye,Ironclad,Skill,Uncommon
+45,잊힌 의식,Forgotten Ritual,Ironclad,Skill,Uncommon
+46,제압,Dominate,Ironclad,Skill,Uncommon
+47,지옥검,Infernal Blade,Ironclad,Skill,Uncommon
+48,싸움 준비,Expect a Fight,Ironclad,Skill,Uncommon
+49,화염 장벽,Flame Barrier,Ironclad,Skill,Uncommon
+50,전투의 북소리,Drum of Battle,Ironclad,Power,Uncommon
+51,돌 갑옷,Stone Armor,Ironclad,Power,Uncommon
+52,무감각,Feel No Pain,Ironclad,Power,Uncommon
+53,발화,Inflame,Ironclad,Power,Uncommon
+54,불바다,Inferno,Ironclad,Power,Uncommon
+55,저글링,Juggling,Ironclad,Power,Uncommon
+56,파열,Rupture,Ironclad,Power,Uncommon
+57,포악함,Vicious,Ironclad,Power,Uncommon
+58,쇄도,Stampede,Ironclad,Power,Uncommon
+59,조약의 끝,Pact's End,Ironclad,Attack,Rare
+60,난타,Thrash,Ironclad,Attack,Rare
+61,대화재,Conflagration,Ironclad,Attack,Rare
+62,포식,Feed,Ironclad,Attack,Rare
+63,갈가리 찢기,Tear Asunder,Ironclad,Attack,Rare
+64,지옥불,Fiend Fire,Ironclad,Attack,Rare
+65,난도질,Mangle,Ironclad,Attack,Rare
+66,낙인,Brand,Ironclad,Skill,Rare
+67,연쇄,Cascade,Ironclad,Skill,Rare
+68,원시의 힘,Primal Force,Ironclad,Skill,Rare
+69,제물,Offering,Ironclad,Skill,Rare
+70,거상,Colossus,Ironclad,Skill,Rare
+71,원투 펀치,One-Two Punch,Ironclad,Skill,Rare
+72,화력 증폭,Stoke,Ironclad,Skill,Rare
+73,무적,Impervious,Ironclad,Skill,Rare
+74,공격성,Aggression,Ironclad,Power,Rare
+75,악랄함,Cruelty,Ironclad,Power,Rare
+76,핏빛 망토,Crimson Mantle,Ironclad,Power,Rare
+77,불의 심장,Hellraiser,Ironclad,Power,Rare
+78,어둠의 포옹,Dark Embrace,Ironclad,Power,Rare
+79,요지부동,Unmovable,Ironclad,Power,Rare
+80,절대적인 힘,Pyre,Ironclad,Power,Rare
+81,지옥검무,Juggernaut,Ironclad,Power,Rare
+82,바리케이드,Barricade,Ironclad,Power,Rare
+83,악마의 형상,Demon Form,Ironclad,Power,Rare
+84,박살,Break,Ironclad,Attack,Misc
+85,타락,Corruption,Ironclad,Power,Misc
+86,악마의 방패,Demonic Shield,Ironclad,Skill,Misc
+87,탱커,Tank,Ironclad,Power,Misc
+
+88,무력화,Neutralize,Silent,Attack,Starter
+89,타격,Strike,Silent,Attack,Starter
+90,생존자,Survivor,Silent,Skill,Starter
+91,수비,Defend,Silent,Skill,Starter
+92,칼질,Slice,Silent,Attack,Common
+93,단검 분사,Dagger Spray,Silent,Attack,Common
+94,단검 투척,Dagger Throw,Silent,Attack,Common
+95,독 찌르기,Poisoned Stab,Silent,Attack,Common
+96,불의의 일격,Backstab,Silent,Attack,Common
+97,선제 타격,Leading Strike,Silent,Attack,Common
+98,재주넘기,Backflip,Silent,Attack,Common
+99,도탄,Ricochet,Silent,Attack,Common
+100,예비,Prepared,Silent,Skill,Common
+101,예측,Anticipate,Silent,Skill,Common
+102,튕겨내기,Deflect,Silent,Skill,Common
+103,검무,Blade Dance,Silent,Skill,Common
+104,곡예,Acrobatics,Silent,Skill,Common
+105,공중제비,Dodge and Roll,Silent,Skill,Common
+106,구르기,Blur,Silent,Skill,Common
+107,귀를 찢는 비명,Piercing Wail,Silent,Skill,Common
+108,망토와 단검,Cloak and Dagger,Silent,Skill,Common
+109,맹독,Deadly Poison,Silent,Skill,Common
+110,뱀 물기,Snakebite,Silent,Skill,Common
+111,범접 불가,Untouchable,Silent,Skill,Common
+112,꼬챙이,Skewer,Silent,Attack,Uncommon
+113,배신,Assassinate,Silent,Attack,Uncommon
+114,정밀한 베기,Precise Cut,Silent,Attack,Uncommon
+115,마무리,Finisher,Silent,Attack,Uncommon
+116,메멘토 모리,Memento Mori,Silent,Attack,Uncommon
+117,목 조르기,Strangle,Silent,Attack,Uncommon
+118,완수,Follow Through,Silent,Attack,Uncommon
+119,프레췌,Flechettes,Silent,Attack,Uncommon
+120,덮치기,Pounce,Silent,Attack,Uncommon
+121,돌진,Dash,Silent,Attack,Uncommon
+122,포식자,Predator,Silent,Attack,Uncommon
+123,정밀 사격,Pinpoint,Silent,Attack,Uncommon
+124,계산된 도박,Calculated Gamble,Silent,Skill,Uncommon
+125,들춰내기,Expose,Silent,Skill,Uncommon
+126,숨겨진 단검,Hidden Daggers,Silent,Skill,Uncommon
+127,탈출구,Escape Plan,Silent,Skill,Uncommon
+128,손기술,Hand Trick,Silent,Skill,Uncommon
+129,신기루,Mirage,Silent,Skill,Uncommon
+130,전문성,Expertise,Silent,Skill,Uncommon
+131,차오르는 독,Bouncing Flask,Silent,Skill,Uncommon
+132,흐릿함,Haze,Silent,Skill,Uncommon
+133,다리 걸기,Leg Sweep,Silent,Skill,Uncommon
+134,비책,Outmaneuver,Silent,Skill,Uncommon
+135,탄성 플라스크,Bouncing Flask,Silent,Skill,Uncommon
+136,반사신경,Reflex,Silent,Skill,Uncommon
+137,아지랑이,Haze,Silent,Skill,Uncommon
+138,전략가,Tactician,Silent,Skill,Uncommon
+139,괜찮은 전략,Well-Laid Plans,Silent,Power,Uncommon
+140,무한의 검날,Infinite Blades,Silent,Power,Uncommon
+141,발놀림,Footwork,Silent,Power,Uncommon
+142,발병,Outbreak,Silent,Power,Uncommon
+143,유독 가스,Noxious Fumes,Silent,Power,Uncommon
+144,정밀,Accuracy,Silent,Power,Uncommon
+145,환영검,Phantom Blades,Silent,Power,Uncommon
+146,스피드스터,Speedster,Silent,Power,Uncommon
+147,대단원의 막,Grand Finale,Silent,Attack,Rare
+148,암살,Assassinate,Silent,Attack,Rare
+149,메아리 참격,Echoing Slash,Silent,Attack,Rare
+150,사냥,The Hunt,Silent,Attack,Rare
+151,살해,Murder,Silent,Attack,Rare
+152,불쾌,Malaise,Silent,Skill,Rare
+153,아드레날린,Adrenaline,Silent,Skill,Rare
+154,강철의 폭풍,Storm of Steel,Silent,Skill,Rare
+155,그림자 걸음,Shadow Step,Silent,Skill,Rare
+156,그림자 은신,Shadowmeld,Silent,Skill,Rare
+157,부식성 파도,Corrosive Wave,Silent,Skill,Rare
+158,잉크 칼날,Blade of Ink,Silent,Skill,Rare
+159,폭주,Burst,Silent,Skill,Rare
+160,칼날 함정,Knife Trap,Silent,Skill,Rare
+161,불릿 타임,Bullet Time,Silent,Skill,Rare
+162,악몽,Nightmare,Silent,Skill,Rare
+163,작업 도구,Tools of the Trade,Silent,Power,Rare
+164,잔상,Afterimage,Silent,Power,Rare
+165,촉진제,Accelerant,Silent,Power,Rare
+166,독 바르기,Envenom,Silent,Power,Rare
+167,설계의 대가,Master Planner,Silent,Power,Rare
+168,추적,Tracking,Silent,Power,Rare
+169,칼날 부채,Fan of Knives,Silent,Power,Rare
+170,구렁이의 형상,Serpent Form,Silent,Power,Rare
+171,연마,Abrasive,Silent,Power,Rare
+172,제압,Suppress,Silent,Power,Misc
+173,유령의 형상,Wraith Form,Silent,Power,Misc
+174,측면 공격,Flanking,Silent,Power,Misc
+175,비열함,Sneaky,Silent,Power,Misc
+
+176,별똥별,Falling Star,Regent,Attack,Starter
+177,타격,Strike,Regent,Attack,Starter
+178,수비,Defend,Regent,Skill,Starter
+179,추앙,Venerate,Regent,Skill,Starter
+180,별의 파동,Astral Pulse,Regent,Attack,Common
+181,불가피한 충돌,Collision Course,Regent,Attack,Common
+182,광자 베기,Photon Cut,Regent,Attack,Common
+183,길잡이별,Guiding Star,Regent,Attack,Common
+184,물렀거라!,BEGONE!,Regent,Attack,Common
+185,전장의 생존자,Wrought in War,Regent,Attack,Common
+186,지면 파쇄,Crush Under,Regent,Attack,Common
+187,초승달 창,Crescent Spear,Regent,Attack,Common
+188,태양의 타격,Solar Strike,Regent,Attack,Common
+189,천상의 권능,Celestial Might,Regent,Attack,Common
+190,네 주제를 알라,Know Thy Place,Regent,Skill,Common
+191,별의 망토,Cloak of Stars,Regent,Skill,Common
+192,검날 개선,Refine Blade,Regent,Skill,Common
+193,광채,Glow,Regent,Skill,Common
+194,별무리,Glitterstream,Regent,Skill,Common
+195,비밀 상자,Hidden Cache,Regent,Skill,Common
+196,빛 거두기,Gather Light,Regent,Skill,Common
+197,우주적 무관심,Cosmic Indifference,Regent,Skill,Common
+198,전투의 성과,Spoils of Battle,Regent,Skill,Common
+199,빛의 흐름,Patter,Regent,Skill,Common
+200,감마 세례,Gamma Blast,Regent,Attack,Uncommon
+201,달의 세례,Lunar Blast,Regent,Attack,Uncommon
+202,방출,Radiate,Regent,Attack,Uncommon
+203,우주 먼지,Stardust,Regent,Attack,Uncommon
+204,빛나는 타격,Shining Strike,Regent,Attack,Uncommon
+205,왕의 주먹,Kingly Punch,Regent,Attack,Uncommon
+206,초질량,Supermassive,Regent,Attack,Uncommon
+207,초토화,Devastate,Regent,Attack,Uncommon
+208,패권,Hegemony,Regent,Attack,Uncommon
+209,필사의 일격,Stardust,Regent,Attack,Uncommon
+210,왕의 발차기,Kingly Kick,Regent,Attack,Uncommon
+211,독백,Monologue,Regent,Skill,Uncommon
+212,성대한 도박,Royal Gamble,Regent,Skill,Uncommon
+213,입자 벽,Particle Wall,Regent,Skill,Uncommon
+214,정렬,Alignment,Regent,Skill,Uncommon
+215,준항성,Quasar,Regent,Skill,Uncommon
+216,공진,Resonance,Regent,Skill,Uncommon
+217,권위 행사,Manifest Authority,Regent,Skill,Uncommon
+218,돌격!!!!,CHARGE!!,Regent,Skill,Uncommon
+219,반사,Reflect,Regent,Skill,Uncommon
+220,수렴,Convergence,Regent,Skill,Uncommon
+221,대령하라,Summon Forth,Regent,Skill,Uncommon
+222,정복자,Conqueror,Regent,Skill,Uncommon
+223,테라포밍,Terraforming,Regent,Skill,Uncommon
+224,희미한 빛,Glimmer,Regent,Skill,Uncommon
+225,보루,Bulwark,Regent,Skill,Uncommon
+226,예언,Prophesize,Regent,Skill,Uncommon
+227,별의 아이,Child of the Stars,Regent,Power,Uncommon
+228,블랙홀,Black Hole,Regent,Power,Uncommon
+229,용광로,Furnace,Regent,Power,Uncommon
+230,창백한 푸른 점,Pale Blue Dot,Regent,Power,Uncommon
+231,창조의 기둥,Pillar of Creation,Regent,Power,Uncommon
+232,쳐내기,Parry,Regent,Power,Uncommon
+233,궤도,Orbit,Regent,Power,Uncommon
+234,스펙트럼 이동,Spectrum Shift,Regent,Power,Uncommon
+235,그렇게 하라,Make It So,Regent,Attack,Rare
+236,천원돌파,Heavenly Drill,Regent,Attack,Rare
+237,혜성,Comet,Regent,Attack,Rare
+238,불시착,Crash Landing,Regent,Attack,Rare
+239,재성형,Beat into Shape,Regent,Attack,Rare
+240,죽어가는 별,Dying Star,Regent,Attack,Rare
+241,선조의 망치,Heirloom Hammer,Regent,Attack,Rare
+242,일곱 개의 별,Seven Stars,Regent,Attack,Rare
+243,포격,Bombardment,Regent,Attack,Rare
+244,빅뱅,Big Bang,Regent,Skill,Rare
+245,어려운 결정,"Decisions, Decisions",Regent,Skill,Rare
+246,나는 무적이다,I Am Invincible,Regent,Skill,Rare
+247,위대한 재련,The Smith,Regent,Skill,Rare
+248,필연적인 결과,Foregone Conclusion,Regent,Skill,Rare
+249,기쁨의 선물,Bundle of Joy,Regent,Skill,Rare
+250,막아라!!,GUARDS!!!,Regent,Skill,Rare
+251,날 세우기,Seeking Edge,Regent,Power,Rare
+252,독재,Tyranny,Regent,Power,Rare
+253,로열티,Royalties,Regent,Power,Rare
+254,무기고,Arsenal,Regent,Power,Rare
+255,중성자 방패,Neutron Aegis,Regent,Power,Rare
+256,검성,Sword Sage,Regent,Power,Rare
+257,창세,Genesis,Regent,Power,Rare
+258,공허의 형상,Void Form,Regent,Power,Rare
+259,군주의 시선,Monarch's Gaze,Regent,Power,Rare
+260,유성우,Meteor Shower,Regent,Power,Misc
+261,봉인된 왕좌,The Sealed Throne,Regent,Power,Misc
+262,하사,Largesse,Regent,Power,Misc
+263,망치질 시간,Hammer Time,Regent,Power,Misc
+
+264,타격,Strike,Necrobinder,Attack,Starter
+265,풀어놓기,Unleash,Necrobinder,Attack,Starter
+266,수비,Defend,Necrobinder,Skill,Starter
+267,호위,Bodyguard,Necrobinder,Skill,Starter
+268,쑤시기,Poke,Necrobinder,Attack,Common
+269,강탈,Dredge,Necrobinder,Attack,Common
+270,기력 흡수,Drain Power,Necrobinder,Attack,Common
+271,넘기기,Flatten,Necrobinder,Attack,Common
+272,두려움,Fear,Necrobinder,Attack,Common
+273,모독,Defile,Necrobinder,Attack,Common
+274,무덤 폭발,Graveblast,Necrobinder,Attack,Common
+275,역병 타격,Blight Strike,Necrobinder,Attack,Common
+276,조각 타격,Sculpting Strike,Necrobinder,Attack,Common
+277,파종,Sow,Necrobinder,Attack,Common
+278,땅고르기,Flatten,Necrobinder,Attack,Common
+279,수확,Reap,Necrobinder,Attack,Common
+280,위습,Wisp,Necrobinder,Skill,Common
+281,내세,Afterlife,Necrobinder,Skill,Common
+282,무덤지기,Grave Warden,Necrobinder,Skill,Common
+283,반항,,Necrobinder,Skill,Common
+284,부름,Invoke,Necrobinder,Skill,Common
+285,비관적인 맥박,Negative Pulse,Necrobinder,Skill,Common
+286,징벌,Scourge,Necrobinder,Skill,Common
+287,시선 유도,Pull Aggro,Necrobinder,Skill,Common
+288,진정한 오른팔,Right Hand Hand,Necrobinder,Attack,Uncommon
+289,회수,Fetch,Necrobinder,Attack,Uncommon
+290,끌어내리기,Pull from Below,Necrobinder,Attack,Uncommon
+291,덜그럭대기,Rattle,Necrobinder,Attack,Uncommon
+292,덮쳐!,Sic 'Em,Necrobinder,Attack,Uncommon
+293,뼛조각,Bone Shards,Necrobinder,Attack,Uncommon
+294,쇠락,Severance,Necrobinder,Attack,Uncommon
+295,장막 관통자,Veilpiercer,Necrobinder,Attack,Uncommon
+296,죽음의 행진,Death March,Necrobinder,Attack,Uncommon
+297,분리,Severance,Necrobinder,Attack,Uncommon
+298,하이파이브,High Five,Necrobinder,Attack,Uncommon
+299,매장,Bury,Necrobinder,Attack,Uncommon
+300,연명,Borrowed Time,Necrobinder,Skill,Uncommon
+301,장송가,Dirge,Necrobinder,Skill,Uncommon
+302,격려,Spur,Necrobinder,Skill,Uncommon
+303,도망칠 수 없다,No Escape,Necrobinder,Skill,Uncommon
+304,부식,Putrefy,Necrobinder,Skill,Uncommon
+305,분석,Parse,Necrobinder,Skill,Uncommon
+306,쇠약의 손길,Enfeebling Touch,Necrobinder,Skill,Uncommon
+307,정화,Cleanse,Necrobinder,Skill,Uncommon
+308,죽음의 문턱,Death's Door,Necrobinder,Skill,Uncommon
+309,추출,Capture Spirit,Necrobinder,Skill,Uncommon
+310,혼령 포획,Capture Spirit,Necrobinder,Skill,Uncommon
+311,죽음 인도자,Deathbringer,Necrobinder,Skill,Uncommon
+312,지연,Delay,Necrobinder,Skill,Uncommon
+313,비애,Melancholy,Necrobinder,Skill,Uncommon
+314,서류 폭풍,Pagestorm,Necrobinder,Power,Uncommon
+315,석회화,Calcify,Necrobinder,Power,Uncommon
+316,수의,Shroud,Necrobinder,Power,Uncommon
+317,우정,Friendship,Necrobinder,Power,Uncommon
+318,죽음의 무도,Danse Macabre,Necrobinder,Power,Uncommon
+319,출몰,Haunt,Necrobinder,Power,Uncommon
+320,치사성,Lethality,Necrobinder,Power,Uncommon
+321,카운트다운,Countdown,Necrobinder,Power,Uncommon
+322,살점 재주,Sleight of Flesh,Necrobinder,Power,Uncommon
+323,비참함,Misery,Necrobinder,Attack,Rare
+324,척결,Eradicate,Necrobinder,Attack,Rare
+325,매달기,Hang,Necrobinder,Attack,Rare
+326,영혼 폭풍,Soul Storm,Necrobinder,Attack,Rare
+327,때가 되었다,Time's Up,Necrobinder,Attack,Rare
+328,사신의 낫,The Scythe,Necrobinder,Attack,Rare
+329,쥐어짜기,Squeeze,Necrobinder,Attack,Rare
+330,밴시의 외침,Banshee's Cry,Necrobinder,Attack,Rare
+331,강령회,Seance,Necrobinder,Skill,Rare
+332,망각,Oblivion,Necrobinder,Skill,Rare
+333,불사,Undeath,Necrobinder,Skill,Rare
+334,운명 공유,Shared Fate,Necrobinder,Skill,Rare
+335,변형,Transfigure,Necrobinder,Skill,Rare
+336,희생,Sacrifice,Necrobinder,Skill,Rare
+337,허상,Eidolon,Necrobinder,Skill,Rare
+338,소생,Reanimate,Necrobinder,Skill,Rare
+339,종말의 날,End of Days,Necrobinder,Skill,Rare
+340,정신 폭주,Neurosurge,Necrobinder,Power,Rare
+341,공허의 부름,Call of the Void,Necrobinder,Power,Rare
+342,생명 삼키기,Devour Life,Necrobinder,Power,Rare
+343,잿빛 혼령,Spirit of Ash,Necrobinder,Power,Rare
+344,강령의 극의,Necro Mastery,Necrobinder,Power,Rare
+345,경계 태세,Sentry Mode,Necrobinder,Power,Rare
+346,권역,Demesne,Necrobinder,Power,Rare
+347,사신의 형상,Reaper Form,Necrobinder,Power,Rare
+348,파수꾼,Protector,Necrobinder,Power,Misc
+349,금지된 마도서,Forbidden Grimoire,Necrobinder,Power,Misc
+350,해골 군단,Legion of Bone,Necrobinder,Power,Misc
+351,경계 엿보기,Glimpse Beyond,Necrobinder,Power,Misc
+
+352,타격,Strike,Defect,Attack,Starter
+353,수비,Defend,Defect,Skill,Starter
+354,이중 시전,Dualcast,Defect,Attack,Starter
+355,파지직,Zap,Defect,Skill,Starter
+356,눈 할퀴기,Go for the Eyes,Defect,Attack,Common
+357,레이저 포인터,Beam Cell,Defect,Attack,Common
+358,후벼 파기,Claw,Defect,Attack,Common
+359,광선 휩쓸기,Sweeping Beam,Defect,Attack,Common
+360,꽃샘추위,Cold Snap,Defect,Attack,Common
+361,밀집 타격,Focused Strike,Defect,Attack,Common
+362,번개 구체,Ball Lightning,Defect,Attack,Common
+363,일제 사격,Barrage,Defect,Attack,Common
+364,추진 타격,Compile Driver,Defect,Attack,Common
+365,컴파일 드라이버,Compile Driver,Defect,Attack,Common
+366,틀어막기,Gunk Up,Defect,Attack,Common
+367,난동,Uproar,Defect,Attack,Common
+368,가속 이탈,Boost Away,Defect,Skill,Common
+369,터보,TURBO,Defect,Skill,Common
+370,핫픽스,Hotfix,Defect,Skill,Common
+371,냉정함,Coolheaded,Defect,Skill,Common
+372,도약,Leap,Defect,Skill,Common
+373,배터리 충전,Charge Battery,Defect,Skill,Common
+374,피뢰침,Lightning Rod,Defect,Skill,Common
+375,홀로그램,Hologram,Defect,Skill,Common
+376,FTL,FTL,Defect,Attack,Uncommon
+377,테슬라 코일,Tesla Coil,Defect,Attack,Uncommon
+378,긁어내기,Scrape,Defect,Attack,Uncommon
+379,Null,Null,Defect,Attack,Uncommon
+380,로켓 펀치,Rocket Punch,Defect,Attack,Uncommon
+381,합성,Synthesis,Defect,Attack,Uncommon
+382,굴절,Refract,Defect,Attack,Uncommon
+383,찢기,Sunder,Defect,Attack,Uncommon
+384,뇌우,Tempest,Defect,Skill,Uncommon
+385,부팅 과정,Boot Sequence,Defect,Skill,Uncommon
+386,오버클럭,Overclock,Defect,Skill,Uncommon
+387,오한,Chill,Defect,Skill,Uncommon
+388,강행 돌파,Fight Through,Defect,Skill,Uncommon
+389,걷어내기,Skim,Defect,Skill,Uncommon
+390,동기화,Synchronize,Defect,Skill,Uncommon
+391,백색 소음,White Noise,Defect,Skill,Uncommon
+392,압축,Compact,Defect,Skill,Uncommon
+393,어둠,Darkness,Defect,Skill,Uncommon
+394,에너자이저,Energy Surge,Defect,Skill,Uncommon
+395,유리 공예,Glasswork,Defect,Skill,Uncommon
+396,포집,Chaos,Defect,Skill,Uncommon
+397,혼돈,Chaos,Defect,Skill,Uncommon
+398,그림자 방패,Shadow Shield,Defect,Skill,Uncommon
+399,빙하,Glacier,Defect,Skill,Uncommon
+400,융합,Fusion,Defect,Skill,Uncommon
+401,굴뚝,Smokestack,Defect,Power,Uncommon
+402,반복,Loop,Defect,Power,Uncommon
+403,벼락,Thunder,Defect,Power,Uncommon
+404,서브루틴,Subroutine,Defect,Power,Uncommon
+405,순회,Iteration,Defect,Power,Uncommon
+406,우박 폭풍,Hailstorm,Defect,Power,Uncommon
+407,축전기,Capacitor,Defect,Power,Uncommon
+408,폭풍,Storm,Defect,Power,Uncommon
+409,야성,Feral,Defect,Power,Uncommon
+410,증강,Bulk Up,Defect,Power,Uncommon
+411,나선 관통,Helix Drill,Defect,Attack,Rare
+412,산산조각,Shatter,Defect,Attack,Rare
+413,대공포,Flak Cannon,Defect,Attack,Rare
+414,적응형 타격,Adaptive Strike,Defect,Attack,Rare
+415,파괴광선,Hyperbeam,Defect,Attack,Rare
+416,하나를 위한 모두,All for One,Defect,Attack,Rare
+417,얼음 창,Ice Lance,Defect,Attack,Rare
+418,유성 타격,Meteor Strike,Defect,Attack,Rare
+419,다시 시작,Reboot,Defect,Skill,Rare
+420,다중 시전,Multi-Cast,Defect,Skill,Rare
+421,모드 적용,Modded,Defect,Skill,Rare
+422,임계 초과,Supercritical,Defect,Skill,Rare
+423,신호 증폭,Signal Boost,Defect,Skill,Rare
+424,유전 알고리즘,Genetic Algorithm,Defect,Skill,Rare
+425,동전기,Voltaic,Defect,Skill,Rare
+426,무지개,Rainbow,Defect,Skill,Rare
+427,고철을 보물로,Trash to Treasure,Defect,Power,Rare
+428,기계학습,Machine Learning,Defect,Power,Rare
+429,냉각재,Coolant,Defect,Power,Rare
+430,스피너,Spinner,Defect,Power,Rare
+431,조각모음,Defragment,Defect,Power,Rare
+432,그림자 소모,Consuming Shadow,Defect,Power,Rare
+433,버퍼,Buffer,Defect,Power,Rare
+434,메아리의 형상,Echo Form,Defect,Power,Rare
+435,사중 시전,Quadcast,Defect,Power,Misc
+436,인지 편향,Biased Cognition,Defect,Power,Misc
+437,에너지 폭주,Energy Surge,Defect,Power,Misc
+438,점화,Ignition,Defect,Power,Misc
+
+439,강철의 섬광,Flash of Steel,Colorless,Attack,Uncommon
+440,극적인 입장,Dramatic Entrance,Colorless,Attack,Uncommon
+441,난사,Volley,Colorless,Attack,Uncommon
+442,만물 절단,Omnislice,Colorless,Attack,Uncommon
+443,고동치는 도끼,Thrumming Hatchet,Colorless,Attack,Uncommon
+444,궁극의 타격,Ultimate Strike,Colorless,Attack,Uncommon
+445,정신 공격,Mind Blast,Colorless,Attack,Uncommon
+446,주먹다짐,Fisticuffs,Colorless,Attack,Uncommon
+447,집단 공격,Gang Up,Colorless,Attack,Misc
+448,탐색 타격,Seeker Strike,Colorless,Attack,Uncommon
+449,태그 팀,Tag Team,Colorless,Attack,Misc
+450,너만 믿는다,Believe in You,Colorless,Skill,Misc
+451,능숙,Finesse,Colorless,Skill,Uncommon
+452,미래 예지,Thinking Ahead,Colorless,Skill,Uncommon
+453,비상 단추,Panic Button,Colorless,Skill,Uncommon
+454,생산,Production,Colorless,Skill,Uncommon
+455,성급함,Impatience,Colorless,Skill,Uncommon
+456,순수,Purity,Colorless,Skill,Uncommon
+457,어둠의 족쇄,Dark Shackles,Colorless,Skill,Uncommon
+458,연장,Prolong,Colorless,Skill,Uncommon
+459,초조함,Restlessness,Colorless,Skill,Uncommon
+460,팔방미인,Jack of All Trades,Colorless,Skill,Uncommon
+461,가로막기,Intercept,Colorless,Skill,Misc
+462,궁극의 수비,Ultimate Defend,Colorless,Skill,Uncommon
+463,똘똘 뭉치기,Huddle Up,Colorless,Skill,Misc
+464,발견,Discovery,Colorless,Skill,Uncommon
+465,부양,Lift,Colorless,Skill,Misc
+466,착수,The Gambit,Colorless,Skill,Uncommon
+467,협력,Coordinate,Colorless,Skill,Misc
+468,재난,Calamity,Colorless,Skill,Uncommon
+469,충격파,Shockwave,Colorless,Skill,Uncommon
+470,평형,Equilibrium,Colorless,Skill,Uncommon
+471,폭탄,The Bomb,Colorless,Skill,Uncommon
+472,위풍당당,Panache,Colorless,Power,Uncommon
+473,고정시키기,Fasten,Colorless,Power,Uncommon
+474,기량,Prowess,Colorless,Power,Uncommon
+475,자동화,Automation,Colorless,Power,Uncommon
+476,준비 시간,Prep Time,Colorless,Power,Uncommon
+477,책략,Stratagem,Colorless,Power,Uncommon
+478,사냥돌,Rolling Boulder,Colorless,Attack,Rare
+479,집중 포화,Salvo,Colorless,Attack,Rare
+480,황금 도끼,Gold Axe,Colorless,Attack,Rare
+481,쥐어뜯기,Rend,Colorless,Attack,Rare
+482,탐욕의 손,Hand of Greed,Colorless,Attack,Rare
+483,때려눕히기,Knockdown,Colorless,Attack,Misc
+484,잭팟,Jackpot,Colorless,Attack,Rare
+485,비밀 기술,Secret Technique,Colorless,Skill,Rare
+486,비밀 병기,Secret Weapon,Colorless,Skill,Rare
+487,전략의 천재,Master of Strategy,Colorless,Skill,Rare
+488,포석,Stratagem,Colorless,Skill,Rare
+489,숨겨진 보석,Hidden Gem,Colorless,Skill,Rare
+490,연금,Alchemize,Colorless,Skill,Rare
+491,임명,Anointed,Colorless,Skill,Rare
+492,휘갈김,Scrawl,Colorless,Skill,Rare
+493,흉내내기,Mimic,Colorless,Skill,Misc
+494,단결,Rally,Colorless,Skill,Misc
+495,두들겨 패기,Beat Down,Colorless,Skill,Rare
+496,엔트로피,Entropy,Colorless,Power,Rare
+497,향수,Nostalgia,Colorless,Power,Rare
+498,희망의 등불,Beacon of Hope,Colorless,Power,Misc
+499,대혼란,Mayhem,Colorless,Power,Rare
+500,굴러가는 바위,Rolling Boulder,Colorless,Power,Rare
+501,영원의 갑옷,Eternal Armor,Colorless,Power,Rare
+502,재앙,Catastrophe,Colorless,Power,Rare
+
+503,유성우,Meteor Shower,Ancient,Attack,Ancient
+504,제압,Suppress,Ancient,Attack,Ancient
+505,니오우의 격분,Neow's Fury,Ancient,Attack,Ancient
+506,파수꾼,Protector,Ancient,Attack,Ancient
+507,할퀴기,Maul,Ancient,Attack,Ancient
+508,박살,Break,Ancient,Attack,Ancient
+509,호각 불기,Whistle,Ancient,Attack,Ancient
+510,염원,Wish,Ancient,Skill,Ancient
+511,찬란한 불꽃,Brightest Flame,Ancient,Skill,Ancient
+512,사중 시전,Quadcast,Ancient,Skill,Ancient
+513,영체화,Apparition,Ancient,Skill,Ancient
+514,신성,Apotheosis,Ancient,Skill,Ancient
+515,안식,Relax,Ancient,Skill,Ancient
+516,봉인된 왕좌,The Sealed Throne,Ancient,Power,Ancient
+517,인지 편향,Biased Cognition,Ancient,Power,Ancient
+518,금지된 마도서,Forbidden Grimoire,Ancient,Power,Ancient
+519,유령의 형상,Wraith Form,Ancient,Power,Ancient
+520,타락,Corruption,Ancient,Power,Ancient
+
+521,감염,Infection,Status,Status,Status
+522,공허,Void,Status,Status,Status
+523,그을음,Soot,Status,Status,Status
+524,나태,Sloth,Status,Status,Status
+525,부상,Wound,Status,Status,Status
+526,분해,Disintegration,Status,Status,Status
+527,쇠퇴,Waste Away,Status,Status,Status
+528,어지러움,Dazed,Status,Status,Status
+529,정신 오염,Mind Rot,Status,Status,Status
+530,화상,Burn,Status,Status,Status
+531,유독성,Toxic,Status,Status,Status
+532,유인,Beckon,Status,Status,Status
+533,잔해,Debris,Status,Status,Status
+534,점액투성이,Slimed,Status,Status,Status
+535,필사적인 도주,Frantic Escape,Status,Status,Status
+
+536,규칙 준수,Normality,Curse,Curse,Curse
+537,등반가의 골칫거리,Ascender's Bane,Curse,Curse,Curse
+538,몸부림,Writhe,Curse,Curse,Curse
+539,방울의 저주,Curse of the Bell,Curse,Curse,Curse
+540,부패,Decay,Curse,Curse,Curse
+541,불운,Bad Luck,Curse,Curse,Curse
+542,빚,Debt,Curse,Curse,Curse
+543,상처,Injury,Curse,Curse,Curse
+544,서투름,Clumsy,Curse,Curse,Curse
+545,수면 부족,Poor Sleep,Curse,Curse,Curse
+546,수치,Shame,Curse,Curse,Curse
+547,어리석음,Folly,Curse,Curse,Curse
+548,의심,Doubt,Curse,Curse,Curse
+549,죄책감,Guilty,Curse,Curse,Curse
+550,탐욕,Greed,Curse,Curse,Curse
+551,후회,Regret,Curse,Curse,Curse
+552,포자 잠식,Spore Mind,Curse,Curse,Curse
+553,매료됨,Enthralled,Curse,Curse,Curse
+
+554,격돌,Clash,Event,Attack,Event
+555,섀 급습,Byrd Swoop,Event,Attack,Event
+556,되돌리기,Rebound,Event,Attack,Event
+557,박멸,Exterminate,Event,Attack,Event
+558,짓누르기,Squash,Event,Attack,Event
+559,쪼기,Peck,Event,Attack,Event
+560,계몽,Enlightenment,Event,Skill,Event
+561,광란의 포식,Feeding Frenzy,Event,Skill,Event
+562,방해,Distraction,Event,Skill,Event
+563,스택,Stack,Event,Skill,Event
+564,압도,Outmaneuver,Event,Skill,Event
+565,이도류,Dual Wield,Event,Skill,Event
+566,고리형 강인함,Toric Toughness,Event,Skill,Event
+567,참호,Entrench,Event,Skill,Event
+568,탈바꿈,Metamorphosis,Event,Skill,Event
+569,마름쇠,Caltrops,Event,Power,Event
+570,Hello World,Hello World,Event,Power,Event
+
+571,랜턴 열쇠,Lantern Key,Quest,Quest,Quest
+572,보물 지도,Spoils Map,Quest,Quest,Quest
+573,섀도니스 알,Byrdonis Egg,Quest,Quest,Quest
+
+574,단도,Shiv,Token,Attack,Token
+575,하수인 타격,Minion Strike,Token,Attack,Token
+576,훑어보기,Sweeping Gaze,Token,Attack,Token
+577,거대한 바위,Giant Rock,Token,Attack,Token
+578,하수인 투하,Minion Dive Bomb,Token,Attack,Token
+579,군주의 칼날,Sovereign Blade,Token,Attack,Token
+580,발광,Luminesce,Token,Skill,Token
+581,연료,Fuel,Token,Skill,Token
+582,영혼,Soul,Token,Skill,Token
+583,하수인 희생,Minion Sacrifice,Token,Skill,Token
