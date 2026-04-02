@@ -408,6 +408,10 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    will-change: opacity, visibility;
 }
 
 .modal-overlay {
@@ -486,13 +490,13 @@ body {
     height: 100%;
     width: auto;
     aspect-ratio: 273 / 380;
-    filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.8));
-    /* 모달 카드는 hover scale 불필요 */
-    transform: none !important;
+    transform: translateZ(0) !important;
+    will-change: transform;
 }
 
-.card-large-preview img {
-    transition: transform 0.2s;
+.layer-art img {
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 /* 확대된 카드용 텍스트 스타일 조정 */
@@ -661,7 +665,10 @@ body {
 
 /* ── 유틸 ── */
 .hidden {
-    display: none !important;
+    display: flex !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
 }
 
 .spin {
