@@ -87,14 +87,11 @@ function findCardMeta(sourcePath) {
     const character = DIR_TO_CHARACTER[dirName] || '';
     const fileKey = toKey(fileName);
 
-    // 1차: 캐릭터 + 파일명 조합
     const combinedKey = `${toKey(character)}:${fileKey}`;
     if (CHAR_NAME_MAP.has(combinedKey)) return CHAR_NAME_MAP.get(combinedKey);
 
-    // 2차: 파일명만
     if (NAME_MAP.has(fileKey)) return NAME_MAP.get(fileKey);
 
-    // 3차: 숫자 접미사 제거 후 재시도 (ex. anger_2 → anger)
     let end = fileKey.length;
     while (end > 0 && fileKey[end - 1] >= '0' && fileKey[end - 1] <= '9') end--;
     const trimmedKey = fileKey.substring(0, end);
@@ -115,9 +112,7 @@ const state = {
     editingCardIndex: -1,
     isDirty: false,
     filters: { character: 'all', type: 'all', rarity: 'all' },
-    /** 현재 편집 중인 카드의 조정 상태 (미리보기에 실시간 반영) */
     adjustState: { zoom: 1.0, offsetX: 0.0, offsetY: 0.0, sourceDataUrl: null, sourceImage: null },
-    /** 스크롤바 드래그 상태 */
     isDraggingScrollbar: false,
     isScrollUpdating: false,
     startY: 0,
@@ -1075,7 +1070,7 @@ function updateCustomScrollbar() {
 
     // GPU 가속을 위해 top 대신 transform: translate3d 사용
     scrollbarThumb.style.transform = `translate3d(-50%, ${thumbTop}px, 0)`;
-    
+
     state.isScrollUpdating = false;
 }
 
@@ -1089,7 +1084,7 @@ function startScrollbarDrag(e) {
 
     window.addEventListener('mousemove', handleScrollbarDrag);
     window.addEventListener('mouseup', stopScrollbarDrag);
-    
+
     e.preventDefault(); // 텍스트 선택 방지
 }
 
