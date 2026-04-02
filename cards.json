@@ -313,358 +313,6 @@
   },
   {
     "no": 40,
-    "name_kr": "전투 최면",
-    "name_en": "Battle Trance",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 41,
-    "name_kr": "기사회생",
-    "name_en": "Second Wind",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 42,
-    "name_kr": "도발",
-    "name_en": "Taunt",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 43,
-    "name_kr": "불타는 조약",
-    "name_en": "Burning Pact",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 44,
-    "name_kr": "악마의 눈",
-    "name_en": "Evil Eye",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 45,
-    "name_kr": "잊힌 의식",
-    "name_en": "Forgotten Ritual",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 46,
-    "name_kr": "제압",
-    "name_en": "Dominate",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 47,
-    "name_kr": "지옥검",
-    "name_en": "Infernal Blade",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 48,
-    "name_kr": "싸움 준비",
-    "name_en": "Expect a Fight",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 49,
-    "name_kr": "화염 장벽",
-    "name_en": "Flame Barrier",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 50,
-    "name_kr": "전투의 북소리",
-    "name_en": "Drum of Battle",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 51,
-    "name_kr": "돌 갑옷",
-    "name_en": "Stone Armor",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 52,
-    "name_kr": "무감각",
-    "name_en": "Feel No Pain",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 53,
-    "name_kr": "발화",
-    "name_en": "Inflame",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 54,
-    "name_kr": "불바다",
-    "name_en": "Inferno",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 55,
-    "name_kr": "저글링",
-    "name_en": "Juggling",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 56,
-    "name_kr": "파열",
-    "name_en": "Rupture",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 57,
-    "name_kr": "포악함",
-    "name_en": "Vicious",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 58,
-    "name_kr": "쇄도",
-    "name_en": "Stampede",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 59,
-    "name_kr": "조약의 끝",
-    "name_en": "Pact's End",
-    "character": "Ironclad",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 60,
-    "name_kr": "난타",
-    "name_en": "Thrash",
-    "character": "Ironclad",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 61,
-    "name_kr": "대화재",
-    "name_en": "Conflagration",
-    "character": "Ironclad",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 62,
-    "name_kr": "포식",
-    "name_en": "Feed",
-    "character": "Ironclad",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 63,
-    "name_kr": "갈가리 찢기",
-    "name_en": "Tear Asunder",
-    "character": "Ironclad",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 64,
-    "name_kr": "지옥불",
-    "name_en": "Fiend Fire",
-    "character": "Ironclad",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 65,
-    "name_kr": "난도질",
-    "name_en": "Mangle",
-    "character": "Ironclad",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 66,
-    "name_kr": "낙인",
-    "name_en": "Brand",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 67,
-    "name_kr": "연쇄",
-    "name_en": "Cascade",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 68,
-    "name_kr": "원시의 힘",
-    "name_en": "Primal Force",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 69,
-    "name_kr": "제물",
-    "name_en": "Offering",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 70,
-    "name_kr": "거상",
-    "name_en": "Colossus",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 71,
-    "name_kr": "원투 펀치",
-    "name_en": "One-Two Punch",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 72,
-    "name_kr": "화력 증폭",
-    "name_en": "Stoke",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 73,
-    "name_kr": "무적",
-    "name_en": "Impervious",
-    "character": "Ironclad",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 74,
-    "name_kr": "공격성",
-    "name_en": "Aggression",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 75,
-    "name_kr": "악랄함",
-    "name_en": "Cruelty",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 76,
-    "name_kr": "핏빛 망토",
-    "name_en": "Crimson Mantle",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 77,
-    "name_kr": "불의 심장",
-    "name_en": "Hellraiser",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 78,
-    "name_kr": "어둠의 포옹",
-    "name_en": "Dark Embrace",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 79,
-    "name_kr": "요지부동",
-    "name_en": "Unmovable",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 80,
-    "name_kr": "절대적인 힘",
-    "name_en": "Pyre",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 81,
-    "name_kr": "지옥검무",
-    "name_en": "Juggernaut",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 82,
-    "name_kr": "바리케이드",
-    "name_en": "Barricade",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 83,
-    "name_kr": "악마의 형상",
-    "name_en": "Demon Form",
-    "character": "Ironclad",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 84,
     "name_kr": "악마의 방패",
     "name_en": "Demonic Shield",
     "character": "Ironclad",
@@ -672,9 +320,361 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 85,
+    "no": 41,
+    "name_kr": "전투 최면",
+    "name_en": "Battle Trance",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 42,
+    "name_kr": "기사회생",
+    "name_en": "Second Wind",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 43,
+    "name_kr": "도발",
+    "name_en": "Taunt",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 44,
+    "name_kr": "불타는 조약",
+    "name_en": "Burning Pact",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 45,
+    "name_kr": "악마의 눈",
+    "name_en": "Evil Eye",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 46,
+    "name_kr": "잊힌 의식",
+    "name_en": "Forgotten Ritual",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 47,
+    "name_kr": "지배",
+    "name_en": "Dominate",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 48,
+    "name_kr": "지옥검",
+    "name_en": "Infernal Blade",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 49,
+    "name_kr": "싸움 준비",
+    "name_en": "Expect a Fight",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 50,
+    "name_kr": "화염 장벽",
+    "name_en": "Flame Barrier",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 51,
+    "name_kr": "전투의 북소리",
+    "name_en": "Drum of Battle",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 52,
+    "name_kr": "돌 갑옷",
+    "name_en": "Stone Armor",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 53,
+    "name_kr": "무감각",
+    "name_en": "Feel No Pain",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 54,
+    "name_kr": "발화",
+    "name_en": "Inflame",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 55,
+    "name_kr": "불바다",
+    "name_en": "Inferno",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 56,
+    "name_kr": "저글링",
+    "name_en": "Juggling",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 57,
+    "name_kr": "파열",
+    "name_en": "Rupture",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 58,
+    "name_kr": "포악함",
+    "name_en": "Vicious",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 59,
+    "name_kr": "쇄도",
+    "name_en": "Stampede",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 60,
+    "name_kr": "조약의 끝",
+    "name_en": "Pact's End",
+    "character": "Ironclad",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 61,
+    "name_kr": "난타",
+    "name_en": "Thrash",
+    "character": "Ironclad",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 62,
+    "name_kr": "대화재",
+    "name_en": "Conflagration",
+    "character": "Ironclad",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 63,
+    "name_kr": "포식",
+    "name_en": "Feed",
+    "character": "Ironclad",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 64,
+    "name_kr": "갈가리 찢기",
+    "name_en": "Tear Asunder",
+    "character": "Ironclad",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 65,
+    "name_kr": "지옥불",
+    "name_en": "Fiend Fire",
+    "character": "Ironclad",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 66,
+    "name_kr": "난도질",
+    "name_en": "Mangle",
+    "character": "Ironclad",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 67,
+    "name_kr": "낙인",
+    "name_en": "Brand",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 68,
+    "name_kr": "연쇄",
+    "name_en": "Cascade",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 69,
+    "name_kr": "원시의 힘",
+    "name_en": "Primal Force",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 70,
+    "name_kr": "제물",
+    "name_en": "Offering",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 71,
+    "name_kr": "거상",
+    "name_en": "Colossus",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 72,
+    "name_kr": "원투 펀치",
+    "name_en": "One-Two Punch",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 73,
+    "name_kr": "화력 증폭",
+    "name_en": "Stoke",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 74,
+    "name_kr": "무적",
+    "name_en": "Impervious",
+    "character": "Ironclad",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 75,
+    "name_kr": "공격성",
+    "name_en": "Aggression",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 76,
+    "name_kr": "악랄함",
+    "name_en": "Cruelty",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 77,
     "name_kr": "탱커",
     "name_en": "Tank",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 78,
+    "name_kr": "핏빛 망토",
+    "name_en": "Crimson Mantle",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 79,
+    "name_kr": "불의 심장",
+    "name_en": "Pyre",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 80,
+    "name_kr": "어둠의 포옹",
+    "name_en": "Dark Embrace",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 81,
+    "name_kr": "요지부동",
+    "name_en": "Unmovable",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 82,
+    "name_kr": "절대적인 힘",
+    "name_en": "Juggernaut",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 83,
+    "name_kr": "지옥검무",
+    "name_en": "Hellraiser",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 84,
+    "name_kr": "바리케이드",
+    "name_en": "Barricade",
+    "character": "Ironclad",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 85,
+    "name_kr": "악마의 형상",
+    "name_en": "Demon Form",
     "character": "Ironclad",
     "cardType": "Power",
     "rarity": "Rare"
@@ -818,7 +818,7 @@
   {
     "no": 103,
     "name_kr": "공중제비",
-    "name_en": "Dodge and Roll",
+    "name_en": "Backflip",
     "character": "Silent",
     "cardType": "Skill",
     "rarity": "Common"
@@ -826,7 +826,7 @@
   {
     "no": 104,
     "name_kr": "구르기",
-    "name_en": "Blur",
+    "name_en": "Dodge and Roll",
     "character": "Silent",
     "cardType": "Skill",
     "rarity": "Common"
@@ -882,7 +882,7 @@
   {
     "no": 111,
     "name_kr": "배신",
-    "name_en": "Assassinate",
+    "name_en": "Backstab",
     "character": "Silent",
     "cardType": "Attack",
     "rarity": "Uncommon"
@@ -1034,7 +1034,7 @@
   {
     "no": 130,
     "name_kr": "흐릿함",
-    "name_en": "Haze",
+    "name_en": "Blur",
     "character": "Silent",
     "cardType": "Skill",
     "rarity": "Uncommon"
@@ -1057,302 +1057,6 @@
   },
   {
     "no": 133,
-    "name_kr": "탄성 플라스크",
-    "name_en": "Bouncing Flask",
-    "character": "Silent",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 134,
-    "name_kr": "반사신경",
-    "name_en": "Reflex",
-    "character": "Silent",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 135,
-    "name_kr": "아지랑이",
-    "name_en": "Haze",
-    "character": "Silent",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 136,
-    "name_kr": "전략가",
-    "name_en": "Tactician",
-    "character": "Silent",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 137,
-    "name_kr": "괜찮은 전략",
-    "name_en": "Well-Laid Plans",
-    "character": "Silent",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 138,
-    "name_kr": "무한의 검날",
-    "name_en": "Infinite Blades",
-    "character": "Silent",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 139,
-    "name_kr": "발놀림",
-    "name_en": "Footwork",
-    "character": "Silent",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 140,
-    "name_kr": "발병",
-    "name_en": "Outbreak",
-    "character": "Silent",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 141,
-    "name_kr": "유독 가스",
-    "name_en": "Noxious Fumes",
-    "character": "Silent",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 142,
-    "name_kr": "정밀",
-    "name_en": "Accuracy",
-    "character": "Silent",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 143,
-    "name_kr": "환영검",
-    "name_en": "Phantom Blades",
-    "character": "Silent",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 144,
-    "name_kr": "스피드스터",
-    "name_en": "Speedster",
-    "character": "Silent",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 145,
-    "name_kr": "대단원의 막",
-    "name_en": "Grand Finale",
-    "character": "Silent",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 146,
-    "name_kr": "암살",
-    "name_en": "Assassinate",
-    "character": "Silent",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 147,
-    "name_kr": "메아리 참격",
-    "name_en": "Echoing Slash",
-    "character": "Silent",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 148,
-    "name_kr": "사냥",
-    "name_en": "The Hunt",
-    "character": "Silent",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 149,
-    "name_kr": "살해",
-    "name_en": "Murder",
-    "character": "Silent",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 150,
-    "name_kr": "불쾌",
-    "name_en": "Malaise",
-    "character": "Silent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 151,
-    "name_kr": "아드레날린",
-    "name_en": "Adrenaline",
-    "character": "Silent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 152,
-    "name_kr": "강철의 폭풍",
-    "name_en": "Storm of Steel",
-    "character": "Silent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 153,
-    "name_kr": "그림자 걸음",
-    "name_en": "Shadow Step",
-    "character": "Silent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 154,
-    "name_kr": "그림자 은신",
-    "name_en": "Shadowmeld",
-    "character": "Silent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 155,
-    "name_kr": "부식성 파도",
-    "name_en": "Corrosive Wave",
-    "character": "Silent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 156,
-    "name_kr": "잉크 칼날",
-    "name_en": "Blade of Ink",
-    "character": "Silent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 157,
-    "name_kr": "폭주",
-    "name_en": "Burst",
-    "character": "Silent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 158,
-    "name_kr": "칼날 함정",
-    "name_en": "Knife Trap",
-    "character": "Silent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 159,
-    "name_kr": "불릿 타임",
-    "name_en": "Bullet Time",
-    "character": "Silent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 160,
-    "name_kr": "악몽",
-    "name_en": "Nightmare",
-    "character": "Silent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 161,
-    "name_kr": "작업 도구",
-    "name_en": "Tools of the Trade",
-    "character": "Silent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 162,
-    "name_kr": "잔상",
-    "name_en": "Afterimage",
-    "character": "Silent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 163,
-    "name_kr": "촉진제",
-    "name_en": "Accelerant",
-    "character": "Silent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 164,
-    "name_kr": "독 바르기",
-    "name_en": "Envenom",
-    "character": "Silent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 165,
-    "name_kr": "설계의 대가",
-    "name_en": "Master Planner",
-    "character": "Silent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 166,
-    "name_kr": "추적",
-    "name_en": "Tracking",
-    "character": "Silent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 167,
-    "name_kr": "칼날 부채",
-    "name_en": "Fan of Knives",
-    "character": "Silent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 168,
-    "name_kr": "구렁이의 형상",
-    "name_en": "Serpent Form",
-    "character": "Silent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 169,
-    "name_kr": "연마",
-    "name_en": "Abrasive",
-    "character": "Silent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 170,
     "name_kr": "측면 공격",
     "name_en": "Flanking",
     "character": "Silent",
@@ -1360,9 +1064,305 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 171,
+    "no": 134,
+    "name_kr": "탄성 플라스크",
+    "name_en": "Bouncing Flask",
+    "character": "Silent",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 135,
+    "name_kr": "반사신경",
+    "name_en": "Reflex",
+    "character": "Silent",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 136,
+    "name_kr": "아지랑이",
+    "name_en": "Haze",
+    "character": "Silent",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 137,
+    "name_kr": "전략가",
+    "name_en": "Tactician",
+    "character": "Silent",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 138,
+    "name_kr": "괜찮은 전략",
+    "name_en": "Well-Laid Plans",
+    "character": "Silent",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 139,
+    "name_kr": "무한의 검날",
+    "name_en": "Infinite Blades",
+    "character": "Silent",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 140,
+    "name_kr": "발놀림",
+    "name_en": "Footwork",
+    "character": "Silent",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 141,
+    "name_kr": "발병",
+    "name_en": "Outbreak",
+    "character": "Silent",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 142,
+    "name_kr": "유독 가스",
+    "name_en": "Noxious Fumes",
+    "character": "Silent",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 143,
+    "name_kr": "정밀",
+    "name_en": "Accuracy",
+    "character": "Silent",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 144,
+    "name_kr": "환영검",
+    "name_en": "Phantom Blades",
+    "character": "Silent",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 145,
+    "name_kr": "스피드스터",
+    "name_en": "Speedster",
+    "character": "Silent",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 146,
+    "name_kr": "대단원의 막",
+    "name_en": "Grand Finale",
+    "character": "Silent",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 147,
+    "name_kr": "암살",
+    "name_en": "Assassinate",
+    "character": "Silent",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 148,
+    "name_kr": "메아리 참격",
+    "name_en": "Echoing Slash",
+    "character": "Silent",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 149,
+    "name_kr": "사냥",
+    "name_en": "The Hunt",
+    "character": "Silent",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 150,
+    "name_kr": "살해",
+    "name_en": "Murder",
+    "character": "Silent",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 151,
+    "name_kr": "불쾌",
+    "name_en": "Malaise",
+    "character": "Silent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 152,
+    "name_kr": "아드레날린",
+    "name_en": "Adrenaline",
+    "character": "Silent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 153,
+    "name_kr": "강철의 폭풍",
+    "name_en": "Storm of Steel",
+    "character": "Silent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 154,
+    "name_kr": "그림자 걸음",
+    "name_en": "Shadow Step",
+    "character": "Silent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 155,
+    "name_kr": "그림자 은신",
+    "name_en": "Shadowmeld",
+    "character": "Silent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 156,
+    "name_kr": "부식성 파도",
+    "name_en": "Corrosive Wave",
+    "character": "Silent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 157,
+    "name_kr": "잉크 칼날",
+    "name_en": "Blade of Ink",
+    "character": "Silent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 158,
+    "name_kr": "폭주",
+    "name_en": "Burst",
+    "character": "Silent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 159,
+    "name_kr": "칼날 함정",
+    "name_en": "Knife Trap",
+    "character": "Silent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 160,
+    "name_kr": "불릿 타임",
+    "name_en": "Bullet Time",
+    "character": "Silent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 161,
+    "name_kr": "악몽",
+    "name_en": "Nightmare",
+    "character": "Silent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 162,
+    "name_kr": "작업 도구",
+    "name_en": "Tools of the Trade",
+    "character": "Silent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 163,
+    "name_kr": "잔상",
+    "name_en": "Afterimage",
+    "character": "Silent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 164,
+    "name_kr": "촉진제",
+    "name_en": "Accelerant",
+    "character": "Silent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 165,
+    "name_kr": "독 바르기",
+    "name_en": "Envenom",
+    "character": "Silent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 166,
     "name_kr": "비열함",
     "name_en": "Sneaky",
+    "character": "Silent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 167,
+    "name_kr": "설계의 대가",
+    "name_en": "Master Planner",
+    "character": "Silent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 168,
+    "name_kr": "추적",
+    "name_en": "Tracking",
+    "character": "Silent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 169,
+    "name_kr": "칼날 부채",
+    "name_en": "Fan of Knives",
+    "character": "Silent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 170,
+    "name_kr": "구렁이의 형상",
+    "name_en": "Serpent Form",
+    "character": "Silent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 171,
+    "name_kr": "연마",
+    "name_en": "Abrasive",
     "character": "Silent",
     "cardType": "Power",
     "rarity": "Rare"
@@ -1433,14 +1433,6 @@
   },
   {
     "no": 180,
-    "name_kr": "물렀거라!",
-    "name_en": "BEGONE!",
-    "character": "Regent",
-    "cardType": "Attack",
-    "rarity": "Common"
-  },
-  {
-    "no": 181,
     "name_kr": "전장의 생존자",
     "name_en": "Wrought in War",
     "character": "Regent",
@@ -1448,7 +1440,7 @@
     "rarity": "Common"
   },
   {
-    "no": 182,
+    "no": 181,
     "name_kr": "지면 파쇄",
     "name_en": "Crush Under",
     "character": "Regent",
@@ -1456,7 +1448,7 @@
     "rarity": "Common"
   },
   {
-    "no": 183,
+    "no": 182,
     "name_kr": "초승달 창",
     "name_en": "Crescent Spear",
     "character": "Regent",
@@ -1464,7 +1456,7 @@
     "rarity": "Common"
   },
   {
-    "no": 184,
+    "no": 183,
     "name_kr": "태양의 타격",
     "name_en": "Solar Strike",
     "character": "Regent",
@@ -1472,7 +1464,7 @@
     "rarity": "Common"
   },
   {
-    "no": 185,
+    "no": 184,
     "name_kr": "천상의 권능",
     "name_en": "Celestial Might",
     "character": "Regent",
@@ -1480,7 +1472,7 @@
     "rarity": "Common"
   },
   {
-    "no": 186,
+    "no": 185,
     "name_kr": "네 주제를 알라",
     "name_en": "Know Thy Place",
     "character": "Regent",
@@ -1488,7 +1480,7 @@
     "rarity": "Common"
   },
   {
-    "no": 187,
+    "no": 186,
     "name_kr": "별의 망토",
     "name_en": "Cloak of Stars",
     "character": "Regent",
@@ -1496,7 +1488,7 @@
     "rarity": "Common"
   },
   {
-    "no": 188,
+    "no": 187,
     "name_kr": "검날 개선",
     "name_en": "Refine Blade",
     "character": "Regent",
@@ -1504,11 +1496,19 @@
     "rarity": "Common"
   },
   {
-    "no": 189,
+    "no": 188,
     "name_kr": "광채",
     "name_en": "Glow",
     "character": "Regent",
     "cardType": "Skill",
+    "rarity": "Common"
+  },
+  {
+    "no": 189,
+    "name_kr": "물렀거라!",
+    "name_en": "BEGONE!",
+    "character": "Regent",
+    "cardType": "Attack",
     "rarity": "Common"
   },
   {
@@ -1634,7 +1634,7 @@
   {
     "no": 205,
     "name_kr": "필사의 일격",
-    "name_en": "Stardust",
+    "name_en": "Knockout Blow",
     "character": "Regent",
     "cardType": "Attack",
     "rarity": "Uncommon"
@@ -1689,358 +1689,6 @@
   },
   {
     "no": 212,
-    "name_kr": "공진",
-    "name_en": "Resonance",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 213,
-    "name_kr": "권위 행사",
-    "name_en": "Manifest Authority",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 214,
-    "name_kr": "돌격!!!!",
-    "name_en": "CHARGE!!",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 215,
-    "name_kr": "반사",
-    "name_en": "Reflect",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 216,
-    "name_kr": "수렴",
-    "name_en": "Convergence",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 217,
-    "name_kr": "대령하라",
-    "name_en": "Summon Forth",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 218,
-    "name_kr": "정복자",
-    "name_en": "Conqueror",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 219,
-    "name_kr": "테라포밍",
-    "name_en": "Terraforming",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 220,
-    "name_kr": "희미한 빛",
-    "name_en": "Glimmer",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 221,
-    "name_kr": "보루",
-    "name_en": "Bulwark",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 222,
-    "name_kr": "예언",
-    "name_en": "Prophesize",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 223,
-    "name_kr": "별의 아이",
-    "name_en": "Child of the Stars",
-    "character": "Regent",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 224,
-    "name_kr": "블랙홀",
-    "name_en": "Black Hole",
-    "character": "Regent",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 225,
-    "name_kr": "용광로",
-    "name_en": "Furnace",
-    "character": "Regent",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 226,
-    "name_kr": "창백한 푸른 점",
-    "name_en": "Pale Blue Dot",
-    "character": "Regent",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 227,
-    "name_kr": "창조의 기둥",
-    "name_en": "Pillar of Creation",
-    "character": "Regent",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 228,
-    "name_kr": "쳐내기",
-    "name_en": "Parry",
-    "character": "Regent",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 229,
-    "name_kr": "궤도",
-    "name_en": "Orbit",
-    "character": "Regent",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 230,
-    "name_kr": "스펙트럼 이동",
-    "name_en": "Spectrum Shift",
-    "character": "Regent",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 231,
-    "name_kr": "그렇게 하라",
-    "name_en": "Make It So",
-    "character": "Regent",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 232,
-    "name_kr": "천원돌파",
-    "name_en": "Heavenly Drill",
-    "character": "Regent",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 233,
-    "name_kr": "혜성",
-    "name_en": "Comet",
-    "character": "Regent",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 234,
-    "name_kr": "불시착",
-    "name_en": "Crash Landing",
-    "character": "Regent",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 235,
-    "name_kr": "재성형",
-    "name_en": "Beat into Shape",
-    "character": "Regent",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 236,
-    "name_kr": "죽어가는 별",
-    "name_en": "Dying Star",
-    "character": "Regent",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 237,
-    "name_kr": "선조의 망치",
-    "name_en": "Heirloom Hammer",
-    "character": "Regent",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 238,
-    "name_kr": "일곱 개의 별",
-    "name_en": "Seven Stars",
-    "character": "Regent",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 239,
-    "name_kr": "포격",
-    "name_en": "Bombardment",
-    "character": "Regent",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 240,
-    "name_kr": "빅뱅",
-    "name_en": "Big Bang",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 241,
-    "name_kr": "어려운 결정",
-    "name_en": "Decisions, Decisions",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 242,
-    "name_kr": "나는 무적이다",
-    "name_en": "I Am Invincible",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 243,
-    "name_kr": "위대한 재련",
-    "name_en": "The Smith",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 244,
-    "name_kr": "필연적인 결과",
-    "name_en": "Foregone Conclusion",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 245,
-    "name_kr": "기쁨의 선물",
-    "name_en": "Bundle of Joy",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 246,
-    "name_kr": "막아라!!",
-    "name_en": "GUARDS!!!",
-    "character": "Regent",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 247,
-    "name_kr": "날 세우기",
-    "name_en": "Seeking Edge",
-    "character": "Regent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 248,
-    "name_kr": "독재",
-    "name_en": "Tyranny",
-    "character": "Regent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 249,
-    "name_kr": "로열티",
-    "name_en": "Royalties",
-    "character": "Regent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 250,
-    "name_kr": "무기고",
-    "name_en": "Arsenal",
-    "character": "Regent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 251,
-    "name_kr": "중성자 방패",
-    "name_en": "Neutron Aegis",
-    "character": "Regent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 252,
-    "name_kr": "검성",
-    "name_en": "Sword Sage",
-    "character": "Regent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 253,
-    "name_kr": "창세",
-    "name_en": "Genesis",
-    "character": "Regent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 254,
-    "name_kr": "공허의 형상",
-    "name_en": "Void Form",
-    "character": "Regent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 255,
-    "name_kr": "군주의 시선",
-    "name_en": "Monarch's Gaze",
-    "character": "Regent",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 256,
     "name_kr": "하사",
     "name_en": "Largesse",
     "character": "Regent",
@@ -2048,9 +1696,361 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 257,
+    "no": 213,
+    "name_kr": "공진",
+    "name_en": "Resonance",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 214,
+    "name_kr": "권위 행사",
+    "name_en": "Manifest Authority",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 215,
+    "name_kr": "대령하라",
+    "name_en": "Summon Forth",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 216,
+    "name_kr": "돌격!!!!",
+    "name_en": "CHARGE!!",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 217,
+    "name_kr": "반사",
+    "name_en": "Reflect",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 218,
+    "name_kr": "수렴",
+    "name_en": "Convergence",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 219,
+    "name_kr": "정복자",
+    "name_en": "Conqueror",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 220,
+    "name_kr": "테라포밍",
+    "name_en": "Terraforming",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 221,
+    "name_kr": "희미한 빛",
+    "name_en": "Glimmer",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 222,
+    "name_kr": "보루",
+    "name_en": "Bulwark",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 223,
+    "name_kr": "예언",
+    "name_en": "Prophesize",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 224,
+    "name_kr": "별의 아이",
+    "name_en": "Child of the Stars",
+    "character": "Regent",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 225,
+    "name_kr": "블랙홀",
+    "name_en": "Black Hole",
+    "character": "Regent",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 226,
+    "name_kr": "용광로",
+    "name_en": "Furnace",
+    "character": "Regent",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 227,
+    "name_kr": "창백한 푸른 점",
+    "name_en": "Pale Blue Dot",
+    "character": "Regent",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 228,
+    "name_kr": "창조의 기둥",
+    "name_en": "Pillar of Creation",
+    "character": "Regent",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 229,
+    "name_kr": "쳐내기",
+    "name_en": "Parry",
+    "character": "Regent",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 230,
+    "name_kr": "궤도",
+    "name_en": "Orbit",
+    "character": "Regent",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 231,
+    "name_kr": "스펙트럼 이동",
+    "name_en": "Spectrum Shift",
+    "character": "Regent",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 232,
+    "name_kr": "그렇게 하라",
+    "name_en": "Make It So",
+    "character": "Regent",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 233,
+    "name_kr": "천원돌파",
+    "name_en": "Heavenly Drill",
+    "character": "Regent",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 234,
+    "name_kr": "혜성",
+    "name_en": "Comet",
+    "character": "Regent",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 235,
+    "name_kr": "불시착",
+    "name_en": "Crash Landing",
+    "character": "Regent",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 236,
+    "name_kr": "재성형",
+    "name_en": "Beat into Shape",
+    "character": "Regent",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 237,
+    "name_kr": "죽어가는 별",
+    "name_en": "Dying Star",
+    "character": "Regent",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 238,
+    "name_kr": "선조의 망치",
+    "name_en": "Heirloom Hammer",
+    "character": "Regent",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 239,
+    "name_kr": "일곱 개의 별",
+    "name_en": "Seven Stars",
+    "character": "Regent",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 240,
+    "name_kr": "포격",
+    "name_en": "Bombardment",
+    "character": "Regent",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 241,
+    "name_kr": "빅뱅",
+    "name_en": "Big Bang",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 242,
+    "name_kr": "어려운 결정",
+    "name_en": "Decisions, Decisions",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 243,
+    "name_kr": "나는 무적이다",
+    "name_en": "I Am Invincible",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 244,
+    "name_kr": "위대한 재련",
+    "name_en": "The Smith",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 245,
+    "name_kr": "필연적인 결과",
+    "name_en": "Foregone Conclusion",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 246,
+    "name_kr": "기쁨의 선물",
+    "name_en": "Bundle of Joy",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 247,
+    "name_kr": "막아라!!",
+    "name_en": "GUARDS!!!",
+    "character": "Regent",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 248,
+    "name_kr": "날 세우기",
+    "name_en": "Seeking Edge",
+    "character": "Regent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 249,
+    "name_kr": "독재",
+    "name_en": "Tyranny",
+    "character": "Regent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 250,
+    "name_kr": "로열티",
+    "name_en": "Royalties",
+    "character": "Regent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 251,
+    "name_kr": "무기고",
+    "name_en": "Arsenal",
+    "character": "Regent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 252,
+    "name_kr": "중성자 방패",
+    "name_en": "Neutron Aegis",
+    "character": "Regent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 253,
+    "name_kr": "검성",
+    "name_en": "Sword Sage",
+    "character": "Regent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 254,
     "name_kr": "망치질 시간",
     "name_en": "Hammer Time",
+    "character": "Regent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 255,
+    "name_kr": "창세",
+    "name_en": "Genesis",
+    "character": "Regent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 256,
+    "name_kr": "공허의 형상",
+    "name_en": "Void Form",
+    "character": "Regent",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 257,
+    "name_kr": "군주의 시선",
+    "name_en": "Monarch's Gaze",
     "character": "Regent",
     "cardType": "Power",
     "rarity": "Rare"
@@ -2098,7 +2098,7 @@
   {
     "no": 263,
     "name_kr": "강탈",
-    "name_en": "Dredge",
+    "name_en": "Reave",
     "character": "Necrobinder",
     "cardType": "Attack",
     "rarity": "Common"
@@ -2114,7 +2114,7 @@
   {
     "no": 265,
     "name_kr": "넘기기",
-    "name_en": "Flatten",
+    "name_en": "Snap",
     "character": "Necrobinder",
     "cardType": "Attack",
     "rarity": "Common"
@@ -2298,7 +2298,7 @@
   {
     "no": 288,
     "name_kr": "쇠락",
-    "name_en": "Severance",
+    "name_en": "Debilitate",
     "character": "Necrobinder",
     "cardType": "Attack",
     "rarity": "Uncommon"
@@ -2418,7 +2418,7 @@
   {
     "no": 303,
     "name_kr": "추출",
-    "name_en": "Capture Spirit",
+    "name_en": "Dredge",
     "character": "Necrobinder",
     "cardType": "Skill",
     "rarity": "Uncommon"
@@ -2449,286 +2449,6 @@
   },
   {
     "no": 307,
-    "name_kr": "비애",
-    "name_en": "Melancholy",
-    "character": "Necrobinder",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 308,
-    "name_kr": "서류 폭풍",
-    "name_en": "Pagestorm",
-    "character": "Necrobinder",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 309,
-    "name_kr": "석회화",
-    "name_en": "Calcify",
-    "character": "Necrobinder",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 310,
-    "name_kr": "수의",
-    "name_en": "Shroud",
-    "character": "Necrobinder",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 311,
-    "name_kr": "우정",
-    "name_en": "Friendship",
-    "character": "Necrobinder",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 312,
-    "name_kr": "죽음의 무도",
-    "name_en": "Danse Macabre",
-    "character": "Necrobinder",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 313,
-    "name_kr": "출몰",
-    "name_en": "Haunt",
-    "character": "Necrobinder",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 314,
-    "name_kr": "치사성",
-    "name_en": "Lethality",
-    "character": "Necrobinder",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 315,
-    "name_kr": "카운트다운",
-    "name_en": "Countdown",
-    "character": "Necrobinder",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 316,
-    "name_kr": "살점 재주",
-    "name_en": "Sleight of Flesh",
-    "character": "Necrobinder",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 317,
-    "name_kr": "비참함",
-    "name_en": "Misery",
-    "character": "Necrobinder",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 318,
-    "name_kr": "척결",
-    "name_en": "Eradicate",
-    "character": "Necrobinder",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 319,
-    "name_kr": "매달기",
-    "name_en": "Hang",
-    "character": "Necrobinder",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 320,
-    "name_kr": "영혼 폭풍",
-    "name_en": "Soul Storm",
-    "character": "Necrobinder",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 321,
-    "name_kr": "때가 되었다",
-    "name_en": "Time's Up",
-    "character": "Necrobinder",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 322,
-    "name_kr": "사신의 낫",
-    "name_en": "The Scythe",
-    "character": "Necrobinder",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 323,
-    "name_kr": "쥐어짜기",
-    "name_en": "Squeeze",
-    "character": "Necrobinder",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 324,
-    "name_kr": "밴시의 외침",
-    "name_en": "Banshee's Cry",
-    "character": "Necrobinder",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 325,
-    "name_kr": "강령회",
-    "name_en": "Seance",
-    "character": "Necrobinder",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 326,
-    "name_kr": "망각",
-    "name_en": "Oblivion",
-    "character": "Necrobinder",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 327,
-    "name_kr": "불사",
-    "name_en": "Undeath",
-    "character": "Necrobinder",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 328,
-    "name_kr": "운명 공유",
-    "name_en": "Shared Fate",
-    "character": "Necrobinder",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 329,
-    "name_kr": "변형",
-    "name_en": "Transfigure",
-    "character": "Necrobinder",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 330,
-    "name_kr": "희생",
-    "name_en": "Sacrifice",
-    "character": "Necrobinder",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 331,
-    "name_kr": "허상",
-    "name_en": "Eidolon",
-    "character": "Necrobinder",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 332,
-    "name_kr": "소생",
-    "name_en": "Reanimate",
-    "character": "Necrobinder",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 333,
-    "name_kr": "종말의 날",
-    "name_en": "End of Days",
-    "character": "Necrobinder",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 334,
-    "name_kr": "정신 폭주",
-    "name_en": "Neurosurge",
-    "character": "Necrobinder",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 335,
-    "name_kr": "공허의 부름",
-    "name_en": "Call of the Void",
-    "character": "Necrobinder",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 336,
-    "name_kr": "생명 삼키기",
-    "name_en": "Devour Life",
-    "character": "Necrobinder",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 337,
-    "name_kr": "잿빛 혼령",
-    "name_en": "Spirit of Ash",
-    "character": "Necrobinder",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 338,
-    "name_kr": "강령의 극의",
-    "name_en": "Necro Mastery",
-    "character": "Necrobinder",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 339,
-    "name_kr": "경계 태세",
-    "name_en": "Sentry Mode",
-    "character": "Necrobinder",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 340,
-    "name_kr": "권역",
-    "name_en": "Demesne",
-    "character": "Necrobinder",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 341,
-    "name_kr": "사신의 형상",
-    "name_en": "Reaper Form",
-    "character": "Necrobinder",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 342,
     "name_kr": "해골 군단",
     "name_en": "Legion of Bone",
     "character": "Necrobinder",
@@ -2736,11 +2456,291 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 343,
+    "no": 308,
+    "name_kr": "비애",
+    "name_en": "Melancholy",
+    "character": "Necrobinder",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 309,
+    "name_kr": "서류 폭풍",
+    "name_en": "Pagestorm",
+    "character": "Necrobinder",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 310,
+    "name_kr": "석회화",
+    "name_en": "Calcify",
+    "character": "Necrobinder",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 311,
+    "name_kr": "수의",
+    "name_en": "Shroud",
+    "character": "Necrobinder",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 312,
+    "name_kr": "우정",
+    "name_en": "Friendship",
+    "character": "Necrobinder",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 313,
+    "name_kr": "죽음의 무도",
+    "name_en": "Danse Macabre",
+    "character": "Necrobinder",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 314,
+    "name_kr": "출몰",
+    "name_en": "Haunt",
+    "character": "Necrobinder",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 315,
+    "name_kr": "치사성",
+    "name_en": "Lethality",
+    "character": "Necrobinder",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 316,
+    "name_kr": "카운트다운",
+    "name_en": "Countdown",
+    "character": "Necrobinder",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 317,
+    "name_kr": "살점 재주",
+    "name_en": "Sleight of Flesh",
+    "character": "Necrobinder",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 318,
+    "name_kr": "비참함",
+    "name_en": "Misery",
+    "character": "Necrobinder",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 319,
+    "name_kr": "척결",
+    "name_en": "Eradicate",
+    "character": "Necrobinder",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 320,
+    "name_kr": "매달기",
+    "name_en": "Hang",
+    "character": "Necrobinder",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 321,
+    "name_kr": "영혼 폭풍",
+    "name_en": "Soul Storm",
+    "character": "Necrobinder",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 322,
+    "name_kr": "때가 되었다",
+    "name_en": "Time's Up",
+    "character": "Necrobinder",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 323,
+    "name_kr": "사신의 낫",
+    "name_en": "The Scythe",
+    "character": "Necrobinder",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 324,
+    "name_kr": "쥐어짜기",
+    "name_en": "Squeeze",
+    "character": "Necrobinder",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 325,
+    "name_kr": "밴시의 외침",
+    "name_en": "Banshee's Cry",
+    "character": "Necrobinder",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 326,
     "name_kr": "경계 엿보기",
     "name_en": "Glimpse Beyond",
     "character": "Necrobinder",
     "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 327,
+    "name_kr": "망각",
+    "name_en": "Oblivion",
+    "character": "Necrobinder",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 328,
+    "name_kr": "불사",
+    "name_en": "Undeath",
+    "character": "Necrobinder",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 329,
+    "name_kr": "운명 공유",
+    "name_en": "Shared Fate",
+    "character": "Necrobinder",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 330,
+    "name_kr": "강령회",
+    "name_en": "Seance",
+    "character": "Necrobinder",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 331,
+    "name_kr": "변형",
+    "name_en": "Transfigure",
+    "character": "Necrobinder",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 332,
+    "name_kr": "희생",
+    "name_en": "Sacrifice",
+    "character": "Necrobinder",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 333,
+    "name_kr": "허상",
+    "name_en": "Eidolon",
+    "character": "Necrobinder",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 334,
+    "name_kr": "소생",
+    "name_en": "Reanimate",
+    "character": "Necrobinder",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 335,
+    "name_kr": "종말의 날",
+    "name_en": "End of Days",
+    "character": "Necrobinder",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 336,
+    "name_kr": "정신 폭주",
+    "name_en": "Neurosurge",
+    "character": "Necrobinder",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 337,
+    "name_kr": "공허의 부름",
+    "name_en": "Call of the Void",
+    "character": "Necrobinder",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 338,
+    "name_kr": "생명 삼키기",
+    "name_en": "Devour Life",
+    "character": "Necrobinder",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 339,
+    "name_kr": "잿빛 혼령",
+    "name_en": "Spirit of Ash",
+    "character": "Necrobinder",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 340,
+    "name_kr": "강령의 극의",
+    "name_en": "Necro Mastery",
+    "character": "Necrobinder",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 341,
+    "name_kr": "경계 태세",
+    "name_en": "Sentry Mode",
+    "character": "Necrobinder",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 342,
+    "name_kr": "권역",
+    "name_en": "Demesne",
+    "character": "Necrobinder",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 343,
+    "name_kr": "사신의 형상",
+    "name_en": "Reaper Form",
+    "character": "Necrobinder",
+    "cardType": "Power",
     "rarity": "Rare"
   },
   {
@@ -2842,7 +2842,7 @@
   {
     "no": 356,
     "name_kr": "추진 타격",
-    "name_en": "Compile Driver",
+    "name_en": "Momentum Strike",
     "character": "Defect",
     "cardType": "Attack",
     "rarity": "Common"
@@ -2937,16 +2937,16 @@
   },
   {
     "no": 368,
-    "name_kr": "FTL",
-    "name_en": "FTL",
+    "name_kr": "테슬라 코일",
+    "name_en": "Tesla Coil",
     "character": "Defect",
     "cardType": "Attack",
     "rarity": "Uncommon"
   },
   {
     "no": 369,
-    "name_kr": "테슬라 코일",
-    "name_en": "Tesla Coil",
+    "name_kr": "FTL",
+    "name_en": "FTL",
     "character": "Defect",
     "cardType": "Attack",
     "rarity": "Uncommon"
@@ -2961,14 +2961,6 @@
   },
   {
     "no": 371,
-    "name_kr": "Null",
-    "name_en": "Null",
-    "character": "Defect",
-    "cardType": "Attack",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 372,
     "name_kr": "로켓 펀치",
     "name_en": "Rocket Punch",
     "character": "Defect",
@@ -2976,9 +2968,17 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 373,
+    "no": 372,
     "name_kr": "합성",
     "name_en": "Synthesis",
+    "character": "Defect",
+    "cardType": "Attack",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 373,
+    "name_kr": "Null",
+    "name_en": "Null",
     "character": "Defect",
     "cardType": "Attack",
     "rarity": "Uncommon"
@@ -3082,333 +3082,13 @@
   {
     "no": 386,
     "name_kr": "에너자이저",
-    "name_en": "Energy Surge",
+    "name_en": "Double Energy",
     "character": "Defect",
     "cardType": "Skill",
     "rarity": "Uncommon"
   },
   {
     "no": 387,
-    "name_kr": "유리 공예",
-    "name_en": "Glasswork",
-    "character": "Defect",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 388,
-    "name_kr": "포집",
-    "name_en": "Chaos",
-    "character": "Defect",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 389,
-    "name_kr": "혼돈",
-    "name_en": "Chaos",
-    "character": "Defect",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 390,
-    "name_kr": "그림자 방패",
-    "name_en": "Shadow Shield",
-    "character": "Defect",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 391,
-    "name_kr": "빙하",
-    "name_en": "Glacier",
-    "character": "Defect",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 392,
-    "name_kr": "융합",
-    "name_en": "Fusion",
-    "character": "Defect",
-    "cardType": "Skill",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 393,
-    "name_kr": "굴뚝",
-    "name_en": "Smokestack",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 394,
-    "name_kr": "반복",
-    "name_en": "Loop",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 395,
-    "name_kr": "벼락",
-    "name_en": "Thunder",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 396,
-    "name_kr": "서브루틴",
-    "name_en": "Subroutine",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 397,
-    "name_kr": "순회",
-    "name_en": "Iteration",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 398,
-    "name_kr": "우박 폭풍",
-    "name_en": "Hailstorm",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 399,
-    "name_kr": "축전기",
-    "name_en": "Capacitor",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 400,
-    "name_kr": "폭풍",
-    "name_en": "Storm",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 401,
-    "name_kr": "야성",
-    "name_en": "Feral",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 402,
-    "name_kr": "증강",
-    "name_en": "Bulk Up",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Uncommon"
-  },
-  {
-    "no": 403,
-    "name_kr": "나선 관통",
-    "name_en": "Helix Drill",
-    "character": "Defect",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 404,
-    "name_kr": "산산조각",
-    "name_en": "Shatter",
-    "character": "Defect",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 405,
-    "name_kr": "대공포",
-    "name_en": "Flak Cannon",
-    "character": "Defect",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 406,
-    "name_kr": "적응형 타격",
-    "name_en": "Adaptive Strike",
-    "character": "Defect",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 407,
-    "name_kr": "파괴광선",
-    "name_en": "Hyperbeam",
-    "character": "Defect",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 408,
-    "name_kr": "하나를 위한 모두",
-    "name_en": "All for One",
-    "character": "Defect",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 409,
-    "name_kr": "얼음 창",
-    "name_en": "Ice Lance",
-    "character": "Defect",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 410,
-    "name_kr": "유성 타격",
-    "name_en": "Meteor Strike",
-    "character": "Defect",
-    "cardType": "Attack",
-    "rarity": "Rare"
-  },
-  {
-    "no": 411,
-    "name_kr": "다시 시작",
-    "name_en": "Reboot",
-    "character": "Defect",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 412,
-    "name_kr": "다중 시전",
-    "name_en": "Multi-Cast",
-    "character": "Defect",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 413,
-    "name_kr": "모드 적용",
-    "name_en": "Modded",
-    "character": "Defect",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 414,
-    "name_kr": "임계 초과",
-    "name_en": "Supercritical",
-    "character": "Defect",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 415,
-    "name_kr": "신호 증폭",
-    "name_en": "Signal Boost",
-    "character": "Defect",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 416,
-    "name_kr": "유전 알고리즘",
-    "name_en": "Genetic Algorithm",
-    "character": "Defect",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 417,
-    "name_kr": "동전기",
-    "name_en": "Voltaic",
-    "character": "Defect",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 418,
-    "name_kr": "무지개",
-    "name_en": "Rainbow",
-    "character": "Defect",
-    "cardType": "Skill",
-    "rarity": "Rare"
-  },
-  {
-    "no": 419,
-    "name_kr": "고철을 보물로",
-    "name_en": "Trash to Treasure",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 420,
-    "name_kr": "기계학습",
-    "name_en": "Machine Learning",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 421,
-    "name_kr": "냉각재",
-    "name_en": "Coolant",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 422,
-    "name_kr": "스피너",
-    "name_en": "Spinner",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 423,
-    "name_kr": "조각모음",
-    "name_en": "Defragment",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 424,
-    "name_kr": "그림자 소모",
-    "name_en": "Consuming Shadow",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 425,
-    "name_kr": "버퍼",
-    "name_en": "Buffer",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 426,
-    "name_kr": "메아리의 형상",
-    "name_en": "Echo Form",
-    "character": "Defect",
-    "cardType": "Power",
-    "rarity": "Rare"
-  },
-  {
-    "no": 427,
     "name_kr": "에너지 폭주",
     "name_en": "Energy Surge",
     "character": "Defect",
@@ -3416,7 +3096,247 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 428,
+    "no": 388,
+    "name_kr": "유리 공예",
+    "name_en": "Glasswork",
+    "character": "Defect",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 389,
+    "name_kr": "포집",
+    "name_en": "Scavenge",
+    "character": "Defect",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 390,
+    "name_kr": "혼돈",
+    "name_en": "Chaos",
+    "character": "Defect",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 391,
+    "name_kr": "그림자 방패",
+    "name_en": "Shadow Shield",
+    "character": "Defect",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 392,
+    "name_kr": "빙하",
+    "name_en": "Glacier",
+    "character": "Defect",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 393,
+    "name_kr": "융합",
+    "name_en": "Fusion",
+    "character": "Defect",
+    "cardType": "Skill",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 394,
+    "name_kr": "굴뚝",
+    "name_en": "Smokestack",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 395,
+    "name_kr": "반복",
+    "name_en": "Loop",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 396,
+    "name_kr": "벼락",
+    "name_en": "Thunder",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 397,
+    "name_kr": "서브루틴",
+    "name_en": "Subroutine",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 398,
+    "name_kr": "순회",
+    "name_en": "Iteration",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 399,
+    "name_kr": "우박 폭풍",
+    "name_en": "Hailstorm",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 400,
+    "name_kr": "축전기",
+    "name_en": "Capacitor",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 401,
+    "name_kr": "폭풍",
+    "name_en": "Storm",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 402,
+    "name_kr": "야성",
+    "name_en": "Feral",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 403,
+    "name_kr": "증강",
+    "name_en": "Bulk Up",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Uncommon"
+  },
+  {
+    "no": 404,
+    "name_kr": "나선 관통",
+    "name_en": "Helix Drill",
+    "character": "Defect",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 405,
+    "name_kr": "산산조각",
+    "name_en": "Shatter",
+    "character": "Defect",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 406,
+    "name_kr": "대공포",
+    "name_en": "Flak Cannon",
+    "character": "Defect",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 407,
+    "name_kr": "적응형 타격",
+    "name_en": "Adaptive Strike",
+    "character": "Defect",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 408,
+    "name_kr": "파괴광선",
+    "name_en": "Hyperbeam",
+    "character": "Defect",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 409,
+    "name_kr": "하나를 위한 모두",
+    "name_en": "All for One",
+    "character": "Defect",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 410,
+    "name_kr": "얼음 창",
+    "name_en": "Ice Lance",
+    "character": "Defect",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 411,
+    "name_kr": "유성 타격",
+    "name_en": "Meteor Strike",
+    "character": "Defect",
+    "cardType": "Attack",
+    "rarity": "Rare"
+  },
+  {
+    "no": 412,
+    "name_kr": "다시 시작",
+    "name_en": "Reboot",
+    "character": "Defect",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 413,
+    "name_kr": "다중 시전",
+    "name_en": "Multi-Cast",
+    "character": "Defect",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 414,
+    "name_kr": "모드 적용",
+    "name_en": "Modded",
+    "character": "Defect",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 415,
+    "name_kr": "임계 초과",
+    "name_en": "Supercritical",
+    "character": "Defect",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 416,
+    "name_kr": "신호 증폭",
+    "name_en": "Signal Boost",
+    "character": "Defect",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 417,
+    "name_kr": "유전 알고리즘",
+    "name_en": "Genetic Algorithm",
+    "character": "Defect",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 418,
     "name_kr": "점화",
     "name_en": "Ignition",
     "character": "Defect",
@@ -3424,7 +3344,95 @@
     "rarity": "Rare"
   },
   {
+    "no": 419,
+    "name_kr": "무지개",
+    "name_en": "Rainbow",
+    "character": "Defect",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 420,
+    "name_kr": "동전기",
+    "name_en": "Voltaic",
+    "character": "Defect",
+    "cardType": "Skill",
+    "rarity": "Rare"
+  },
+  {
+    "no": 421,
+    "name_kr": "고철을 보물로",
+    "name_en": "Trash to Treasure",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 422,
+    "name_kr": "기계학습",
+    "name_en": "Machine Learning",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 423,
+    "name_kr": "냉각재",
+    "name_en": "Coolant",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 424,
+    "name_kr": "스피너",
+    "name_en": "Spinner",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 425,
+    "name_kr": "조각모음",
+    "name_en": "Defragment",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 426,
+    "name_kr": "그림자 소모",
+    "name_en": "Consuming Shadow",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 427,
+    "name_kr": "버퍼",
+    "name_en": "Buffer",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 428,
+    "name_kr": "메아리의 형상",
+    "name_en": "Echo Form",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
     "no": 429,
+    "name_kr": "창의적인 인공지능",
+    "name_en": "Creative AI",
+    "character": "Defect",
+    "cardType": "Power",
+    "rarity": "Rare"
+  },
+  {
+    "no": 430,
     "name_kr": "강철의 섬광",
     "name_en": "Flash of Steel",
     "character": "Colorless",
@@ -3432,7 +3440,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 430,
+    "no": 431,
     "name_kr": "극적인 입장",
     "name_en": "Dramatic Entrance",
     "character": "Colorless",
@@ -3440,7 +3448,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 431,
+    "no": 432,
     "name_kr": "난사",
     "name_en": "Volley",
     "character": "Colorless",
@@ -3448,7 +3456,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 432,
+    "no": 433,
     "name_kr": "만물 절단",
     "name_en": "Omnislice",
     "character": "Colorless",
@@ -3456,7 +3464,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 433,
+    "no": 434,
     "name_kr": "고동치는 도끼",
     "name_en": "Thrumming Hatchet",
     "character": "Colorless",
@@ -3464,7 +3472,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 434,
+    "no": 435,
     "name_kr": "궁극의 타격",
     "name_en": "Ultimate Strike",
     "character": "Colorless",
@@ -3472,7 +3480,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 435,
+    "no": 436,
     "name_kr": "정신 공격",
     "name_en": "Mind Blast",
     "character": "Colorless",
@@ -3480,7 +3488,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 436,
+    "no": 437,
     "name_kr": "주먹다짐",
     "name_en": "Fisticuffs",
     "character": "Colorless",
@@ -3488,7 +3496,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 437,
+    "no": 438,
     "name_kr": "집단 공격",
     "name_en": "Gang Up",
     "character": "Colorless",
@@ -3496,7 +3504,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 438,
+    "no": 439,
     "name_kr": "탐색 타격",
     "name_en": "Seeker Strike",
     "character": "Colorless",
@@ -3504,7 +3512,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 439,
+    "no": 440,
     "name_kr": "태그 팀",
     "name_en": "Tag Team",
     "character": "Colorless",
@@ -3512,7 +3520,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 440,
+    "no": 441,
     "name_kr": "너만 믿는다",
     "name_en": "Believe in You",
     "character": "Colorless",
@@ -3520,7 +3528,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 441,
+    "no": 442,
     "name_kr": "능숙",
     "name_en": "Finesse",
     "character": "Colorless",
@@ -3528,7 +3536,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 442,
+    "no": 443,
     "name_kr": "미래 예지",
     "name_en": "Thinking Ahead",
     "character": "Colorless",
@@ -3536,7 +3544,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 443,
+    "no": 444,
     "name_kr": "비상 단추",
     "name_en": "Panic Button",
     "character": "Colorless",
@@ -3544,7 +3552,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 444,
+    "no": 445,
     "name_kr": "생산",
     "name_en": "Production",
     "character": "Colorless",
@@ -3552,7 +3560,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 445,
+    "no": 446,
     "name_kr": "성급함",
     "name_en": "Impatience",
     "character": "Colorless",
@@ -3560,7 +3568,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 446,
+    "no": 447,
     "name_kr": "순수",
     "name_en": "Purity",
     "character": "Colorless",
@@ -3568,7 +3576,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 447,
+    "no": 448,
     "name_kr": "어둠의 족쇄",
     "name_en": "Dark Shackles",
     "character": "Colorless",
@@ -3576,7 +3584,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 448,
+    "no": 449,
     "name_kr": "연장",
     "name_en": "Prolong",
     "character": "Colorless",
@@ -3584,7 +3592,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 449,
+    "no": 450,
     "name_kr": "초조함",
     "name_en": "Restlessness",
     "character": "Colorless",
@@ -3592,7 +3600,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 450,
+    "no": 451,
     "name_kr": "팔방미인",
     "name_en": "Jack of All Trades",
     "character": "Colorless",
@@ -3600,7 +3608,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 451,
+    "no": 452,
     "name_kr": "가로막기",
     "name_en": "Intercept",
     "character": "Colorless",
@@ -3608,7 +3616,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 452,
+    "no": 453,
     "name_kr": "궁극의 수비",
     "name_en": "Ultimate Defend",
     "character": "Colorless",
@@ -3616,7 +3624,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 453,
+    "no": 454,
     "name_kr": "똘똘 뭉치기",
     "name_en": "Huddle Up",
     "character": "Colorless",
@@ -3624,7 +3632,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 454,
+    "no": 455,
     "name_kr": "발견",
     "name_en": "Discovery",
     "character": "Colorless",
@@ -3632,7 +3640,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 455,
+    "no": 456,
     "name_kr": "부양",
     "name_en": "Lift",
     "character": "Colorless",
@@ -3640,15 +3648,15 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 456,
+    "no": 457,
     "name_kr": "착수",
-    "name_en": "The Gambit",
+    "name_en": "Splash",
     "character": "Colorless",
     "cardType": "Skill",
     "rarity": "Uncommon"
   },
   {
-    "no": 457,
+    "no": 458,
     "name_kr": "협력",
     "name_en": "Coordinate",
     "character": "Colorless",
@@ -3656,15 +3664,15 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 458,
+    "no": 459,
     "name_kr": "재난",
-    "name_en": "Calamity",
+    "name_en": "Catastrophe",
     "character": "Colorless",
     "cardType": "Skill",
     "rarity": "Uncommon"
   },
   {
-    "no": 459,
+    "no": 460,
     "name_kr": "충격파",
     "name_en": "Shockwave",
     "character": "Colorless",
@@ -3672,7 +3680,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 460,
+    "no": 461,
     "name_kr": "평형",
     "name_en": "Equilibrium",
     "character": "Colorless",
@@ -3680,7 +3688,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 461,
+    "no": 462,
     "name_kr": "폭탄",
     "name_en": "The Bomb",
     "character": "Colorless",
@@ -3688,7 +3696,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 462,
+    "no": 463,
     "name_kr": "위풍당당",
     "name_en": "Panache",
     "character": "Colorless",
@@ -3696,7 +3704,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 463,
+    "no": 464,
     "name_kr": "고정시키기",
     "name_en": "Fasten",
     "character": "Colorless",
@@ -3704,7 +3712,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 464,
+    "no": 465,
     "name_kr": "기량",
     "name_en": "Prowess",
     "character": "Colorless",
@@ -3712,7 +3720,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 465,
+    "no": 466,
     "name_kr": "자동화",
     "name_en": "Automation",
     "character": "Colorless",
@@ -3720,7 +3728,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 466,
+    "no": 467,
     "name_kr": "준비 시간",
     "name_en": "Prep Time",
     "character": "Colorless",
@@ -3728,7 +3736,7 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 467,
+    "no": 468,
     "name_kr": "책략",
     "name_en": "Stratagem",
     "character": "Colorless",
@@ -3736,15 +3744,15 @@
     "rarity": "Uncommon"
   },
   {
-    "no": 468,
+    "no": 469,
     "name_kr": "사냥돌",
-    "name_en": "Rolling Boulder",
+    "name_en": "Bolas",
     "character": "Colorless",
     "cardType": "Attack",
     "rarity": "Rare"
   },
   {
-    "no": 469,
+    "no": 470,
     "name_kr": "집중 포화",
     "name_en": "Salvo",
     "character": "Colorless",
@@ -3752,7 +3760,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 470,
+    "no": 471,
     "name_kr": "황금 도끼",
     "name_en": "Gold Axe",
     "character": "Colorless",
@@ -3760,7 +3768,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 471,
+    "no": 472,
     "name_kr": "쥐어뜯기",
     "name_en": "Rend",
     "character": "Colorless",
@@ -3768,7 +3776,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 472,
+    "no": 473,
     "name_kr": "탐욕의 손",
     "name_en": "Hand of Greed",
     "character": "Colorless",
@@ -3776,7 +3784,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 473,
+    "no": 474,
     "name_kr": "때려눕히기",
     "name_en": "Knockdown",
     "character": "Colorless",
@@ -3784,7 +3792,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 474,
+    "no": 475,
     "name_kr": "잭팟",
     "name_en": "Jackpot",
     "character": "Colorless",
@@ -3792,7 +3800,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 475,
+    "no": 476,
     "name_kr": "비밀 기술",
     "name_en": "Secret Technique",
     "character": "Colorless",
@@ -3800,7 +3808,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 476,
+    "no": 477,
     "name_kr": "비밀 병기",
     "name_en": "Secret Weapon",
     "character": "Colorless",
@@ -3808,7 +3816,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 477,
+    "no": 478,
     "name_kr": "전략의 천재",
     "name_en": "Master of Strategy",
     "character": "Colorless",
@@ -3816,15 +3824,15 @@
     "rarity": "Rare"
   },
   {
-    "no": 478,
+    "no": 479,
     "name_kr": "포석",
-    "name_en": "Stratagem",
+    "name_en": "The Gambit",
     "character": "Colorless",
     "cardType": "Skill",
     "rarity": "Rare"
   },
   {
-    "no": 479,
+    "no": 480,
     "name_kr": "숨겨진 보석",
     "name_en": "Hidden Gem",
     "character": "Colorless",
@@ -3832,7 +3840,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 480,
+    "no": 481,
     "name_kr": "연금",
     "name_en": "Alchemize",
     "character": "Colorless",
@@ -3840,7 +3848,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 481,
+    "no": 482,
     "name_kr": "임명",
     "name_en": "Anointed",
     "character": "Colorless",
@@ -3848,7 +3856,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 482,
+    "no": 483,
     "name_kr": "휘갈김",
     "name_en": "Scrawl",
     "character": "Colorless",
@@ -3856,7 +3864,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 483,
+    "no": 484,
     "name_kr": "흉내내기",
     "name_en": "Mimic",
     "character": "Colorless",
@@ -3864,7 +3872,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 484,
+    "no": 485,
     "name_kr": "단결",
     "name_en": "Rally",
     "character": "Colorless",
@@ -3872,7 +3880,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 485,
+    "no": 486,
     "name_kr": "두들겨 패기",
     "name_en": "Beat Down",
     "character": "Colorless",
@@ -3880,7 +3888,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 486,
+    "no": 487,
     "name_kr": "엔트로피",
     "name_en": "Entropy",
     "character": "Colorless",
@@ -3888,7 +3896,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 487,
+    "no": 488,
     "name_kr": "향수",
     "name_en": "Nostalgia",
     "character": "Colorless",
@@ -3896,7 +3904,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 488,
+    "no": 489,
     "name_kr": "희망의 등불",
     "name_en": "Beacon of Hope",
     "character": "Colorless",
@@ -3904,7 +3912,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 489,
+    "no": 490,
     "name_kr": "대혼란",
     "name_en": "Mayhem",
     "character": "Colorless",
@@ -3912,7 +3920,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 490,
+    "no": 491,
     "name_kr": "굴러가는 바위",
     "name_en": "Rolling Boulder",
     "character": "Colorless",
@@ -3920,7 +3928,7 @@
     "rarity": "Rare"
   },
   {
-    "no": 491,
+    "no": 492,
     "name_kr": "영원의 갑옷",
     "name_en": "Eternal Armor",
     "character": "Colorless",
@@ -3928,15 +3936,15 @@
     "rarity": "Rare"
   },
   {
-    "no": 492,
+    "no": 493,
     "name_kr": "재앙",
-    "name_en": "Catastrophe",
+    "name_en": "Calamity",
     "character": "Colorless",
     "cardType": "Power",
     "rarity": "Rare"
   },
   {
-    "no": 493,
+    "no": 494,
     "name_kr": "유성우",
     "name_en": "Meteor Shower",
     "character": "Regent",
@@ -3944,7 +3952,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 494,
+    "no": 495,
     "name_kr": "제압",
     "name_en": "Suppress",
     "character": "Silent",
@@ -3952,7 +3960,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 495,
+    "no": 496,
     "name_kr": "니오우의 격분",
     "name_en": "Neow's Fury",
     "character": "Ancient",
@@ -3960,7 +3968,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 496,
+    "no": 497,
     "name_kr": "박살",
     "name_en": "Break",
     "character": "Ironclad",
@@ -3968,7 +3976,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 497,
+    "no": 498,
     "name_kr": "파수꾼",
     "name_en": "Protector",
     "character": "Necrobinder",
@@ -3976,7 +3984,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 498,
+    "no": 499,
     "name_kr": "할퀴기",
     "name_en": "Maul",
     "character": "Ancient",
@@ -3984,7 +3992,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 499,
+    "no": 500,
     "name_kr": "호각 불기",
     "name_en": "Whistle",
     "character": "Ancient",
@@ -3992,7 +4000,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 500,
+    "no": 501,
     "name_kr": "염원",
     "name_en": "Wish",
     "character": "Ancient",
@@ -4000,7 +4008,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 501,
+    "no": 502,
     "name_kr": "찬란한 불꽃",
     "name_en": "Brightest Flame",
     "character": "Ancient",
@@ -4008,7 +4016,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 502,
+    "no": 503,
     "name_kr": "사중 시전",
     "name_en": "Quadcast",
     "character": "Defect",
@@ -4016,7 +4024,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 503,
+    "no": 504,
     "name_kr": "영체화",
     "name_en": "Apparition",
     "character": "Ancient",
@@ -4024,7 +4032,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 504,
+    "no": 505,
     "name_kr": "신성",
     "name_en": "Apotheosis",
     "character": "Ancient",
@@ -4032,7 +4040,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 505,
+    "no": 506,
     "name_kr": "안식",
     "name_en": "Relax",
     "character": "Ancient",
@@ -4040,7 +4048,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 506,
+    "no": 507,
     "name_kr": "봉인된 왕좌",
     "name_en": "The Sealed Throne",
     "character": "Regent",
@@ -4048,7 +4056,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 507,
+    "no": 508,
     "name_kr": "인지 편향",
     "name_en": "Biased Cognition",
     "character": "Defect",
@@ -4056,7 +4064,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 508,
+    "no": 509,
     "name_kr": "금지된 마도서",
     "name_en": "Forbidden Grimoire",
     "character": "Necrobinder",
@@ -4064,7 +4072,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 509,
+    "no": 510,
     "name_kr": "유령의 형상",
     "name_en": "Wraith Form",
     "character": "Silent",
@@ -4072,7 +4080,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 510,
+    "no": 511,
     "name_kr": "타락",
     "name_en": "Corruption",
     "character": "Ironclad",
@@ -4080,7 +4088,7 @@
     "rarity": "Ancient"
   },
   {
-    "no": 511,
+    "no": 512,
     "name_kr": "감염",
     "name_en": "Infection",
     "character": "Status",
@@ -4088,7 +4096,7 @@
     "rarity": "Status"
   },
   {
-    "no": 512,
+    "no": 513,
     "name_kr": "공허",
     "name_en": "Void",
     "character": "Status",
@@ -4096,7 +4104,7 @@
     "rarity": "Status"
   },
   {
-    "no": 513,
+    "no": 514,
     "name_kr": "그을음",
     "name_en": "Soot",
     "character": "Status",
@@ -4104,7 +4112,7 @@
     "rarity": "Status"
   },
   {
-    "no": 514,
+    "no": 515,
     "name_kr": "나태",
     "name_en": "Sloth",
     "character": "Status",
@@ -4112,7 +4120,7 @@
     "rarity": "Status"
   },
   {
-    "no": 515,
+    "no": 516,
     "name_kr": "부상",
     "name_en": "Wound",
     "character": "Status",
@@ -4120,7 +4128,7 @@
     "rarity": "Status"
   },
   {
-    "no": 516,
+    "no": 517,
     "name_kr": "분해",
     "name_en": "Disintegration",
     "character": "Status",
@@ -4128,7 +4136,7 @@
     "rarity": "Status"
   },
   {
-    "no": 517,
+    "no": 518,
     "name_kr": "쇠퇴",
     "name_en": "Waste Away",
     "character": "Status",
@@ -4136,7 +4144,7 @@
     "rarity": "Status"
   },
   {
-    "no": 518,
+    "no": 519,
     "name_kr": "어지러움",
     "name_en": "Dazed",
     "character": "Status",
@@ -4144,7 +4152,7 @@
     "rarity": "Status"
   },
   {
-    "no": 519,
+    "no": 520,
     "name_kr": "정신 오염",
     "name_en": "Mind Rot",
     "character": "Status",
@@ -4152,7 +4160,7 @@
     "rarity": "Status"
   },
   {
-    "no": 520,
+    "no": 521,
     "name_kr": "화상",
     "name_en": "Burn",
     "character": "Status",
@@ -4160,7 +4168,7 @@
     "rarity": "Status"
   },
   {
-    "no": 521,
+    "no": 522,
     "name_kr": "유독성",
     "name_en": "Toxic",
     "character": "Status",
@@ -4168,7 +4176,7 @@
     "rarity": "Status"
   },
   {
-    "no": 522,
+    "no": 523,
     "name_kr": "유인",
     "name_en": "Beckon",
     "character": "Status",
@@ -4176,7 +4184,7 @@
     "rarity": "Status"
   },
   {
-    "no": 523,
+    "no": 524,
     "name_kr": "잔해",
     "name_en": "Debris",
     "character": "Status",
@@ -4184,7 +4192,7 @@
     "rarity": "Status"
   },
   {
-    "no": 524,
+    "no": 525,
     "name_kr": "점액투성이",
     "name_en": "Slimed",
     "character": "Status",
@@ -4192,7 +4200,7 @@
     "rarity": "Status"
   },
   {
-    "no": 525,
+    "no": 526,
     "name_kr": "필사적인 도주",
     "name_en": "Frantic Escape",
     "character": "Status",
@@ -4200,7 +4208,7 @@
     "rarity": "Status"
   },
   {
-    "no": 526,
+    "no": 527,
     "name_kr": "규칙 준수",
     "name_en": "Normality",
     "character": "Curse",
@@ -4208,7 +4216,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 527,
+    "no": 528,
     "name_kr": "등반가의 골칫거리",
     "name_en": "Ascender's Bane",
     "character": "Curse",
@@ -4216,7 +4224,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 528,
+    "no": 529,
     "name_kr": "몸부림",
     "name_en": "Writhe",
     "character": "Curse",
@@ -4224,7 +4232,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 529,
+    "no": 530,
     "name_kr": "방울의 저주",
     "name_en": "Curse of the Bell",
     "character": "Curse",
@@ -4232,7 +4240,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 530,
+    "no": 531,
     "name_kr": "부패",
     "name_en": "Decay",
     "character": "Curse",
@@ -4240,7 +4248,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 531,
+    "no": 532,
     "name_kr": "불운",
     "name_en": "Bad Luck",
     "character": "Curse",
@@ -4248,7 +4256,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 532,
+    "no": 533,
     "name_kr": "빚",
     "name_en": "Debt",
     "character": "Curse",
@@ -4256,7 +4264,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 533,
+    "no": 534,
     "name_kr": "상처",
     "name_en": "Injury",
     "character": "Curse",
@@ -4264,7 +4272,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 534,
+    "no": 535,
     "name_kr": "서투름",
     "name_en": "Clumsy",
     "character": "Curse",
@@ -4272,7 +4280,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 535,
+    "no": 536,
     "name_kr": "수면 부족",
     "name_en": "Poor Sleep",
     "character": "Curse",
@@ -4280,7 +4288,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 536,
+    "no": 537,
     "name_kr": "수치",
     "name_en": "Shame",
     "character": "Curse",
@@ -4288,7 +4296,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 537,
+    "no": 538,
     "name_kr": "어리석음",
     "name_en": "Folly",
     "character": "Curse",
@@ -4296,7 +4304,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 538,
+    "no": 539,
     "name_kr": "의심",
     "name_en": "Doubt",
     "character": "Curse",
@@ -4304,7 +4312,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 539,
+    "no": 540,
     "name_kr": "죄책감",
     "name_en": "Guilty",
     "character": "Curse",
@@ -4312,7 +4320,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 540,
+    "no": 541,
     "name_kr": "탐욕",
     "name_en": "Greed",
     "character": "Curse",
@@ -4320,7 +4328,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 541,
+    "no": 542,
     "name_kr": "후회",
     "name_en": "Regret",
     "character": "Curse",
@@ -4328,7 +4336,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 542,
+    "no": 543,
     "name_kr": "포자 잠식",
     "name_en": "Spore Mind",
     "character": "Curse",
@@ -4336,7 +4344,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 543,
+    "no": 544,
     "name_kr": "매료됨",
     "name_en": "Enthralled",
     "character": "Curse",
@@ -4344,7 +4352,7 @@
     "rarity": "Curse"
   },
   {
-    "no": 544,
+    "no": 545,
     "name_kr": "격돌",
     "name_en": "Clash",
     "character": "Ironclad",
@@ -4352,7 +4360,7 @@
     "rarity": "Event"
   },
   {
-    "no": 545,
+    "no": 546,
     "name_kr": "섀 급습",
     "name_en": "Byrd Swoop",
     "character": "Event",
@@ -4360,7 +4368,7 @@
     "rarity": "Event"
   },
   {
-    "no": 546,
+    "no": 547,
     "name_kr": "되돌리기",
     "name_en": "Rebound",
     "character": "Defect",
@@ -4368,7 +4376,7 @@
     "rarity": "Event"
   },
   {
-    "no": 547,
+    "no": 548,
     "name_kr": "박멸",
     "name_en": "Exterminate",
     "character": "Event",
@@ -4376,7 +4384,7 @@
     "rarity": "Event"
   },
   {
-    "no": 548,
+    "no": 549,
     "name_kr": "짓누르기",
     "name_en": "Squash",
     "character": "Event",
@@ -4384,7 +4392,7 @@
     "rarity": "Event"
   },
   {
-    "no": 549,
+    "no": 550,
     "name_kr": "쪼기",
     "name_en": "Peck",
     "character": "Event",
@@ -4392,7 +4400,7 @@
     "rarity": "Event"
   },
   {
-    "no": 550,
+    "no": 551,
     "name_kr": "계몽",
     "name_en": "Enlightenment",
     "character": "Event",
@@ -4400,7 +4408,7 @@
     "rarity": "Event"
   },
   {
-    "no": 551,
+    "no": 552,
     "name_kr": "광란의 포식",
     "name_en": "Feeding Frenzy",
     "character": "Event",
@@ -4408,7 +4416,7 @@
     "rarity": "Event"
   },
   {
-    "no": 552,
+    "no": 553,
     "name_kr": "방해",
     "name_en": "Distraction",
     "character": "Silent",
@@ -4416,7 +4424,7 @@
     "rarity": "Event"
   },
   {
-    "no": 553,
+    "no": 554,
     "name_kr": "스택",
     "name_en": "Stack",
     "character": "Defect",
@@ -4424,7 +4432,7 @@
     "rarity": "Event"
   },
   {
-    "no": 554,
+    "no": 555,
     "name_kr": "압도",
     "name_en": "Outmaneuver",
     "character": "Silent",
@@ -4432,7 +4440,7 @@
     "rarity": "Event"
   },
   {
-    "no": 555,
+    "no": 556,
     "name_kr": "이도류",
     "name_en": "Dual Wield",
     "character": "Ironclad",
@@ -4440,7 +4448,7 @@
     "rarity": "Event"
   },
   {
-    "no": 556,
+    "no": 557,
     "name_kr": "고리형 강인함",
     "name_en": "Toric Toughness",
     "character": "Event",
@@ -4448,7 +4456,7 @@
     "rarity": "Event"
   },
   {
-    "no": 557,
+    "no": 558,
     "name_kr": "참호",
     "name_en": "Entrench",
     "character": "Ironclad",
@@ -4456,7 +4464,7 @@
     "rarity": "Event"
   },
   {
-    "no": 558,
+    "no": 559,
     "name_kr": "탈바꿈",
     "name_en": "Metamorphosis",
     "character": "Event",
@@ -4464,7 +4472,7 @@
     "rarity": "Event"
   },
   {
-    "no": 559,
+    "no": 560,
     "name_kr": "마름쇠",
     "name_en": "Caltrops",
     "character": "Silent",
@@ -4472,7 +4480,7 @@
     "rarity": "Event"
   },
   {
-    "no": 560,
+    "no": 561,
     "name_kr": "Hello World",
     "name_en": "Hello World",
     "character": "Defect",
@@ -4480,7 +4488,7 @@
     "rarity": "Event"
   },
   {
-    "no": 561,
+    "no": 562,
     "name_kr": "랜턴 열쇠",
     "name_en": "Lantern Key",
     "character": "Quest",
@@ -4488,7 +4496,7 @@
     "rarity": "Quest"
   },
   {
-    "no": 562,
+    "no": 563,
     "name_kr": "보물 지도",
     "name_en": "Spoils Map",
     "character": "Quest",
@@ -4496,7 +4504,7 @@
     "rarity": "Quest"
   },
   {
-    "no": 563,
+    "no": 564,
     "name_kr": "섀도니스 알",
     "name_en": "Byrdonis Egg",
     "character": "Quest",
@@ -4504,7 +4512,7 @@
     "rarity": "Quest"
   },
   {
-    "no": 564,
+    "no": 565,
     "name_kr": "단도",
     "name_en": "Shiv",
     "character": "Token",
@@ -4512,7 +4520,7 @@
     "rarity": "Token"
   },
   {
-    "no": 565,
+    "no": 566,
     "name_kr": "하수인 타격",
     "name_en": "Minion Strike",
     "character": "Token",
@@ -4520,7 +4528,7 @@
     "rarity": "Token"
   },
   {
-    "no": 566,
+    "no": 567,
     "name_kr": "하수인 투하",
     "name_en": "Minion Dive Bomb",
     "character": "Token",
@@ -4528,7 +4536,7 @@
     "rarity": "Token"
   },
   {
-    "no": 567,
+    "no": 568,
     "name_kr": "훑어보기",
     "name_en": "Sweeping Gaze",
     "character": "Token",
@@ -4536,7 +4544,7 @@
     "rarity": "Token"
   },
   {
-    "no": 568,
+    "no": 569,
     "name_kr": "거대한 바위",
     "name_en": "Giant Rock",
     "character": "Token",
@@ -4544,7 +4552,7 @@
     "rarity": "Token"
   },
   {
-    "no": 569,
+    "no": 570,
     "name_kr": "군주의 칼날",
     "name_en": "Sovereign Blade",
     "character": "Token",
@@ -4552,7 +4560,7 @@
     "rarity": "Token"
   },
   {
-    "no": 570,
+    "no": 571,
     "name_kr": "발광",
     "name_en": "Luminesce",
     "character": "Token",
@@ -4560,7 +4568,7 @@
     "rarity": "Token"
   },
   {
-    "no": 571,
+    "no": 572,
     "name_kr": "연료",
     "name_en": "Fuel",
     "character": "Token",
@@ -4568,7 +4576,7 @@
     "rarity": "Token"
   },
   {
-    "no": 572,
+    "no": 573,
     "name_kr": "영혼",
     "name_en": "Soul",
     "character": "Token",
@@ -4576,7 +4584,7 @@
     "rarity": "Token"
   },
   {
-    "no": 573,
+    "no": 574,
     "name_kr": "하수인 희생",
     "name_en": "Minion Sacrifice",
     "character": "Token",

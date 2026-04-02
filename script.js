@@ -115,6 +115,13 @@ const state = {
     editingCardIndex: -1,
     isDirty: false,
     filters: { character: 'all', type: 'all', rarity: 'all' },
+    /** 현재 편집 중인 카드의 조정 상태 (미리보기에 실시간 반영) */
+    adjustState: { zoom: 1.0, offsetX: 0.0, offsetY: 0.0, sourceDataUrl: null, sourceImage: null },
+    /** 스크롤바 드래그 상태 */
+    isDraggingScrollbar: false,
+    isScrollUpdating: false,
+    startY: 0,
+    startScrollTop: 0,
 };
 
 // ================================================================
@@ -144,9 +151,10 @@ function initDom() {
         zoomVal: $('zoomVal'),
         offsetXVal: $('offsetXVal'),
         offsetYVal: $('offsetYVal'),
+        resetAdjustBtn: $('resetAdjustBtn'),
         imageInput: $('imageInput'),
         toggleOriginalBtn: $('toggleOriginalBtn'),
-        // 모달 레이어 참조 추가
+        // 모달 레이어 참조
         modalLayerBg: $('modalLayerBg'),
         modalLayerFrame: $('modalLayerFrame'),
         modalLayerBanner: $('modalLayerBanner'),
@@ -156,6 +164,10 @@ function initDom() {
         modalPreviewOriginal: $('modalPreviewOriginal'),
         modalTextName: $('modalTextName'),
         modalTextType: $('modalTextType'),
+        // 커스텀 스크롤바 참조
+        contentArea: $('contentArea'),
+        customScrollbar: $('customScrollbar'),
+        scrollbarThumb: $('scrollbarThumb'),
     };
 }
 
@@ -287,10 +299,11 @@ function buildCardFrameHTML(assets, artContent) {
  * 카드 이름·타입 텍스트 레이어 HTML 생성
  */
 function buildCardTextHTML(card) {
+    const name = card.name_kr || card.name_en;
     const typeKo = CARD_TYPE_KO[card.cardType] || card.cardType;
     return `
         <div class="layer layer-text">
-            <div class="card-name-overlay">${card.name_kr || card.name_en}</div>
+            <div class="card-name-overlay" data-text="${name}">${name}</div>
         </div>
         <div class="layer layer-text">
             <div class="card-type-overlay">${typeKo}</div>
@@ -323,6 +336,11 @@ function initAllCards() {
             width: isAncient ? 606 : 1000,
             height: isAncient ? 852 : 760,
             png_base64: '',
+            source_png_base64: '',
+            adjust_zoom: 1.0,
+            adjust_offset_x: 0.0,
+            adjust_offset_y: 0.0,
+            display_mode: 'default',
             blobUrl: null,
         };
     });
@@ -334,6 +352,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     lucide.createIcons();
 
     dom.appLoading.classList.remove('hidden');
+    showLoading(true, '초기 에셋을 로딩 중입니다...');
 
     await fetchCardDatabase();
     initAllCards();
@@ -349,6 +368,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 if (target && savedCard.png_base64) {
                     target.png_base64 = savedCard.png_base64;
+                    target.source_png_base64 = savedCard.source_png_base64 || savedCard.png_base64;
+                    target.adjust_zoom = savedCard.adjust_zoom ?? 1.0;
+                    target.adjust_offset_x = savedCard.adjust_offset_x ?? 0.0;
+                    target.adjust_offset_y = savedCard.adjust_offset_y ?? 0.0;
+                    target.display_mode = savedCard.display_mode || 'default';
                     target.updated_at = savedCard.updated_at;
                     updateCardBlobUrl(target);
                 }
@@ -418,6 +442,7 @@ function bindEvents() {
     $('uploadImageBtn').onclick = () => dom.imageInput.click();
     dom.imageInput.addEventListener('change', handleImageUpload);
     dom.toggleOriginalBtn.onclick = toggleOriginalView;
+    dom.resetAdjustBtn.onclick = resetAdjustValues;
 
     [dom.zoomSlider, dom.offsetXSlider, dom.offsetYSlider].forEach(s =>
         s.addEventListener('input', updateModalPreviewTransform)
@@ -426,13 +451,23 @@ function bindEvents() {
     window.addEventListener('beforeunload', e => {
         if (state.isDirty) { e.preventDefault(); e.returnValue = ''; }
     });
+
+    // 커스텀 스크롤바 이벤트
+    dom.contentArea.addEventListener('scroll', () => {
+        if (!state.isScrollUpdating) {
+            state.isScrollUpdating = true;
+            requestAnimationFrame(updateCustomScrollbar);
+        }
+    });
+    window.addEventListener('resize', updateCustomScrollbar);
+    dom.scrollbarThumb.addEventListener('mousedown', startScrollbarDrag);
 }
 
 // ================================================================
 // 파일 처리
 // ================================================================
 async function handleFileUpload(file) {
-    showLoading(true);
+    showLoading(true, '아트팩 데이터를 처리 중입니다...');
     try {
         const text = await readFileAsText(file);
         const data = JSON.parse(text);
@@ -451,6 +486,11 @@ async function handleFileUpload(file) {
             }
             if (target) {
                 target.png_base64 = fileCard.png_base64;
+                target.source_png_base64 = fileCard.source_png_base64 || fileCard.png_base64;
+                target.adjust_zoom = fileCard.adjust_zoom ?? 1.0;
+                target.adjust_offset_x = fileCard.adjust_offset_x ?? 0.0;
+                target.adjust_offset_y = fileCard.adjust_offset_y ?? 0.0;
+                target.display_mode = fileCard.display_mode || 'default';
                 target.updated_at = fileCard.updated_at;
                 target.artType = fileCard.artType;
                 updateCardBlobUrl(target);
@@ -484,6 +524,11 @@ function enrichCard(raw) {
         rarity: meta?.rarity ?? 'Common',
         width: raw.width ?? (isAncient ? 606 : 1000),
         height: raw.height ?? (isAncient ? 852 : 760),
+        source_png_base64: raw.source_png_base64 || raw.png_base64 || '',
+        adjust_zoom: raw.adjust_zoom ?? 1.0,
+        adjust_offset_x: raw.adjust_offset_x ?? 0.0,
+        adjust_offset_y: raw.adjust_offset_y ?? 0.0,
+        display_mode: raw.display_mode || 'default',
     };
 }
 
@@ -524,6 +569,8 @@ function renderUI() {
     updateStats();
     renderCardGrid();
     lucide.createIcons();
+    // 렌더링 후 스크롤바 상태 업데이트
+    setTimeout(updateCustomScrollbar, 100);
 }
 
 /** 수정된 카드 수 업데이트 */
@@ -631,7 +678,7 @@ function filterCards() {
 async function unloadArtPack() {
     if (!confirm('현재 로드된 아트팩을 해제하고 초기 상태로 되돌리시겠습니까?')) return;
 
-    showLoading(true);
+    showLoading(true, '아트팩을 해제하고 있습니다...');
     try {
         // 모든 Blob URL 해제
         state.cards.forEach(c => {
@@ -673,14 +720,24 @@ function openEditor(cardIndex) {
     const fallbackSrc = 'source/img/card_frame/273px-StS2_AncientCardHighlight.png';
     const charPrefix = (card.character || '').toLowerCase();
     const defaultArtSrc = `source/img/card_images/${charPrefix}_${(card.name_en || '').toLowerCase().replace(/ /g, '_')}.webp`;
-    const artSrc = card.png_base64 ? `data:image/png;base64,${card.png_base64}` : defaultArtSrc;
+
+    // 소스 이미지: source_png_base64(원본 미조정 이미지) 우선 사용
+    const sourceBase64 = card.source_png_base64 || card.png_base64;
+    const sourceSrc = sourceBase64 ? `data:image/png;base64,${sourceBase64}` : defaultArtSrc;
+
+    // adjustState 초기화: 카드에 저장된 조정값 복원
+    state.adjustState = {
+        zoom: card.adjust_zoom ?? 1.0,
+        offsetX: card.adjust_offset_x ?? 0.0,
+        offsetY: card.adjust_offset_y ?? 0.0,
+        sourceDataUrl: sourceSrc,
+    };
 
     const assets = getCardAssets(card.character, card.cardType, card.rarity);
 
     // 이미지 경로 업데이트 (src가 다를 때만 업데이트하여 캐시 활용 극대화)
     const updateSrc = (img, src) => {
         if (!src) { img.src = ''; return; }
-        // 브라우저의 img.src는 항상 절대경로를 반환하므로, URL 객체로 변환하여 비교
         const absSrc = new URL(src, window.location.href).href;
         if (img.src !== absSrc) {
             img.src = src;
@@ -701,22 +758,22 @@ function openEditor(cardIndex) {
     }
 
     updateSrc(dom.modalPreviewOriginal, defaultArtSrc);
-    updateSrc(dom.modalPreview, artSrc);
 
     // 텍스트 업데이트
-    dom.modalTextName.innerText = card.name_kr || card.name_en;
+    const name = card.name_kr || card.name_en;
+    dom.modalTextName.innerText = name;
+    dom.modalTextName.setAttribute('data-text', name);
     dom.modalTextType.innerText = CARD_TYPE_KO[card.cardType] || card.cardType;
 
     dom.modalSize.textContent = `${card.width || 1000} × ${card.height || 760}`;
     dom.modalNameKr.textContent = card.name_kr ? `${card.name_kr} (${card.name_en || ''})` : (card.name_en || '');
 
-    // 슬라이더 초기화
-    dom.zoomSlider.value = 100;
-    dom.offsetXSlider.value = 0;
-    dom.offsetYSlider.value = 0;
-    updateModalPreviewTransform();
+    // 슬라이더: 저장된 조정값으로 초기화 (zoom: 1.0→100, offset: -1.0~1.0→-100~100)
+    dom.zoomSlider.value = Math.round((card.adjust_zoom ?? 1.0) * 100);
+    dom.offsetXSlider.value = Math.round((card.adjust_offset_x ?? 0.0) * 100);
+    dom.offsetYSlider.value = Math.round((card.adjust_offset_y ?? 0.0) * 100);
 
-    // 토글 버튼 초기 상태 (인라인 SVG로 lucide.createIcons 호출 불필요)
+    // 토글 버튼 초기 상태
     dom.modalPreview.classList.remove('hidden');
     dom.modalPreviewOriginal.classList.add('hidden');
     dom.toggleOriginalBtn.innerHTML = `${SVG_EYE} 원본(Original) 대상 보기`;
@@ -724,8 +781,19 @@ function openEditor(cardIndex) {
     // 희귀도 클래스 적용
     dom.cardLargePreview.querySelector('.sts2-card').className = `sts2-card ${card.rarity ? `rarity-${card.rarity.toLowerCase()}` : ''}`;
 
-    requestAnimationFrame(() => {
+    requestAnimationFrame(async () => {
         dom.editModal.classList.remove('hidden');
+        // 소스 이미지 로드 후 메모리에 캐싱하여 실시간 렌더링 시 점멸 방지
+        try {
+            state.adjustState.sourceDataUrl = sourceSrc;
+            state.adjustState.sourceImage = await loadSourceImage(sourceSrc);
+            updateModalPreviewTransform();
+        } catch (err) {
+            console.warn('소스 이미지 로드 실패, 기본 이미지 사용:', err);
+            state.adjustState.sourceDataUrl = defaultArtSrc;
+            state.adjustState.sourceImage = await loadSourceImage(defaultArtSrc);
+            updateModalPreviewTransform();
+        }
     });
 }
 
@@ -748,36 +816,102 @@ function handleImageUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = ev => {
-        dom.modalPreview.src = ev.target.result;
+    reader.onload = async ev => {
+        const dataUrl = ev.target.result;
+        // 새 이미지 업로드 시 조정값을 초기화하고 원본 소스를 메모리에 캐싱
+        state.adjustState.sourceDataUrl = dataUrl;
+        state.adjustState.sourceImage = await loadSourceImage(dataUrl);
+        state.adjustState.zoom = 1.0;
+        state.adjustState.offsetX = 0.0;
+        state.adjustState.offsetY = 0.0;
+        dom.zoomSlider.value = 100;
+        dom.offsetXSlider.value = 0;
+        dom.offsetYSlider.value = 0;
         state.isDirty = true;
+        // 캐싱된 이미지를 사용하여 즉시 미리보기 갱신
+        updateModalPreviewTransform();
     };
     reader.readAsDataURL(file);
 }
 
+/**
+ * 캐싱된 이미지를 사용하여 Canvas에 미세조정 결과를 즉시 렌더링 (점멸 방지)
+ */
 function updateModalPreviewTransform() {
-    const zoom = dom.zoomSlider.value;
-    const x = dom.offsetXSlider.value;
-    const y = dom.offsetYSlider.value;
-    dom.zoomVal.setAttribute('data-value', `${zoom}%`);
-    dom.offsetXVal.setAttribute('data-value', `${x}px`);
-    dom.offsetYVal.setAttribute('data-value', `${y}px`);
-    dom.modalPreview.style.transform = `scale(${zoom / 100}) translate(${x}px, ${y}px)`;
+    const zoomRaw = parseInt(dom.zoomSlider.value, 10);
+    const offsetXRaw = parseInt(dom.offsetXSlider.value, 10);
+    const offsetYRaw = parseInt(dom.offsetYSlider.value, 10);
+
+    const zoom = zoomRaw / 100.0;
+    const offsetX = offsetXRaw / 100.0;
+    const offsetY = offsetYRaw / 100.0;
+
+    state.adjustState.zoom = zoom;
+    state.adjustState.offsetX = offsetX;
+    state.adjustState.offsetY = offsetY;
+
+    dom.zoomVal.setAttribute('data-value', `${zoomRaw}%`);
+    dom.offsetXVal.setAttribute('data-value', `${offsetXRaw}`);
+    dom.offsetYVal.setAttribute('data-value', `${offsetYRaw}`);
+
+    const img = state.adjustState.sourceImage;
+    if (!img) return;
+
+    const card = state.cards[state.editingCardIndex];
+    const targetW = card?.width || 1000;
+    const targetH = card?.height || 760;
+
+    // dom.modalPreview가 이제 canvas 엘리먼트임
+    const canvas = dom.modalPreview;
+    canvas.width = targetW;
+    canvas.height = targetH;
+    const ctx = canvas.getContext('2d', { alpha: true });
+
+    const scaleX = targetW / img.naturalWidth;
+    const scaleY = targetH / img.naturalHeight;
+    const scaleFactor = Math.max(scaleX, scaleY) * Math.max(1.0, zoom);
+
+    const resizedW = Math.max(targetW, Math.round(img.naturalWidth * scaleFactor));
+    const resizedH = Math.max(targetH, Math.round(img.naturalHeight * scaleFactor));
+
+    const extraW = Math.max(0, resizedW - targetW);
+    const extraH = Math.max(0, resizedH - targetH);
+
+    const clampedOffX = Math.max(-1.0, Math.min(1.0, offsetX));
+    const clampedOffY = Math.max(-1.0, Math.min(1.0, offsetY));
+    const cropX = Math.round(extraW * 0.5 + clampedOffX * extraW * 0.5);
+    const cropY = Math.round(extraH * 0.5 + clampedOffY * extraH * 0.5);
+
+    ctx.clearRect(0, 0, targetW, targetH);
+    ctx.drawImage(img, -cropX, -cropY, resizedW, resizedH);
 }
 
 function saveChanges() {
     const card = state.cards[state.editingCardIndex];
     if (!card) return;
-    const src = dom.modalPreview.src;
-    if (src.startsWith('data:image')) {
-        card.png_base64 = src.split(',')[1];
-        card.updated_at = new Date().toISOString().slice(0, 19).replace('T', ' ');
-        state.isDirty = true;
-        updateCardBlobUrl(card);
-        saveToDB({ originalData: state.originalData, cards: state.cards });
-        replaceCardDOM(card);
-        updateStats();
+
+    // dom.modalPreview는 캔버스이므로 toDataURL()로 데이터 추출
+    const src = dom.modalPreview.toDataURL('image/png');
+    card.png_base64 = src.split(',')[1];
+
+    // 원본 소스 이미지 보존 (재조정 가능하도록)
+    if (state.adjustState.sourceDataUrl?.startsWith('data:image')) {
+        card.source_png_base64 = state.adjustState.sourceDataUrl.split(',')[1];
+    } else {
+        card.source_png_base64 = card.png_base64;
     }
+
+    // 조정값 저장
+    card.adjust_zoom = state.adjustState.zoom;
+    card.adjust_offset_x = state.adjustState.offsetX;
+    card.adjust_offset_y = state.adjustState.offsetY;
+    card.updated_at = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    state.isDirty = true;
+
+    updateCardBlobUrl(card);
+    saveToDB({ originalData: state.originalData, cards: state.cards });
+    replaceCardDOM(card);
+    updateStats();
     closeModal();
 }
 
@@ -786,6 +920,10 @@ function resetCurrentCard() {
     const card = state.cards[state.editingCardIndex];
     if (!card) return;
     card.png_base64 = '';
+    card.source_png_base64 = '';
+    card.adjust_zoom = 1.0;
+    card.adjust_offset_x = 0.0;
+    card.adjust_offset_y = 0.0;
     updateCardBlobUrl(card);
     state.isDirty = true;
     saveToDB({ originalData: state.originalData, cards: state.cards });
@@ -794,17 +932,42 @@ function resetCurrentCard() {
     closeModal();
 }
 
+/** 조정 슬라이더를 기본값으로 리셋 (모드의 Reset 버튼과 동일) */
+function resetAdjustValues() {
+    dom.zoomSlider.value = 100;
+    dom.offsetXSlider.value = 0;
+    dom.offsetYSlider.value = 0;
+    updateModalPreviewTransform();
+}
+
 // ================================================================
 // 내보내기
 // ================================================================
 function exportJSON() {
     const modifiedCards = state.cards.filter(c => c.png_base64?.length > 0);
-    const overrides = modifiedCards.map(({ artType, no, name_kr, name_en, character, cardType, rarity, domNode, ...rest }) => ({
-        ...rest, type: artType,
-    }));
+    const overrides = modifiedCards.map(c => {
+        const obj = {
+            source_path: c.source_path,
+            width: c.width,
+            height: c.height,
+            updated_at: c.updated_at || new Date().toISOString().slice(0, 19).replace('T', ' '),
+            type: c.artType || 'static',
+            display_mode: c.display_mode || 'default',
+            png_base64: c.png_base64,
+        };
+        // 에디터 재수정을 위해 커스텀 데이터(원본 이미지, 조정값)도 추가로 내보냄 (모드에서는 무시됨)
+        if (c.source_png_base64) obj.source_png_base64 = c.source_png_base64;
+        if (c.adjust_zoom !== undefined) obj.adjust_zoom = c.adjust_zoom;
+        if (c.adjust_offset_x !== undefined) obj.adjust_offset_x = c.adjust_offset_x;
+        if (c.adjust_offset_y !== undefined) obj.adjust_offset_y = c.adjust_offset_y;
+        return obj;
+    });
 
+    const baseData = state.originalData || { format: 'card_art_bundle', version: 1 };
     const exportData = {
-        ...(state.originalData || { format: 'card_art_bundle' }),
+        ...baseData,
+        format: 'card_art_bundle',
+        version: baseData.version || 1,
         exported_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
         count: overrides.length,
         overrides,
@@ -866,6 +1029,93 @@ async function loadFromDB() {
 // ================================================================
 // 유틸
 // ================================================================
-function showLoading(show) {
+/** 로딩 레이어 표시 제어 (메시지 포함) */
+function showLoading(show, message = '에셋 로딩 중...') {
+    const textEl = document.getElementById('loadingText');
+    if (textEl) textEl.textContent = message;
     dom.appLoading.classList.toggle('hidden', !show);
+}
+
+/** 이미지 URL로부터 Image 객체를 생성하여 Promise 반환 */
+function loadSourceImage(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = url;
+    });
+}
+
+/** 커스텀 스크롤바 위치 업데이트 (rAF 내부에서 실행 권장) */
+function updateCustomScrollbar() {
+    const { contentArea, scrollbarThumb, customScrollbar } = dom;
+    if (!contentArea || !scrollbarThumb || !customScrollbar) {
+        state.isScrollUpdating = false;
+        return;
+    }
+
+    const scrollHeight = contentArea.scrollHeight;
+    const clientHeight = contentArea.clientHeight;
+    const scrollTop = contentArea.scrollTop;
+
+    if (scrollHeight <= clientHeight + 1) {
+        customScrollbar.style.display = 'none';
+        state.isScrollUpdating = false;
+        return;
+    }
+    customScrollbar.style.display = 'flex';
+
+    const trackHeight = customScrollbar.clientHeight;
+    const thumbHeight = scrollbarThumb.clientHeight;
+    const maxScroll = scrollHeight - clientHeight;
+    const maxThumbMove = trackHeight - thumbHeight;
+
+    const scrollRatio = Math.min(1, Math.max(0, scrollTop / maxScroll));
+    const thumbTop = scrollRatio * maxThumbMove;
+
+    // GPU 가속을 위해 top 대신 transform: translate3d 사용
+    scrollbarThumb.style.transform = `translate3d(-50%, ${thumbTop}px, 0)`;
+    
+    state.isScrollUpdating = false;
+}
+
+/** 스크롤바 드래그 시작 */
+function startScrollbarDrag(e) {
+    state.isDraggingScrollbar = true;
+    state.startY = e.clientY;
+    state.startScrollTop = dom.contentArea.scrollTop;
+
+    document.body.classList.add('dragging');
+
+    window.addEventListener('mousemove', handleScrollbarDrag);
+    window.addEventListener('mouseup', stopScrollbarDrag);
+    
+    e.preventDefault(); // 텍스트 선택 방지
+}
+
+/** 스크롤바 드래그 진행 */
+function handleScrollbarDrag(e) {
+    if (!state.isDraggingScrollbar) return;
+
+    const deltaY = e.clientY - state.startY;
+    const { contentArea, customScrollbar, scrollbarThumb } = dom;
+
+    const trackHeight = customScrollbar.clientHeight;
+    const thumbHeight = scrollbarThumb.clientHeight;
+    const maxThumbMove = trackHeight - thumbHeight;
+    const maxScroll = contentArea.scrollHeight - contentArea.clientHeight;
+
+    if (maxThumbMove <= 0 || maxScroll <= 0) return;
+
+    const scrollDelta = (deltaY / maxThumbMove) * maxScroll;
+    contentArea.scrollTop = state.startScrollTop + scrollDelta;
+}
+
+/** 스크롤바 드래그 종료 */
+function stopScrollbarDrag() {
+    state.isDraggingScrollbar = false;
+    document.body.classList.remove('dragging');
+
+    window.removeEventListener('mousemove', handleScrollbarDrag);
+    window.removeEventListener('mouseup', stopScrollbarDrag);
 }
