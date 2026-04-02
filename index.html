@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STS2 Card Art Editor | Slay the Spire 2 Art Mod Tool</title>
+    <meta name="description" content="Slay the Spire 2 모드의 카드 이미지를 편리하게 관리하고 편집할 수 있는 웹 기반 에디터입니다. JSON 번들 가져오기/내보내기를 완벽하게 지원합니다.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="theme-dark">
+    <header class="app-header">
+        <div class="header-container">
+            <div class="logo">
+                <i data-lucide="sparkles" class="logo-icon"></i>
+                <h1>STS2 <span>Card Art Editor</span></h1>
+            </div>
+            <nav class="header-nav">
+                <button id="importBtn" class="btn btn-primary">
+                    <i data-lucide="upload"></i> 아트팩 불러오기
+                </button>
+                <button id="addCardBtn" class="btn btn-secondary" disabled>
+                    <i data-lucide="plus"></i> 카드 추가
+                </button>
+                <button id="exportBtn" class="btn btn-secondary" disabled>
+                    <i data-lucide="download"></i> 내보내기 (.json)
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="app-main">
+        <section id="dropZone" class="upload-section">
+            <div class="drop-content">
+                <i data-lucide="file-json" class="drop-icon"></i>
+                <h2>시작하려면 <span>.cardartpack.json</span> 파일을 업로드하세요</h2>
+                <p>파일을 여기에 끌어다 놓거나 아래 버튼을 클릭하여 선택하세요.</p>
+                <input type="file" id="fileInput" accept=".json" hidden>
+                <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">파일 브라우저 열기</button>
+            </div>
+        </section>
+
+        <section id="editorSection" class="editor-section hidden">
+            <div class="toolbar">
+                <div class="search-box">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="searchInput" placeholder="카드 이름 또는 경로로 검색...">
+                </div>
+                <div class="stats">
+                    수정된 카드: <span id="cardCount">0</span>개
+                </div>
+            </div>
+
+            <div id="cardGrid" class="card-grid">
+                <!-- 카드 이터레이션 -->
+            </div>
+        </section>
+    </main>
+
+    <!-- 카드 편집 모달 -->
+    <div id="editModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>카드 이미지 수정</h3>
+                <button class="btn-close" id="closeModal">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card-large-preview">
+                    <img id="modalPreview" alt="Card Preview">
+                    <div id="modalLoading" class="preview-loading hidden">
+                        <i data-lucide="loader" class="spin"></i>
+                    </div>
+                </div>
+                <div class="card-info">
+                    <div class="info-group">
+                        <label>원본 경로</label>
+                        <div id="modalPath" class="path-display">res://images/...</div>
+                    </div>
+                    <div class="info-group">
+                        <label>이미지 규격</label>
+                        <div id="modalSize" class="size-display">1000 x 760</div>
+                    </div>
+                    <div class="action-group">
+                        <input type="file" id="imageInput" accept="image/*" hidden>
+                        <button class="btn btn-primary btn-full" id="uploadImageBtn">
+                            <i data-lucide="image-plus"></i> 새 이미지 업로드
+                        </button>
+                        <button id="resetCardBtn" class="btn btn-danger btn-full">
+                            <i data-lucide="rotate-ccw"></i> 원본으로 복원
+                        </button>
+                    </div>
+                    <div class="adjustment-group">
+                        <h4>이미지 미세 조정</h4>
+                        <div class="slider-row">
+                            <span>줌</span>
+                            <input type="range" id="zoomSlider" min="100" max="300" value="100">
+                        </div>
+                        <div class="slider-row">
+                            <span>X 이동</span>
+                            <input type="range" id="offsetXSlider" min="-100" max="100" value="0">
+                        </div>
+                        <div class="slider-row">
+                            <span>Y 이동</span>
+                            <input type="range" id="offsetYSlider" min="-100" max="100" value="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelEdit">취소</button>
+                <button class="btn btn-primary" id="saveEdit">저장 및 적용</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로딩 스피너 -->
+    <div id="appLoading" class="app-loading hidden">
+        <div class="loader-content">
+            <div class="skeleton-loader"></div>
+            <p>대용량 데이터를 처리 중입니다... 잠시만 기다려 주세요.</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Init Lucide
+        lucide.createIcons();
+    </script>
+</body>
+</html>
