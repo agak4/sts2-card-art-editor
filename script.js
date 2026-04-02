@@ -1,8 +1,6 @@
 'use strict';
 
-// ================================================================
 // 상수 정의
-// ================================================================
 
 /** 카드 타입 한국어 표기 */
 const CARD_TYPE_KO = {
@@ -39,9 +37,7 @@ const DIR_TO_CHARACTER = {
     event: 'Event', quest: 'Quest', token: 'Token',
 };
 
-// ================================================================
 // 카드 DB
-// ================================================================
 let CARDS_DB = [];
 const CHAR_NAME_MAP = new Map();
 const NAME_MAP = new Map();
@@ -103,9 +99,7 @@ function findCardMeta(sourcePath) {
     return null;
 }
 
-// ================================================================
-// 상태
-// ================================================================
+// 상태 관리
 const state = {
     originalData: null,
     cards: [],
@@ -117,11 +111,15 @@ const state = {
     isScrollUpdating: false,
     startY: 0,
     startScrollTop: 0,
+    isSelectMode: false,
+    selectedCards: new Set(),
+    isDraggingSelection: false,
+    dragStartIndex: -1,
+    dragInitialSelection: new Set(),
+    dragAction: null, // 'select' | 'deselect'
 };
 
-// ================================================================
 // DOM 참조
-// ================================================================
 const $ = id => document.getElementById(id);
 let dom = {};
 
@@ -149,7 +147,6 @@ function initDom() {
         resetAdjustBtn: $('resetAdjustBtn'),
         imageInput: $('imageInput'),
         toggleOriginalBtn: $('toggleOriginalBtn'),
-        // 모달 레이어 참조
         modalLayerBg: $('modalLayerBg'),
         modalLayerFrame: $('modalLayerFrame'),
         modalLayerBanner: $('modalLayerBanner'),
@@ -159,16 +156,19 @@ function initDom() {
         modalPreviewOriginal: $('modalPreviewOriginal'),
         modalTextName: $('modalTextName'),
         modalTextType: $('modalTextType'),
-        // 커스텀 스크롤바 참조
         contentArea: $('contentArea'),
         customScrollbar: $('customScrollbar'),
         scrollbarThumb: $('scrollbarThumb'),
+        selectModeBtn: $('selectModeBtn'),
+        selectionRemote: $('selectionRemote'),
+        cancelSelectBtn: $('cancelSelectBtn'),
+        selectAllBtn: $('selectAllBtn'),
+        exportSelectedBtn: $('exportSelectedBtn'),
+        selectedCount: $('selectedCount'),
     };
 }
 
-// ================================================================
-// 카드 에셋 조회
-// ================================================================
+// 카드 에셋 관리
 
 /** 캐릭터/타입/희귀도 조합에 맞는 카드 프레임 에셋 경로를 반환 */
 function getCardAssets(character, cardType, rarity) {
@@ -269,9 +269,7 @@ function updateCardBlobUrl(card) {
     }
 }
 
-// ================================================================
-// 공유 카드 렌더링 함수
-// ================================================================
+// 카드 렌더링 엔진
 
 /**
  * 카드 프레임 레이어 HTML 생성 (그리드 카드 / 모달 공용)
@@ -306,9 +304,7 @@ function buildCardTextHTML(card) {
     `;
 }
 
-// ================================================================
-// 초기화
-// ================================================================
+// 초기화 프로세스
 
 function getBaseSourcePath(card) {
     const charDir = Object.keys(DIR_TO_CHARACTER).find(k => DIR_TO_CHARACTER[k] === card.character) || 'colorless';
@@ -402,9 +398,7 @@ async function preloadAllAssets() {
     ));
 }
 
-// ================================================================
 // 이벤트 바인딩
-// ================================================================
 function bindEvents() {
     dom.fileInput.addEventListener('change', e => {
         if (e.target.files[0]) handleFileUpload(e.target.files[0]);
@@ -412,7 +406,11 @@ function bindEvents() {
 
     dom.importBtn.onclick = () => dom.fileInput.click();
     dom.unloadBtn.onclick = unloadArtPack;
-    dom.exportBtn.onclick = exportJSON;
+    dom.exportBtn.onclick = () => exportJSON(false);
+    dom.selectModeBtn.onclick = toggleSelectMode;
+    dom.cancelSelectBtn.onclick = cancelSelectMode;
+    dom.selectAllBtn.onclick = selectAllVisibleCards;
+    dom.exportSelectedBtn.onclick = () => exportJSON(true);
 
     dom.searchInput.addEventListener('input', filterCards);
 
@@ -456,11 +454,15 @@ function bindEvents() {
     });
     window.addEventListener('resize', updateCustomScrollbar);
     dom.scrollbarThumb.addEventListener('mousedown', startScrollbarDrag);
+
+    // 글로벌 마우스업 (범위 선택 및 스크롤바 드래그 공용)
+    window.addEventListener('mouseup', () => {
+        if (state.isDraggingSelection) stopDragSelection();
+        if (state.isDraggingScrollbar) stopScrollbarDrag();
+    });
 }
 
-// ================================================================
-// 파일 처리
-// ================================================================
+// 파일 데이터 처리
 async function handleFileUpload(file) {
     showLoading(true, '아트팩 데이터를 처리 중입니다...');
     try {
@@ -554,12 +556,11 @@ function readFileAsText(file) {
     });
 }
 
-// ================================================================
-// UI 렌더링
-// ================================================================
+// UI 업데이트
 function renderUI() {
     dom.editorSection.classList.remove('hidden');
     dom.exportBtn.disabled = false;
+    dom.selectModeBtn.disabled = false;
     dom.unloadBtn.disabled = !state.originalData;
     updateStats();
     renderCardGrid();
@@ -599,8 +600,20 @@ function replaceCardDOM(card) {
 /** 카드 그리드 아이템 DOM 생성 */
 function createCardElement(card) {
     const div = document.createElement('div');
-    div.className = 'card-item';
-    div.onclick = () => openEditor(state.cards.indexOf(card));
+    const index = state.cards.indexOf(card);
+    div.className = 'card-item' + (state.selectedCards.has(index) ? ' selected' : '');
+    
+    // 단순 클릭(Click) 대신 마우스 이벤트를 조합하여 드래그 선택 구현
+    div.addEventListener('mousedown', (e) => handleCardMouseDown(index, e));
+    div.addEventListener('mouseenter', () => handleCardMouseEnter(index));
+    div.addEventListener('click', (e) => {
+        if (state.isSelectMode) {
+            e.preventDefault();
+            e.stopPropagation();
+        } else {
+            openEditor(index);
+        }
+    });
 
     const assets = getCardAssets(card.character, card.cardType, card.rarity);
     const artSrc = getCardArtSrc(card);
@@ -623,9 +636,7 @@ function createCardElement(card) {
     return div;
 }
 
-// ================================================================
-// 필터링
-// ================================================================
+// 필터링 시스템
 function syncRarityFilterState() {
     const rarityGroup = document.querySelector('.rarity-group');
     const isDisabled = RARITY_DISABLED_CHARS.has(state.filters.character);
@@ -665,11 +676,12 @@ function filterCards() {
             card.domNode.style.display = (matchChar && matchType && matchRarity && matchSearch) ? '' : 'none';
         }
     });
+
+    // 필터링이 완료된 후 하단의 선택 버튼 상태 최신화
+    if (state.isSelectMode) updateSelectionUI();
 }
 
-// ================================================================
-// 아트팩 해제
-// ================================================================
+// 아트팩 데이터 해제
 async function unloadArtPack() {
     if (!confirm('현재 로드된 아트팩을 해제하고 초기 상태로 되돌리시겠습니까?')) return;
 
@@ -704,9 +716,7 @@ async function unloadArtPack() {
     }
 }
 
-// ================================================================
-// 모달 에디터
-// ================================================================
+// 모달 편집 시스템
 function openEditor(cardIndex) {
     const card = state.cards[cardIndex];
     if (!card) return;
@@ -936,10 +946,184 @@ function resetAdjustValues() {
 }
 
 // ================================================================
+// 선택 모드 리모콘
+// ================================================================
+function toggleSelectMode() {
+    state.isSelectMode = !state.isSelectMode;
+    document.body.classList.toggle('select-mode', state.isSelectMode);
+    
+    if (state.isSelectMode) {
+        dom.selectionRemote.classList.remove('hidden');
+        updateSelectionUI(); // 진입 시 버튼 상태 초기화
+    } else {
+        cancelSelectMode();
+    }
+}
+
+function cancelSelectMode() {
+    state.isSelectMode = false;
+    document.body.classList.remove('select-mode');
+    dom.selectionRemote.classList.add('hidden');
+    state.selectedCards.clear();
+    updateSelectionUI();
+}
+
+function handleCardMouseDown(index, e) {
+    if (!state.isSelectMode) return;
+    
+    // 마우스 왼쪽 버튼 클릭 시에만 활성화
+    if (e.button !== 0) return;
+
+    state.isDraggingSelection = true;
+    state.dragStartIndex = index;
+    state.dragInitialSelection = new Set(state.selectedCards);
+
+    // 드래그 행동 결정: 이미 선택되어 있었다면 이번 드래그는 '해제' 모드
+    if (state.selectedCards.has(index)) {
+        state.dragAction = 'deselect';
+        state.selectedCards.delete(index);
+    } else {
+        state.dragAction = 'select';
+        state.selectedCards.add(index);
+    }
+    
+    updateSelectionUI();
+    
+    // 드래그 중 텍스트 선택 방지
+    e.preventDefault();
+}
+
+function handleCardMouseEnter(index) {
+    if (!state.isSelectMode || !state.isDraggingSelection) return;
+    
+    updateSelectionRange(state.dragStartIndex, index);
+}
+
+function stopDragSelection() {
+    state.isDraggingSelection = false;
+    state.dragStartIndex = -1;
+    state.dragInitialSelection.clear();
+    state.dragAction = null;
+}
+
+/**
+ * 시작 인덱스와 끝 인덱스 사이의 '보이는' 카드들을 모두 선택 상태로 업데이트
+ * Shift-Click과 유사한 동작 수행
+ */
+function updateSelectionRange(startIdx, endIdx) {
+    // 가시적인 모든 카드의 인덱스를 순서대로 추출
+    const visibleCardIndices = state.cards
+        .map((card, i) => ({ card, i }))
+        .filter(item => item.card.domNode && item.card.domNode.style.display !== 'none')
+        .map(item => item.i);
+
+    const startPos = visibleCardIndices.indexOf(startIdx);
+    const endPos = visibleCardIndices.indexOf(endIdx);
+
+    if (startPos === -1 || endPos === -1) return;
+
+    const [realStart, realEnd] = startPos <= endPos ? [startPos, endPos] : [endPos, startPos];
+    
+    // 이번 드래그에 해당하는 범위
+    const currentRangeIndices = new Set(visibleCardIndices.slice(realStart, realEnd + 1));
+
+    // 드래그 시작 전의 상태에서 현재 범위를 추가하거나 제거 (dragAction 에 따름)
+    const newSelection = new Set(state.dragInitialSelection);
+    
+    currentRangeIndices.forEach(idx => {
+        if (state.dragAction === 'deselect') {
+            newSelection.delete(idx);
+        } else {
+            newSelection.add(idx);
+        }
+    });
+    
+    state.selectedCards = newSelection;
+    updateSelectionUI();
+}
+
+function handleCardClick(index, div) {
+    // mousedown/mouseenter 기반 로직으로 대체되었으므로 legacy 대응만 유지
+    if (!state.isSelectMode) {
+        openEditor(index);
+    }
+}
+
+function selectAllVisibleCards() {
+    const visibleIndices = state.cards
+        .map((card, i) => ({ card, i }))
+        .filter(item => item.card.domNode && item.card.domNode.style.display !== 'none')
+        .map(item => item.i);
+
+    const isAllSelected = visibleIndices.length > 0 && visibleIndices.every(idx => state.selectedCards.has(idx));
+
+    if (isAllSelected) {
+        // 이미 전체 선택된 상태라면 -> 전체 해제
+        visibleIndices.forEach(idx => state.selectedCards.delete(idx));
+    } else {
+        // 아니면 -> 전체 선택
+        visibleIndices.forEach(idx => state.selectedCards.add(idx));
+    }
+    
+    updateSelectionUI();
+}
+
+function updateSelectionUI() {
+    const count = state.selectedCards.size;
+    dom.selectedCount.textContent = count;
+    dom.exportSelectedBtn.disabled = count === 0;
+
+    // 가시적인 모든 카드의 인덱스와 그 선택 상태 파악
+    const visibleIndices = state.cards
+        .map((card, i) => ({ card, i }))
+        .filter(item => item.card.domNode && item.card.domNode.style.display !== 'none')
+        .map(item => item.i);
+
+    const isAllSelected = visibleIndices.length > 0 && visibleIndices.every(idx => state.selectedCards.has(idx));
+
+    // 하단 버튼이 전체 선택인지 전체 선택 해제인지 동적 전환
+    if (isAllSelected) {
+        dom.selectAllBtn.innerHTML = `<i data-lucide="minus-square"></i> 현재 목록 전체 선택 해제`;
+    } else {
+        dom.selectAllBtn.innerHTML = `<i data-lucide="check-square"></i> 현재 목록 전체 선택`;
+    }
+    
+    // Lucide 아이콘 재생성 (버튼 컨테이너의 아이콘만 재생성)
+    if (window.lucide) lucide.createIcons({
+        attrs: { class: 'lucide' },
+        nameAttr: 'data-lucide',
+        icons: undefined
+    }, dom.selectAllBtn);
+
+    // UI 동기화 방어 로직 (개별 카드 클래스 갱신)
+    state.cards.forEach((card, index) => {
+        if (card.domNode) {
+            if (state.selectedCards.has(index)) {
+                card.domNode.classList.add('selected');
+            } else {
+                card.domNode.classList.remove('selected');
+            }
+        }
+    });
+}
+
+// ================================================================
 // 내보내기
 // ================================================================
-function exportJSON() {
-    const modifiedCards = state.cards.filter(c => c.png_base64?.length > 0);
+function exportJSON(selectedOnly = false) {
+    let targetCards = state.cards;
+    
+    if (selectedOnly) {
+        targetCards = state.cards.filter((_, index) => state.selectedCards.has(index));
+    }
+    
+    const modifiedCards = targetCards.filter(c => c.png_base64?.length > 0);
+    
+    if (modifiedCards.length === 0) {
+        alert(selectedOnly ? '선택하신 카드 중 수정된 카드가 없습니다.' : '수정된 카드가 없습니다.');
+        return;
+    }
+
     const overrides = modifiedCards.map(c => {
         const obj = {
             source_path: c.source_path,

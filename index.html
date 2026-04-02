@@ -21,10 +21,8 @@
     <main class="app-main">
         <input type="file" id="fileInput" accept=".json" hidden>
 
-        <!-- 에디터 섹션 -->
         <section id="editorSection" class="editor-section">
 
-            <!-- 좌측 고정 필터 사이드바 -->
             <aside class="filter-sidebar" id="filterRail">
 
                 <div class="logo">
@@ -37,7 +35,6 @@
                     <input type="text" id="searchInput" placeholder="카드 검색...">
                 </div>
 
-                <!-- 캐릭터 필터 -->
                 <div class="filter-group character-group">
                     <p class="filter-group-label">캐릭터</p>
                     <div class="chip-list" data-filter-group="character">
@@ -53,7 +50,6 @@
                     </div>
                 </div>
 
-                <!-- 타입 필터 -->
                 <div class="filter-group type-group">
                     <p class="filter-group-label">타입</p>
                     <div class="chip-list" data-filter-group="type">
@@ -65,7 +61,6 @@
                     </div>
                 </div>
 
-                <!-- 희귀도 필터 -->
                 <div class="filter-group rarity-group">
                     <p class="filter-group-label">희귀도</p>
                     <div class="chip-list" data-filter-group="rarity">
@@ -89,16 +84,17 @@
                         <i data-lucide="trash-2"></i> 아트팩 해제
                     </button>
                     <button id="exportBtn" class="btn btn-secondary btn-full" disabled>
-                        <i data-lucide="download"></i> 내보내기 (.json)
+                        <i data-lucide="download"></i> 전체 내보내기 (.json)
+                    </button>
+                    <button id="selectModeBtn" class="btn btn-secondary btn-full" disabled>
+                        <i data-lucide="check-square"></i> 선택해서 내보내기 (.json)
                     </button>
                 </div>
 
             </aside>
 
-            <!-- 콘텐츠 레이아웃 (그리드 + 커스텀 스크롤바) -->
             <div class="content-wrapper">
                 <div class="content-area" id="contentArea">
-                    <!-- 전체 로딩 레이어 -->
                     <div id="appLoading" class="app-loading hidden">
                         <div class="loader-content">
                             <div class="skeleton-loader"></div>
@@ -111,7 +107,6 @@
                     </div>
                 </div>
 
-                <!-- 커스텀 스크롤바 레이어 (우측 고정됨) -->
                 <div class="custom-scrollbar" id="customScrollbar">
                     <div class="scrollbar-track"></div>
                     <div class="scrollbar-thumb" id="scrollbarThumb"></div>
@@ -121,7 +116,6 @@
         </section>
     </main>
 
-    <!-- 카드 편집 모달 -->
     <div id="editModal" class="modal hidden">
         <div class="modal-overlay"></div>
         <div class="modal-container">
@@ -136,7 +130,7 @@
                         <div class="layer layer-art">
                             <img id="modalPreviewOriginal" class="hidden" decoding="async"
                                 style="position:absolute;width:100%;height:100%;object-fit:cover;">
-                            <canvas id="modalPreview" 
+                            <canvas id="modalPreview"
                                 style="position:absolute;width:100%;height:100%;object-fit:cover;"></canvas>
                         </div>
                         <div class="layer layer-text">
@@ -198,6 +192,23 @@
                         <button class="btn btn-secondary" id="cancelEdit">취소</button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="selectionRemote" class="selection-remote hidden">
+        <div class="remote-content">
+            <span class="remote-info">선택된 카드: <strong id="selectedCount">0</strong>개</span>
+            <div class="remote-actions">
+                <button id="cancelSelectBtn" class="btn btn-danger">
+                    <i data-lucide="x-circle"></i> 선택 취소
+                </button>
+                <button id="selectAllBtn" class="btn btn-secondary">
+                    <i data-lucide="check-square"></i> 현재 목록 전체 선택
+                </button>
+                <button id="exportSelectedBtn" class="btn btn-primary" disabled>
+                    <i data-lucide="download"></i> 선택 항목 내보내기
+                </button>
             </div>
         </div>
     </div>

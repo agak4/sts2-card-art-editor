@@ -27,7 +27,6 @@
     padding: 0;
 }
 
-/* 폰트 전역 상속: 버튼 등 폼 요소 포함 */
 button,
 input,
 select,
@@ -116,7 +115,7 @@ body {
     border-radius: 4px;
 }
 
-/* ── 콘텐츠 레이아웃 (그리드 + 커스텀 스크롤바) ── */
+/* 콘텐츠 레이아웃 */
 .content-wrapper {
     position: relative;
     flex: 1;
@@ -127,8 +126,6 @@ body {
 .content-area {
     flex: 1;
     min-width: 0;
-    padding: 50px 100px 50px 50px;
-    /* 스크롤바 공간 확보 */
     height: 100vh;
     overflow-y: auto;
     scrollbar-width: none;
@@ -139,7 +136,7 @@ body {
     display: none;
 }
 
-/* ── 커스텀 스크롤바 ── */
+/* 커스텀 스크롤바 */
 .custom-scrollbar {
     position: absolute;
     top: 50px;
@@ -191,7 +188,7 @@ body.dragging {
     cursor: grabbing !important;
 }
 
-/* ── 검색창 (사이드바 내) ── */
+/* 검색창 및 필터 */
 .filter-group {
     display: flex;
     flex-direction: column;
@@ -309,7 +306,7 @@ body.dragging {
     gap: 10px;
 }
 
-/* ── 카드 그리드 (5열 고정) ── */
+/* 카드 그리드 */
 .grid-wrapper {
     position: relative;
     min-height: 500px;
@@ -322,11 +319,7 @@ body.dragging {
     row-gap: -10px;
 }
 
-/* ── STS2 카드 ──
- * 성능:
- *  - isolation: isolate → 스태킹 컨텍스트를 사전 생성하여 hover 시 z-index 재계산 비용 감소
- *  - .sts2-card transform: translateZ(0) → GPU 컴포지터 레이어 고정으로 hover scale 지연 제거
- */
+/* STS2 카드 */
 .card-item {
     background: transparent;
     border-radius: 12px;
@@ -519,6 +512,10 @@ body.dragging {
     text-align: center;
     z-index: 0;
     text-shadow: 0px 0px 3px black;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
 }
 
 .card-name-overlay::before {
@@ -539,6 +536,10 @@ body.dragging {
     top: 51.5%;
     width: 100%;
     text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
 }
 
 .badge {
@@ -554,7 +555,7 @@ body.dragging {
     z-index: 10;
 }
 
-/* ── 모달 ── */
+/* 모달 */
 .modal {
     position: fixed;
     inset: 0;
@@ -768,7 +769,7 @@ body.dragging {
     justify-content: center;
 }
 
-/* ── 버튼 ── */
+/* 공통 버튼 */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -798,6 +799,114 @@ body.dragging {
 
 .btn-secondary:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── 선택 모드 ── */
+body.select-mode .card-item:hover .sts2-card {
+    transform: translateZ(0) !important;
+}
+
+body.select-mode .card-item:hover {
+    z-index: unset !important;
+}
+
+body.select-mode .card-item {
+    cursor: pointer;
+}
+
+/* 선택된 카드 시각적 효과 부여 */
+.card-item.selected .sts2-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('source/img/static/select_icon.webp') center/100% 100% no-repeat;
+    z-index: 20;
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+/* ── 선택 리모콘 ── */
+.selection-remote {
+    position: fixed;
+    bottom: 40px;
+    left: calc(50% + 160px);
+    transform: translateX(-50%) translateY(0);
+    background: rgba(15, 17, 26, 0.95);
+    border: 1px solid var(--gold);
+    border-radius: 50px;
+    padding: 12px 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.2);
+    z-index: 2000;
+    transition: transform 0.5s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.3s ease;
+    opacity: 1;
+    backdrop-filter: blur(10px);
+}
+
+.selection-remote.hidden {
+    display: flex !important;
+    transform: translateX(-50%) translateY(150px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.remote-content {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.remote-info {
+    font-size: 15px;
+    color: var(--text-main);
+    white-space: nowrap;
+    padding-left: 8px;
+}
+
+.remote-info strong {
+    color: var(--success);
+    font-size: 20px;
+    margin: 0 4px;
+}
+
+.remote-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.remote-actions .btn {
+    border-radius: 50px;
+    padding: 10px 24px;
+    font-size: 16px;
+    white-space: nowrap;
+}
+
+.remote-actions .btn-danger {
+    background: rgba(255, 82, 82, 0.1);
+    color: var(--danger);
+    border: 1px solid rgba(255, 82, 82, 0.3);
+}
+
+.remote-actions .btn-danger:hover {
+    background: var(--danger);
+    color: #fff;
+}
+
+.remote-actions .btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.remote-actions .btn-primary {
+    background: var(--success);
+    color: #fff;
+}
+
+.remote-actions .btn-primary:hover:not(:disabled) {
+    background: #57a05a;
+}
+
+.remote-actions .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .btn-outline {
