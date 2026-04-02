@@ -111,7 +111,7 @@ const state = {
     cards: [],
     editingCardIndex: -1,
     isDirty: false,
-    filters: { character: 'all', type: 'all', rarity: 'all' },
+    filters: { character: 'Ironclad', type: 'all', rarity: 'all' },
     adjustState: { zoom: 1.0, offsetX: 0.0, offsetY: 0.0, sourceDataUrl: null, sourceImage: null, isAnimated: false, backgroundColor: 'transparent' },
     pendingImportData: null,
     isDraggingScrollbar: false,
@@ -890,10 +890,9 @@ function filterCards() {
     const rarityDisabled = RARITY_DISABLED_CHARS.has(character);
 
     state.cards.forEach(card => {
-        const matchChar = character === 'all' ? true
-            : character === 'Ancient' ? card.rarity === 'Ancient'
-                : character === 'special' ? (SPECIAL_CHARACTERS.has(card.character) || card.rarity === 'Event')
-                    : (card.character === character && card.rarity !== 'Event');
+        const matchChar = character === 'Ancient' ? card.rarity === 'Ancient'
+            : character === 'special' ? (SPECIAL_CHARACTERS.has(card.character) || card.rarity === 'Event')
+                : (card.character === character && card.rarity !== 'Event');
 
         const matchType = type === 'all' ? true
             : type === 'special' ? SPECIAL_TYPES.has(card.cardType)
