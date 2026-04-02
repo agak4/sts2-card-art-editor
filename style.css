@@ -437,7 +437,6 @@ body {
     justify-content: space-between;
     align-items: flex-start;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 24px;
 }
 
 .modal-header h3 {

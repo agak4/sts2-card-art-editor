@@ -60,6 +60,7 @@ function toKey(str) {
 
 /** cards.json으로부터 카드 DB 구축 */
 async function fetchCardDatabase() {
+    console.time('[PERF] fetchCardDatabase');
     try {
         const response = await fetch('cards.json');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -74,6 +75,7 @@ async function fetchCardDatabase() {
     } catch (err) {
         console.error('Database load failed:', err);
     }
+    console.timeEnd('[PERF] fetchCardDatabase');
 }
 
 /** source_path로부터 카드 메타데이터 검색 */
@@ -260,6 +262,7 @@ function initAllCards() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    console.time('[PERF] App Initialization');
     initDom();
     bindEvents();
     lucide.createIcons();
@@ -288,16 +291,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     dom.appLoading.classList.add('hidden');
     renderUI();
+    console.timeEnd('[PERF] App Initialization');
 });
 
 /** 모든 카드 에셋과 아트 이미지를 미리 로드 */
 async function preloadAllAssets() {
+    console.time('[PERF] preloadAllAssets');
     const uniqueUrls = new Set();
     state.cards.forEach(card => {
         const assets = getCardAssets(card.character, card.cardType, card.rarity);
         Object.values(assets).forEach(url => { if (url) uniqueUrls.add(url); });
         uniqueUrls.add(getCardArtSrc(card));
-        // 커스텀 이미지가 있더라도 원본 경로도 프리로드
         uniqueUrls.add(getCardArtSrc({ ...card, png_base64: '' }));
     });
 
@@ -308,6 +312,7 @@ async function preloadAllAssets() {
             img.src = url;
         })
     ));
+    console.timeEnd('[PERF] preloadAllAssets');
 }
 
 // ================================================================
@@ -453,6 +458,7 @@ function updateStats() {
 }
 
 function renderCardGrid() {
+    console.time('[PERF] renderCardGrid');
     if (dom.cardGrid.children.length === 0) {
         state.cards.sort((a, b) => (a.no || 9999) - (b.no || 9999));
         const fragment = document.createDocumentFragment();
@@ -463,6 +469,7 @@ function renderCardGrid() {
         dom.cardGrid.appendChild(fragment);
     }
     filterCards();
+    console.timeEnd('[PERF] renderCardGrid');
 }
 
 /** 카드 DOM을 새로 생성해 교체 (저장/리셋 후 호출) */
@@ -516,6 +523,7 @@ function syncRarityFilterState() {
 }
 
 function filterCards() {
+    console.time('[PERF] filterCards');
     const query = dom.searchInput.value.toLowerCase();
     const { character, type, rarity } = state.filters;
     const rarityDisabled = RARITY_DISABLED_CHARS.has(character);
@@ -542,6 +550,7 @@ function filterCards() {
             card.domNode.style.display = (matchChar && matchType && matchRarity && matchSearch) ? '' : 'none';
         }
     });
+    console.timeEnd('[PERF] filterCards');
 }
 
 // ================================================================
@@ -576,21 +585,25 @@ function addNewCard() {
 // 모달 에디터
 // ================================================================
 function openEditor(cardIndex) {
+    const t0 = performance.now();
+    console.time('[PERF] openEditor TOTAL');
     const card = state.cards[cardIndex];
     if (!card) return;
     state.editingCardIndex = cardIndex;
 
     const fallbackSrc = 'source/img/card_frame/273px-StS2_AncientCardHighlight.png';
     const charPrefix = (card.character || '').toLowerCase();
-    const defaultArtSrc = `source/img/card_images/${charPrefix}_${(card.name_en || '').toLowerCase().replace(/ /g, '_')}.webp`;
+    const nameKey = (card.name_en || '').toLowerCase().replace(/ /g, '_');
+    const defaultArtSrc = `source/img/card_images/${charPrefix}_${nameKey}.webp`;
     const artSrc = card.png_base64 ? `data:image/png;base64,${card.png_base64}` : defaultArtSrc;
 
     const assets = getCardAssets(card.character, card.cardType, card.rarity);
+    const t1 = performance.now();
+    console.log(`[PERF] openEditor - [1/4] 데이터 조회: ${(t1 - t0).toFixed(2)}ms`);
 
     // 이미지 경로 업데이트 (src가 다를 때만 업데이트하여 캐시 활용 극대화)
     const updateSrc = (img, src) => { 
         if (!src) { img.src = ''; return; }
-        // 브라우저의 img.src는 항상 절대경로를 반환하므로, URL 객체로 변환하여 비교
         const absSrc = new URL(src, window.location.href).href;
         if (img.src !== absSrc) {
             img.src = src; 
@@ -612,6 +625,8 @@ function openEditor(cardIndex) {
 
     updateSrc(dom.modalPreviewOriginal, defaultArtSrc);
     updateSrc(dom.modalPreview, artSrc);
+    const t2 = performance.now();
+    console.log(`[PERF] openEditor - [2/4] 이미지 레이어 업데이트(DOM): ${(t2 - t1).toFixed(2)}ms`);
 
     // 텍스트 업데이트
     dom.modalTextName.innerText = card.name_kr || card.name_en;
@@ -619,6 +634,8 @@ function openEditor(cardIndex) {
 
     dom.modalSize.textContent = `${card.width || 1000} × ${card.height || 760}`;
     dom.modalNameKr.textContent = card.name_kr ? `${card.name_kr} (${card.name_en || ''})` : (card.name_en || '');
+    const t3 = performance.now();
+    console.log(`[PERF] openEditor - [3/4] 텍스트 및 정보 업데이트: ${(t3 - t2).toFixed(2)}ms`);
 
     // 슬라이더 초기화
     dom.zoomSlider.value = 100;
@@ -632,11 +649,16 @@ function openEditor(cardIndex) {
     dom.toggleOriginalBtn.innerHTML = `${SVG_EYE} 원본(Original) 대상 보기`;
 
     dom.editModal.classList.remove('hidden');
+    const t4 = performance.now();
+    console.log(`[PERF] openEditor - [4/4] 모달 노출 및 스타일 적용: ${(t4 - t3).toFixed(2)}ms`);
+    console.timeEnd('[PERF] openEditor TOTAL');
 }
 
 function closeModal() {
+    console.time('[PERF] closeModal');
     dom.editModal.classList.add('hidden');
     dom.imageInput.value = '';
+    console.timeEnd('[PERF] closeModal');
 }
 
 /** 원본/커스텀 이미지 토글 */
@@ -650,17 +672,21 @@ function toggleOriginalView() {
 }
 
 function handleImageUpload(e) {
+    console.time('[PERF] handleImageUpload');
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = ev => {
         dom.modalPreview.src = ev.target.result;
         state.isDirty = true;
+        console.timeEnd('[PERF] handleImageUpload (FileReader)');
     };
     reader.readAsDataURL(file);
+    console.timeEnd('[PERF] handleImageUpload');
 }
 
 function updateModalPreviewTransform() {
+    console.time('[PERF] updateModalPreviewTransform');
     const zoom = dom.zoomSlider.value;
     const x = dom.offsetXSlider.value;
     const y = dom.offsetYSlider.value;
@@ -668,9 +694,11 @@ function updateModalPreviewTransform() {
     dom.offsetXVal.setAttribute('data-value', `${x}px`);
     dom.offsetYVal.setAttribute('data-value', `${y}px`);
     dom.modalPreview.style.transform = `scale(${zoom / 100}) translate(${x}px, ${y}px)`;
+    console.timeEnd('[PERF] updateModalPreviewTransform');
 }
 
 function saveChanges() {
+    console.time('[PERF] saveChanges');
     const card = state.cards[state.editingCardIndex];
     if (!card) return;
     const src = dom.modalPreview.src;
@@ -683,10 +711,12 @@ function saveChanges() {
         updateStats();
     }
     closeModal();
+    console.timeEnd('[PERF] saveChanges');
 }
 
 function resetCurrentCard() {
     if (!confirm('이 카드의 커스텀 이미지를 제거하시겠습니까?')) return;
+    console.time('[PERF] resetCurrentCard');
     const card = state.cards[state.editingCardIndex];
     if (!card) return;
     card.png_base64 = '';
@@ -695,6 +725,7 @@ function resetCurrentCard() {
     replaceCardDOM(card);
     updateStats();
     closeModal();
+    console.timeEnd('[PERF] resetCurrentCard');
 }
 
 // ================================================================
