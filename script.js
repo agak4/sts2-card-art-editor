@@ -30,10 +30,11 @@ function toKey(str) {
  */
 async function fetchCardDatabase() {
     try {
-        if (typeof CARDS_DB_RAW === 'undefined') {
-            throw new Error('cards.js가 로드되지 않았습니다.');
+        const response = await fetch('cards.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-        CARDS_DB = CARDS_DB_RAW;
+        CARDS_DB = await response.json();
 
         CARDS_DB.forEach(card => {
             const nk = toKey(card.name_en);
@@ -182,7 +183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initDom();
     bindEvents();
     lucide.createIcons();
-    
+
     // 로딩 화면 표시
     dom.appLoading.classList.remove('hidden');
 
@@ -206,10 +207,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     state.filteredCards = [...state.cards];
-    
+
     // 이미지 전체 프리로드
     await preloadAllAssets();
-    
+
     // 로딩 화면 숨김
     dom.appLoading.classList.add('hidden');
 
@@ -222,7 +223,7 @@ async function preloadAllAssets() {
     state.cards.forEach(card => {
         const assets = getCardAssets(card.character, card.cardType, card.rarity);
         Object.values(assets).forEach(url => { if (url) uniqueUrls.add(url); });
-        
+
         let charPrefix = (card.character || '').toLowerCase();
         let imgFileName = `${charPrefix}_${(card.name_en || '').toLowerCase().replace(/ /g, '_')}.webp`;
         let artSrc = card.png_base64 ? `data:image/png;base64,${card.png_base64}` : `source/img/card_images/${imgFileName}`;
@@ -422,7 +423,7 @@ function renderCardGrid() {
         });
         dom.cardGrid.appendChild(fragment);
     }
-    
+
     // 실제 요소 표시는 filterCards()의 display 토글을 사용함
     filterCards();
 }
@@ -562,8 +563,7 @@ function filterCards() {
         // 캐릭터 필터
         const matchChar = character === 'all' ? true
             : character === 'misc' ? MISC_CHARACTER.has(c)
-            : character === 'Ancient' ? r === 'Ancient'
-            : c === character;
+                : c === character;
 
         // 타입 필터
         const matchType = type === 'all' ? true
@@ -582,11 +582,11 @@ function filterCards() {
             || (card.source_path || '').toLowerCase().includes(query);
 
         const isVisible = matchChar && matchType && matchRarity && matchSearch;
-        
+
         if (card.domNode) {
             card.domNode.style.display = isVisible ? '' : 'none';
         }
-        
+
         if (isVisible) visibleCount++;
     });
 
@@ -614,11 +614,11 @@ function addNewCard() {
     state.filteredCards = [...state.cards];
     state.isDirty = true;
     saveToDB({ originalData: state.originalData, cards: state.cards });
-    
+
     // 새 카드의 DOM 생성 및 추가
     newCard.domNode = createCardElement(newCard);
     dom.cardGrid.appendChild(newCard.domNode);
-    
+
     filterCards();
     updateStats();
     openEditor(state.cards.length - 1);

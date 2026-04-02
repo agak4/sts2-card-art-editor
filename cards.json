@@ -714,7 +714,7 @@
   {
     "no": 90,
     "name_kr": "생존자",
-    "name_en": "Survivor Silent",
+    "name_en": "Survivor",
     "character": "Silent",
     "cardType": "Skill",
     "rarity": "Starter"
@@ -1042,7 +1042,7 @@
   {
     "no": 131,
     "name_kr": "차오르는 독",
-    "name_en": "Bouncing Flask",
+    "name_en": "Bubble Bubble",
     "character": "Silent",
     "cardType": "Skill",
     "rarity": "Uncommon"
@@ -1066,7 +1066,7 @@
   {
     "no": 134,
     "name_kr": "비책",
-    "name_en": "Outmaneuver",
+    "name_en": "Up My Sleeve",
     "character": "Silent",
     "cardType": "Skill",
     "rarity": "Uncommon"
@@ -2258,7 +2258,7 @@
   {
     "no": 283,
     "name_kr": "반항",
-    "name_en": "",
+    "name_en": "Defy",
     "character": "Necrobinder",
     "cardType": "Skill",
     "rarity": "Common"
