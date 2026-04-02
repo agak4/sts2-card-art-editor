@@ -464,7 +464,6 @@ body {
 
 .btn-close:hover {
     color: white;
-    transform: rotate(90deg);
 }
 
 .modal-body {
@@ -619,7 +618,6 @@ body {
 
 .btn-primary:hover:not(:disabled) {
     background: var(--gold-light);
-    transform: translateY(-2px);
 }
 
 .btn-secondary {
