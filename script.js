@@ -1,90 +1,50 @@
 'use strict';
 
 // ================================================================
-// 카드 DB (cards.csv 동적 로드 후 구축)
+// 카드 데이터베이스 (cards.csv 임베드)
+// [no, name_kr, name_en, character, type, rarity]
+// ================================================================
+// ================================================================
+// 카드 DB 구축 및 조회 (cards.json 파일로부터 비동기 로드)
 // ================================================================
 let CARDS_DB = [];
-
-// 캐릭터+이름 조합 맵 (먼저, 더 정확)
 const CHAR_NAME_MAP = new Map();
-// 이름만 맵 (폴백)
 const NAME_MAP = new Map();
 
-/**
- * CSV 한 줄을 필드 배열로 파싱 (따옴표 포함 필드 지원)
- * @param {string} line
- * @returns {string[]}
- */
-function parseCsvLine(line) {
-    const fields = [];
-    let current = '';
-    let insideQuote = false;
-
-    for (let i = 0; i < line.length; i++) {
-        const ch = line[i];
-        if (ch === '"') {
-            if (insideQuote && line[i + 1] === '"') {
-                current += '"';
-                i++;
-            } else {
-                insideQuote = !insideQuote;
-            }
-        } else if (ch === ',' && !insideQuote) {
-            fields.push(current.trim());
-            current = '';
-        } else {
-            current += ch;
+// 조회키: 특수문자 제거 후 소문자 (정규표현식 미사용)
+function toKey(str) {
+    if (!str) return '';
+    let result = '';
+    const lowerStr = str.toLowerCase();
+    for (let i = 0; i < lowerStr.length; i++) {
+        const char = lowerStr[i];
+        if ((char >= 'a' && char <= 'z') || (char >= '0' && char <= '9')) {
+            result += char;
         }
     }
-    fields.push(current.trim());
-    return fields;
+    return result;
 }
 
 /**
- * cards.csv를 fetch로 읽어 CARDS_DB를 반환
- * @returns {Promise<Array>}
+ * cards.json 파일로부터 카드 데이터베이스를 구축합니다.
  */
-async function loadCardsFromCSV() {
-    const response = await fetch('cards.csv');
-    const text = await response.text();
-    const lines = text.split(/\r?\n/);
+async function fetchCardDatabase() {
+    try {
+        if (typeof CARDS_DB_RAW === 'undefined') {
+            throw new Error('cards.js가 로드되지 않았습니다.');
+        }
+        CARDS_DB = CARDS_DB_RAW;
 
-    const db = [];
-    // 첫 행은 헤더(no,name_kr,name_en,character,type,rarity)이므로 건너뜀
-    for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
-
-        const [noStr, name_kr, name_en, character, cardType, rarity] = parseCsvLine(line);
-        const no = parseInt(noStr, 10);
-        if (isNaN(no)) continue;
-
-        db.push({ no, name_kr, name_en, character, cardType, rarity });
+        CARDS_DB.forEach(card => {
+            const nk = toKey(card.name_en);
+            if (!nk) return;
+            const ck = `${toKey(card.character)}:${nk}`;
+            if (!CHAR_NAME_MAP.has(ck)) CHAR_NAME_MAP.set(ck, card);
+            if (!NAME_MAP.has(nk)) NAME_MAP.set(nk, card);
+        });
+    } catch (err) {
+        console.error('Database load failed:', err);
     }
-    return db;
-}
-
-/**
- * CARDS_DB를 받아 조회 맵(CHAR_NAME_MAP, NAME_MAP)을 구축
- * @param {Array} db
- */
-function buildCardsDB(db) {
-    CARDS_DB = db;
-    CHAR_NAME_MAP.clear();
-    NAME_MAP.clear();
-
-    CARDS_DB.forEach(card => {
-        const nk = toKey(card.name_en);
-        if (!nk) return;
-        const ck = `${toKey(card.character)}:${nk}`;
-        if (!CHAR_NAME_MAP.has(ck)) CHAR_NAME_MAP.set(ck, card);
-        if (!NAME_MAP.has(nk)) NAME_MAP.set(nk, card);
-    });
-}
-
-// 조회키: 특수문자 제거 후 소문자
-function toKey(str) {
-    return (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 const DIR_TO_CHARACTER = {
@@ -99,29 +59,45 @@ const DIR_TO_CHARACTER = {
  * @param {string} sourcePath e.g. "res://images/packed/card_portraits/ironclad/anger.png"
  */
 function findCardMeta(sourcePath) {
-    const segs = sourcePath.replace('res://', '').split('/');
-    const rawFile = (segs.pop() || '').replace(/\.[^.]+$/, ''); // 확장자 제거
-    const dir = (segs.pop() || '').toLowerCase();
+    // res:// 제거 (문자열 리터럴 교체 사용)
+    let path = sourcePath;
+    if (path.indexOf('res://') === 0) {
+        path = path.substring(6);
+    }
+    const segs = path.split('/');
+    const fullFileName = segs.pop() || '';
 
-    const character = DIR_TO_CHARACTER[dir] || '';
-    const fileKey = toKey(rawFile);
+    // 확장자 제거 (가장 마지막 . 기점으로 자름)
+    const lastDotIdx = fullFileName.lastIndexOf('.');
+    const fileName = lastDotIdx !== -1 ? fullFileName.substring(0, lastDotIdx) : fullFileName;
+
+    const dirName = (segs.pop() || '').toLowerCase();
+    const character = DIR_TO_CHARACTER[dirName] || '';
+    const fileKey = toKey(fileName);
 
     // 1차: 캐릭터+파일명 조합
-    const ck = `${toKey(character)}:${fileKey}`;
-    if (CHAR_NAME_MAP.has(ck)) return CHAR_NAME_MAP.get(ck);
+    const combinedKey = `${toKey(character)}:${fileKey}`;
+    if (CHAR_NAME_MAP.has(combinedKey)) return CHAR_NAME_MAP.get(combinedKey);
 
     // 2차: 파일명만
     if (NAME_MAP.has(fileKey)) return NAME_MAP.get(fileKey);
 
-    // 3차: 파일명에서 숫자 접미사 제거 후 재시도 (ex. anger_2 -> anger)
-    const trimmedKey = fileKey.replace(/\d+$/, '');
-    if (CHAR_NAME_MAP.has(`${toKey(character)}:${trimmedKey}`)) {
-        return CHAR_NAME_MAP.get(`${toKey(character)}:${trimmedKey}`);
+    // 3차: 파일명 끝의 숫자 접미사 제거 후 재시도 (ex. anger_2 -> anger)
+    let endIdx = fileKey.length;
+    while (endIdx > 0 && fileKey[endIdx - 1] >= '0' && fileKey[endIdx - 1] <= '9') {
+        endIdx--;
     }
-    if (NAME_MAP.has(trimmedKey)) return NAME_MAP.get(trimmedKey);
+    const trimmedKey = fileKey.substring(0, endIdx);
+
+    if (trimmedKey && trimmedKey !== fileKey) {
+        const combinedTrimmedKey = `${toKey(character)}:${trimmedKey}`;
+        if (CHAR_NAME_MAP.has(combinedTrimmedKey)) return CHAR_NAME_MAP.get(combinedTrimmedKey);
+        if (NAME_MAP.has(trimmedKey)) return NAME_MAP.get(trimmedKey);
+    }
 
     return null;
 }
+
 
 // ================================================================
 // 필터 설정
@@ -152,7 +128,6 @@ let dom = {};
 
 function initDom() {
     dom = {
-        dropZone: $('dropZone'),
         fileInput: $('fileInput'),
         editorSection: $('editorSection'),
         cardGrid: $('cardGrid'),
@@ -164,7 +139,7 @@ function initDom() {
         appLoading: $('appLoading'),
         // Modal
         editModal: $('editModal'),
-        modalPreview: $('modalPreview'),
+        cardLargePreview: $('cardLargePreview'),
         modalPath: $('modalPath'),
         modalSize: $('modalSize'),
         modalNameKr: $('modalNameKr'),
@@ -172,47 +147,103 @@ function initDom() {
         offsetXSlider: $('offsetXSlider'),
         offsetYSlider: $('offsetYSlider'),
         imageInput: $('imageInput'),
+        toggleOriginalBtn: $('toggleOriginalBtn'),
     };
 }
 
 // ================================================================
 // 초기화
 // ================================================================
+function getBaseSourcePath(card) {
+    const charDir = Object.keys(DIR_TO_CHARACTER).find(k => DIR_TO_CHARACTER[k] === card.character) || 'colorless';
+    return `res://images/packed/card_portraits/${charDir}/${(card.name_en || '').toLowerCase().replace(/ /g, '_')}.png`;
+}
+
+function initAllCards() {
+    state.cards = CARDS_DB.map(card => {
+        return {
+            source_path: getBaseSourcePath(card),
+            type: 'static',
+            artType: 'static',
+            no: card.no,
+            name_kr: card.name_kr,
+            name_en: card.name_en,
+            character: card.character,
+            cardType: card.cardType,
+            rarity: card.rarity,
+            width: 1000,
+            height: 760,
+            png_base64: ''
+        };
+    });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     initDom();
     bindEvents();
     lucide.createIcons();
+    
+    // 로딩 화면 표시
+    dom.appLoading.classList.remove('hidden');
 
-    // cards.csv 로드 후 조회 DB 구축
-    try {
-        const db = await loadCardsFromCSV();
-        buildCardsDB(db);
-    } catch (err) {
-        console.error('cards.csv 로드 실패:', err);
-    }
+    // 카드 DB 로드
+    await fetchCardDatabase();
+
+    initAllCards();
 
     const saved = await loadFromDB();
     if (saved) {
         state.originalData = saved.originalData;
-        state.cards = saved.cards;
-        state.filteredCards = [...state.cards];
-        renderUI();
+        if (saved.cards) {
+            saved.cards.forEach(savedCard => {
+                const target = state.cards.find(c => c.source_path === savedCard.source_path);
+                if (target && savedCard.png_base64) {
+                    target.png_base64 = savedCard.png_base64;
+                    target.updated_at = savedCard.updated_at;
+                }
+            });
+        }
     }
+
+    state.filteredCards = [...state.cards];
+    
+    // 이미지 전체 프리로드
+    await preloadAllAssets();
+    
+    // 로딩 화면 숨김
+    dom.appLoading.classList.add('hidden');
+
+    renderUI();
 });
+
+// 모든 카드 소스 및 프레임 프리로드 함수
+async function preloadAllAssets() {
+    const uniqueUrls = new Set();
+    state.cards.forEach(card => {
+        const assets = getCardAssets(card.character, card.cardType, card.rarity);
+        Object.values(assets).forEach(url => { if (url) uniqueUrls.add(url); });
+        
+        let charPrefix = (card.character || '').toLowerCase();
+        let imgFileName = `${charPrefix}_${(card.name_en || '').toLowerCase().replace(/ /g, '_')}.webp`;
+        let artSrc = card.png_base64 ? `data:image/png;base64,${card.png_base64}` : `source/img/card_images/${imgFileName}`;
+        uniqueUrls.add(artSrc);
+    });
+
+    const promises = Array.from(uniqueUrls).map(url => {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.onload = resolve;
+            img.onerror = resolve; // 실패해도 진행
+            img.src = url;
+        });
+    });
+    await Promise.all(promises);
+}
 
 // ================================================================
 // 이벤트 바인딩
 // ================================================================
 function bindEvents() {
-    // 드롭존
-    dom.dropZone.addEventListener('dragover', e => { e.preventDefault(); dom.dropZone.classList.add('drag-over'); });
-    dom.dropZone.addEventListener('dragleave', () => dom.dropZone.classList.remove('drag-over'));
-    dom.dropZone.addEventListener('drop', e => {
-        e.preventDefault();
-        dom.dropZone.classList.remove('drag-over');
-        const file = e.dataTransfer.files[0];
-        if (file?.name.endsWith('.json')) handleFileUpload(file);
-    });
     dom.fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFileUpload(e.target.files[0]); });
 
     // 헤더 버튼
@@ -221,7 +252,7 @@ function bindEvents() {
     dom.exportBtn.onclick = exportJSON;
 
     // 검색
-    dom.searchInput.addEventListener('input', debounce(filterCards, 250));
+    dom.searchInput.addEventListener('input', () => { filterCards(); });
 
     // 필터 칩
     document.querySelectorAll('.chip-list').forEach(group => {
@@ -242,10 +273,26 @@ function bindEvents() {
     // 모달
     $('closeModal').onclick = closeModal;
     $('cancelEdit').onclick = closeModal;
+    document.querySelector('.modal-overlay').addEventListener('click', closeModal);
     $('saveEdit').onclick = saveChanges;
     $('resetCardBtn').onclick = resetCurrentCard;
     $('uploadImageBtn').onclick = () => dom.imageInput.click();
-    dom.imageInput.addEventListener('change', handleImageUpload); // 버그 수정
+    dom.imageInput.addEventListener('change', handleImageUpload);
+
+    // 원본 보기 토글 (완전히 교체 표시)
+    dom.toggleOriginalBtn.onclick = () => {
+        const isShowingOriginal = !dom.modalPreview.classList.contains('hidden');
+        if (isShowingOriginal) {
+            dom.modalPreview.classList.add('hidden');
+            dom.modalPreviewOriginal.classList.remove('hidden');
+            dom.toggleOriginalBtn.innerHTML = '<i data-lucide="image"></i> 커스텀 대상 보기';
+        } else {
+            dom.modalPreview.classList.remove('hidden');
+            dom.modalPreviewOriginal.classList.add('hidden');
+            dom.toggleOriginalBtn.innerHTML = '<i data-lucide="eye"></i> 원본(Original) 대상 보기';
+        }
+        lucide.createIcons();
+    };
 
     // 슬라이더
     [dom.zoomSlider, dom.offsetXSlider, dom.offsetYSlider].forEach(s => {
@@ -273,8 +320,21 @@ async function handleFileUpload(file) {
         }
 
         state.originalData = data;
-        // artpack의 type 필드는 'static'/'animated_gif' → artType 으로 rename하고 CSV 메타 병합
-        state.cards = (data.overrides || []).map(enrichCard);
+        // 기존 카드 리스트에 업로드된 정보를 덮어씌움
+        const overrides = data.overrides || [];
+        overrides.forEach(ov => {
+            const fileCard = enrichCard(ov);
+            const target = state.cards.find(c => c.source_path === fileCard.source_path);
+            if (target) {
+                target.png_base64 = fileCard.png_base64;
+                target.updated_at = fileCard.updated_at;
+                target.artType = fileCard.artType;
+            } else {
+                // 새로운 카드 경로라면 맨 끝에 추가
+                state.cards.push(fileCard);
+            }
+        });
+
         state.filteredCards = [...state.cards];
         state.isDirty = false;
 
@@ -337,7 +397,6 @@ function readFileAsText(file) {
 // UI 렌더링
 // ================================================================
 function renderUI() {
-    dom.dropZone.classList.add('hidden');
     dom.editorSection.classList.remove('hidden');
     dom.exportBtn.disabled = false;
     dom.addCardBtn.disabled = false;
@@ -351,17 +410,32 @@ function updateStats() {
 }
 
 function renderCardGrid() {
-    dom.cardGrid.innerHTML = '';
+    if (dom.cardGrid.children.length === 0) {
+        // 최초 1회만 DOM 생성 (no 기준 정렬 됨)
+        state.cards.sort((a, b) => (a.no || 9999) - (b.no || 9999));
+        const fragment = document.createDocumentFragment();
+        state.cards.forEach(card => {
+            if (!card.domNode) {
+                card.domNode = createCardElement(card);
+            }
+            fragment.appendChild(card.domNode);
+        });
+        dom.cardGrid.appendChild(fragment);
+    }
+    
+    // 실제 요소 표시는 filterCards()의 display 토글을 사용함
+    filterCards();
+}
 
-    // no 기준 오름차순 정렬
-    const sorted = [...state.filteredCards].sort((a, b) => (a.no || 9999) - (b.no || 9999));
-
-    const fragment = document.createDocumentFragment();
-    sorted.forEach((card, idx) => {
-        fragment.appendChild(createCardElement(card, idx));
-    });
-    dom.cardGrid.appendChild(fragment);
-    initLazyLoading();
+function replaceCardDOM(card) {
+    if (card.domNode) {
+        // 기존 DOM 상태 저장
+        const isHidden = card.domNode.style.display === 'none';
+        const newDom = createCardElement(card);
+        newDom.style.display = isHidden ? 'none' : '';
+        dom.cardGrid.replaceChild(newDom, card.domNode);
+        card.domNode = newDom;
+    }
 }
 
 function createCardElement(card, index) {
@@ -372,29 +446,38 @@ function createCardElement(card, index) {
     const { character, cardType, rarity, name_kr, name_en, no } = card;
     const assets = getCardAssets(character, cardType, rarity);
 
-    // 커스텀 아트 있으면 base64 우선, 없으면 로컬 경로
+    let charPrefix = (character || '').toLowerCase();
+    let imgFileName = `${charPrefix}_${(name_en || '').toLowerCase().replace(/ /g, '_')}.webp`;
     let artSrc = card.png_base64
         ? `data:image/png;base64,${card.png_base64}`
-        : `source/img/cards/${character}/${(name_en || '').replace(/ /g, '_')}.png`;
+        : `source/img/card_images/${imgFileName}`;
+
+    const CARD_TYPE_KO = {
+        'Attack': '공격',
+        'Skill': '스킬',
+        'Power': '파워',
+        'Status': '상태이상',
+        'Curse': '저주'
+    };
+    const cardTypeKo = CARD_TYPE_KO[cardType] || cardType;
 
     div.innerHTML = `
     <div class="sts2-card">
       <div class="layer layer-bg" style="background-image:url('${assets.bg}')"></div>
-      <div class="layer layer-art">
-        <img data-src="${artSrc}" alt="${name_en || name_kr}"
-             class="lazy"
-             onerror="this.onerror=null;this.src='source/img/card_base/273px-StS2_AncientCardHighlight.png'">
-      </div>
       <div class="layer layer-frame" style="background-image:url('${assets.frame}')"></div>
       <div class="layer layer-banner" style="background-image:url('${assets.banner}')"></div>
+      <div class="layer layer-type" style="background-image:url('${assets.type}')"></div>
       ${assets.orb ? `<div class="layer layer-orb" style="background-image:url('${assets.orb}')"></div>` : ''}
+      <div class="layer layer-art">
+        <img src="${artSrc}" alt="${name_en || name_kr}"
+             onerror="this.onerror=null;this.src='source/img/card_frame/273px-StS2_AncientCardHighlight.png'">
+      </div>
       <div class="layer layer-text">
         <div class="card-name-overlay">${name_kr || name_en}</div>
       </div>
-    </div>
-    <div class="card-meta">
-      <div class="card-name">${name_kr || name_en} <span class="card-no">#${no}</span></div>
-      <div class="card-path">${name_en || card.source_path?.split('/').pop() || ''}</div>
+      <div class="layer layer-text">
+        <div class="card-type-overlay">${cardTypeKo}</div>
+      </div>
     </div>
   `;
 
@@ -409,17 +492,18 @@ function createCardElement(card, index) {
 }
 
 function getCardAssets(character, cardType, rarity) {
-    const p = 'source/img/card_base/273px-StS2_';
+    const p = 'source/img/card_frame/273px-StS2_';
     const miscChars = MISC_CHARACTER;
     const isMisc = miscChars.has(character);
 
-    if (isMisc) {
-        const t = character === 'Status' ? 'Status' : character === 'Curse' ? 'Curse' : 'Quest';
-        return { bg: `${p}Bg${t}.png`, frame: `${p}Frame${t}.png`, banner: `${p}Banner${t}.png`, orb: '' };
-    }
-
     const rarityMap = { Starter: 'Common', Common: 'Common', Uncommon: 'Uncommon', Rare: 'Rare', Ancient: 'Rare', Misc: 'Uncommon' };
     const r = rarityMap[rarity] || 'Common';
+
+    if (isMisc) {
+        const t = character === 'Status' ? 'Status' : character === 'Curse' ? 'Curse' : 'Quest';
+        return { bg: `${p}Bg${t}.png`, frame: `${p}Frame${t}.png`, banner: `${p}Banner${t}.png`, orb: '', type: `${p}Type${r}.png` };
+    }
+
     const c = character === 'Ancient' ? 'Colorless' : character;
     const t = ['Attack', 'Skill', 'Power'].includes(cardType) ? cardType : 'Skill';
 
@@ -428,6 +512,7 @@ function getCardAssets(character, cardType, rarity) {
         frame: `${p}Frame${t}${r}.png`,
         banner: `${p}Banner${r}.png`,
         orb: `${p}Card${c}Orb.png`,
+        type: `${p}Type${r}.png`
     };
 }
 
@@ -468,7 +553,8 @@ function filterCards() {
     const { character, type, rarity } = state.filters;
     const rarityDisabled = RARITY_DISABLED_CHARS.has(character);
 
-    state.filteredCards = state.cards.filter(card => {
+    let visibleCount = 0;
+    state.cards.forEach(card => {
         const c = card.character || '';
         const t = card.cardType || '';
         const r = card.rarity || '';
@@ -476,7 +562,8 @@ function filterCards() {
         // 캐릭터 필터
         const matchChar = character === 'all' ? true
             : character === 'misc' ? MISC_CHARACTER.has(c)
-                : c === character;
+            : character === 'Ancient' ? r === 'Ancient'
+            : c === character;
 
         // 타입 필터
         const matchType = type === 'all' ? true
@@ -494,10 +581,16 @@ function filterCards() {
             || (card.name_en || '').toLowerCase().includes(query)
             || (card.source_path || '').toLowerCase().includes(query);
 
-        return matchChar && matchType && matchRarity && matchSearch;
+        const isVisible = matchChar && matchType && matchRarity && matchSearch;
+        
+        if (card.domNode) {
+            card.domNode.style.display = isVisible ? '' : 'none';
+        }
+        
+        if (isVisible) visibleCount++;
     });
 
-    renderCardGrid();
+    state.filteredCards = state.cards; // 하위 호환성을 위해 유지
 }
 
 // ================================================================
@@ -521,7 +614,12 @@ function addNewCard() {
     state.filteredCards = [...state.cards];
     state.isDirty = true;
     saveToDB({ originalData: state.originalData, cards: state.cards });
-    renderCardGrid();
+    
+    // 새 카드의 DOM 생성 및 추가
+    newCard.domNode = createCardElement(newCard);
+    dom.cardGrid.appendChild(newCard.domNode);
+    
+    filterCards();
     updateStats();
     openEditor(state.cards.length - 1);
 }
@@ -535,11 +633,44 @@ function openEditor(cardIndex) {
 
     state.editingCardIndex = cardIndex;
 
+    let charPrefix = (card.character || '').toLowerCase();
+    let imgFileName = `${charPrefix}_${(card.name_en || '').toLowerCase().replace(/ /g, '_')}.webp`;
+    let fallbackSrc = `source/img/card_frame/273px-StS2_AncientCardHighlight.png`;
+    let defaultArtSrc = `source/img/card_images/${imgFileName}`;
+
     const artSrc = card.png_base64
         ? `data:image/png;base64,${card.png_base64}`
-        : '';
+        : defaultArtSrc;
 
-    dom.modalPreview.src = artSrc || 'source/img/card_base/273px-StS2_AncientCardHighlight.png';
+    // 카드의 모든 프레임 요소를 모달용으로 렌더링
+    const assets = getCardAssets(card.character, card.cardType, card.rarity);
+    const CARD_TYPE_KO = { 'Attack': '공격', 'Skill': '스킬', 'Power': '파워', 'Status': '상태이상', 'Curse': '저주' };
+    const cardTypeKo = CARD_TYPE_KO[card.cardType] || card.cardType;
+
+    dom.cardLargePreview.innerHTML = `
+      <div class="sts2-card">
+        <div class="layer layer-bg" style="background-image:url('${assets.bg}')"></div>
+        <div class="layer layer-frame" style="background-image:url('${assets.frame}')"></div>
+        <div class="layer layer-banner" style="background-image:url('${assets.banner}')"></div>
+        <div class="layer layer-type" style="background-image:url('${assets.type}')"></div>
+        ${assets.orb ? `<div class="layer layer-orb" style="background-image:url('${assets.orb}')"></div>` : ''}
+        <div class="layer layer-art">
+          <img id="modalPreviewOriginal" class="hidden" src="${defaultArtSrc}" onerror="this.onerror=null;this.src='${fallbackSrc}'" style="position:absolute; width:100%; height:100%; object-fit:cover;">
+          <img id="modalPreview" src="${artSrc}" onerror="this.onerror=null;this.src='${fallbackSrc}'" style="position:absolute; width:100%; height:100%; object-fit:cover;">
+        </div>
+        <div class="layer layer-text">
+          <div class="card-name-overlay">${card.name_kr || card.name_en}</div>
+        </div>
+        <div class="layer layer-text">
+          <div class="card-type-overlay">${cardTypeKo}</div>
+        </div>
+      </div>
+    `;
+
+    // DOM 참조 동적 갱신
+    dom.modalPreviewOriginal = document.getElementById('modalPreviewOriginal');
+    dom.modalPreview = document.getElementById('modalPreview');
+
     dom.modalPath.textContent = card.source_path || 'N/A';
     dom.modalSize.textContent = `${card.width || 1000} × ${card.height || 760}`;
     dom.modalNameKr.textContent = card.name_kr ? `${card.name_kr} (${card.name_en || ''})` : (card.name_en || '');
@@ -548,6 +679,10 @@ function openEditor(cardIndex) {
     dom.offsetXSlider.value = 0;
     dom.offsetYSlider.value = 0;
     dom.modalPreview.style.transform = '';
+
+    // Reset toggle state
+    dom.modalPreview.classList.remove('hidden');
+    dom.toggleOriginalBtn.innerHTML = '<i data-lucide="eye"></i> 원본(Original) 대상 보기';
 
     dom.editModal.classList.remove('hidden');
     lucide.createIcons();
@@ -586,7 +721,7 @@ function saveChanges() {
         card.updated_at = new Date().toISOString().slice(0, 19).replace('T', ' ');
         state.isDirty = true;
         saveToDB({ originalData: state.originalData, cards: state.cards });
-        renderCardGrid();
+        replaceCardDOM(card);
     }
     closeModal();
 }
@@ -598,7 +733,7 @@ function resetCurrentCard() {
     card.png_base64 = '';
     state.isDirty = true;
     saveToDB({ originalData: state.originalData, cards: state.cards });
-    renderCardGrid();
+    replaceCardDOM(card);
     closeModal();
 }
 
@@ -606,14 +741,17 @@ function resetCurrentCard() {
 // 내보내기
 // ================================================================
 function exportJSON() {
+    // 수정된(커스텀 이미지가 있는) 카드만 내보내기
+    const modifiedCards = state.cards.filter(c => c.png_base64 && c.png_base64.length > 0);
+
     // artType → type 으로 복원 (artpack 포맷 유지)
-    const overrides = state.cards.map(card => {
+    const overrides = modifiedCards.map(card => {
         const { artType, no, name_kr, name_en, character, cardType, rarity, ...rest } = card;
         return { ...rest, type: artType };
     });
 
     const exportData = {
-        ...state.originalData,
+        ...(state.originalData || { format: 'card_art_bundle' }),
         exported_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
         count: overrides.length,
         overrides,

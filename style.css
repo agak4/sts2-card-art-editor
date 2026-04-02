@@ -1,3 +1,17 @@
+@font-face {
+    font-family: 'GyeonggiMillenniumBackground';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2410-3@1.0/Batang_Regular.woff') format('woff');
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'GyeonggiMillenniumBackground';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2410-3@1.0/Batang_Bold.woff') format('woff');
+    font-weight: 700;
+    font-display: swap;
+}
+
 :root {
     --bg-dark: #0f111a;
     --bg-card: #1a1c2b;
@@ -21,7 +35,7 @@
 }
 
 body {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'GyeonggiMillenniumBackground', 'Outfit', sans-serif;
     background-color: var(--bg-dark);
     color: var(--text-main);
     line-height: 1.6;
@@ -134,7 +148,10 @@ body {
 /* ── 툴바 ── */
 .toolbar {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
     gap: 20px;
     margin-bottom: 32px;
     background: var(--bg-card);
@@ -145,16 +162,16 @@ body {
 
 .filter-rail {
     display: flex;
-    flex-direction: column;
-    gap: 16px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 24px;
 }
 
 .filter-group {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
 }
 
 .filter-group-label {
@@ -163,6 +180,7 @@ body {
     letter-spacing: 1px;
     color: var(--text-muted);
     font-weight: 700;
+    white-space: nowrap;
 }
 
 .chip-list {
@@ -226,9 +244,11 @@ body {
 
 .toolbar-bottom {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     gap: 20px;
+    flex: 1;
+    min-width: 300px;
 }
 
 .search-box {
@@ -275,11 +295,14 @@ body {
 }
 
 /* ── 카드 그리드 (5열 고정) ── */
+.grid-wrapper {
+    position: relative;
+    min-height: 500px;
+}
+
 .card-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 20px;
-    padding-bottom: 40px;
 }
 
 /* ── STS2 카드 ── */
@@ -299,11 +322,16 @@ body {
     width: 100%;
     aspect-ratio: 273 / 380;
     transform-style: preserve-3d;
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: transform 0.3s ease;
+}
+
+.card-item:hover {
+    z-index: 100;
 }
 
 .card-item:hover .sts2-card {
-    transform: translateY(-10px) rotateX(4deg) rotateY(2deg);
+    transform: scale(1.2);
+    transition: transform 0s;
 }
 
 .sts2-card .layer {
@@ -320,18 +348,22 @@ body {
 }
 
 .sts2-card .layer-art {
-    z-index: 2;
+    z-index: -1;
+    position: absolute;
+    top: 17.8%;
+    left: 16.5%;
+    width: 67%;
+    height: 37%;
     overflow: hidden;
-    clip-path: polygon(10% 5%, 90% 5%, 90% 48%, 10% 48%);
 }
 
 .sts2-card .layer-art img {
-    width: 80%;
-    height: 43%;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    position: absolute;
-    top: 5%;
-    left: 10%;
+    position: relative;
+    top: 0;
+    left: 0;
 }
 
 .sts2-card .layer-frame {
@@ -342,12 +374,9 @@ body {
     z-index: 4;
 }
 
-.sts2-card .layer-orb {
+.sts2-card .layer-orb,
+.sts2-card .layer-type {
     z-index: 5;
-    left: -8%;
-    top: -5%;
-    width: 25%;
-    height: 25%;
 }
 
 .sts2-card .layer-text {
@@ -359,19 +388,32 @@ body {
 }
 
 .card-name-overlay {
-    font-size: 12px;
+    font-size: 20px;
     font-weight: 700;
+    letter-spacing: -0.2px;
     color: white;
-    text-shadow: 0 1px 4px black;
+    text-shadow: -1px -1px 0 #4D4B40, 1px -1px 0 #4d4b40, -1px 1px 0 #4D4B40, 1px 1px 0 #4D4B40, 2.5px 2.5px 0px #878686;
     position: absolute;
-    top: 6%;
+    top: 11.5%;
+    width: 100%;
+    text-align: center;
+}
+
+.card-type-overlay {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    color: white;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 1px 3px rgba(0, 0, 0, 0.8);
+    position: absolute;
+    top: 50.5%;
     width: 100%;
     text-align: center;
 }
 
 .badge {
     position: absolute;
-    top: 8px;
+    top: 25px;
     right: 8px;
     padding: 3px 8px;
     background: var(--accent);
@@ -380,40 +422,6 @@ body {
     font-weight: 700;
     border-radius: 4px;
     z-index: 10;
-}
-
-.card-item:hover {
-    transform: translateY(-4px);
-}
-
-.card-meta {
-    padding: 10px 4px;
-    width: 100%;
-}
-
-.card-name {
-    font-weight: 700;
-    font-size: 14px;
-    margin-bottom: 2px;
-    color: var(--gold-light);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.card-no {
-    color: var(--text-muted);
-    font-size: 11px;
-    font-weight: 400;
-}
-
-.card-path {
-    font-family: 'Roboto Mono', monospace;
-    font-size: 11px;
-    color: var(--text-muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 /* ── 모달 ── */
@@ -489,20 +497,27 @@ body {
 
 .card-large-preview {
     width: 100%;
-    aspect-ratio: 1000 / 760;
-    background: #000;
-    border-radius: var(--radius);
-    overflow: hidden;
-    border: 1px solid var(--border);
+    min-height: 480px;
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+}
+
+.card-large-preview .sts2-card {
+    height: 100%;
+    max-height: 550px;
+    width: auto;
+    aspect-ratio: 273 / 380;
+    transform: none !important;
+}
+
+.card-large-preview .sts2-card:hover {
+    transform: none !important;
 }
 
 .card-large-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
     transition: transform 0.2s;
 }
 
@@ -655,13 +670,13 @@ body {
 
 /* ── 앱 로딩 ── */
 .app-loading {
-    position: fixed;
+    position: absolute;
     inset: 0;
-    background: var(--bg-dark);
+    background: rgba(15, 17, 26, 0.95);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
+    z-index: 100;
 }
 
 .loader-content {
