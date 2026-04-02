@@ -16,6 +16,13 @@
 
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script type="module">
+        import { parseGIF, decompressFrames } from 'https://cdn.jsdelivr.net/npm/gifuct-js@2.1.2/+esm';
+
+        window.parseGIF = parseGIF;
+        window.decompressFrames = decompressFrames;
+    </script>
 </head>
 
 <body class="theme-dark">
@@ -212,12 +219,18 @@
                         </div>
                         <div class="color-palette-container">
                             <div class="palette-row">
-                                <button class="color-chip transparent active" data-color="transparent" title="투명"></button>
-                                <button class="color-chip" data-color="#000000" style="background:#000000;" title="검정"></button>
-                                <button class="color-chip" data-color="#ffffff" style="background:#ffffff;" title="하양"></button>
-                                <button class="color-chip" data-color="#2a2a2a" style="background:#2a2a2a;" title="어두운 회색"></button>
-                                <button class="color-chip" data-color="#4a4a4a" style="background:#4a4a4a;" title="회색"></button>
-                                <input type="color" id="bgColorPicker" class="color-picker-input" value="#000000" title="색상 직접 선택">
+                                <button class="color-chip transparent active" data-color="transparent"
+                                    title="투명"></button>
+                                <button class="color-chip" data-color="#000000" style="background:#000000;"
+                                    title="검정"></button>
+                                <button class="color-chip" data-color="#ffffff" style="background:#ffffff;"
+                                    title="하양"></button>
+                                <button class="color-chip" data-color="#2a2a2a" style="background:#2a2a2a;"
+                                    title="어두운 회색"></button>
+                                <button class="color-chip" data-color="#4a4a4a" style="background:#4a4a4a;"
+                                    title="회색"></button>
+                                <input type="color" id="bgColorPicker" class="color-picker-input" value="#000000"
+                                    title="색상 직접 선택">
                             </div>
                         </div>
                     </div>
