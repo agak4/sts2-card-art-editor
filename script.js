@@ -275,14 +275,15 @@ function base64ToBlob(base64, type = 'image/png') {
     return new Blob([array], { type });
 }
 
-/** 카드 객체의 Blob URL 갱신 및 관리 */
+/** 카드 객체의 Blob URL 갱신 및 관리 (GIF/PNG MIME 타입 분기) */
 function updateCardBlobUrl(card) {
     if (card.blobUrl) {
         URL.revokeObjectURL(card.blobUrl);
         card.blobUrl = null;
     }
     if (card.png_base64) {
-        const blob = base64ToBlob(card.png_base64);
+        const mimeType = card.art_mime || (card.artType === 'gif' ? 'image/gif' : 'image/png');
+        const blob = base64ToBlob(card.png_base64, mimeType);
         if (blob) card.blobUrl = URL.createObjectURL(blob);
     }
 }
@@ -389,6 +390,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     target.background_color = savedCard.background_color || 'transparent';
                     target.display_mode = savedCard.display_mode || 'default';
                     target.updated_at = savedCard.updated_at;
+                    target.artType = savedCard.artType || 'static';
+                    target.art_mime = savedCard.art_mime || (target.artType === 'gif' ? 'image/gif' : 'image/png');
+                    target.gif_frames = savedCard.gif_frames || null;
                     updateCardBlobUrl(target);
                 }
             });
@@ -565,6 +569,8 @@ async function processImport(data, isMerge = true) {
                     target.display_mode = fileCard.display_mode || 'default';
                     target.updated_at = fileCard.updated_at;
                     target.artType = fileCard.artType;
+                    target.art_mime = fileCard.art_mime || (fileCard.artType === 'gif' ? 'image/gif' : 'image/png');
+                    target.gif_frames = fileCard.gif_frames || null;
                     updateCardBlobUrl(target);
                 }
             }
@@ -609,9 +615,15 @@ async function resetToCleanState() {
 function enrichCard(raw) {
     const meta = findCardMeta(raw.source_path || '');
     const isAncient = meta?.rarity === 'Ancient';
+    const detectedArtType = raw.type || 'static';
+    const hasGifFrames = raw.frames && raw.frames.length > 0;
+    // GIF 번들: frames 배열의 첫 번째 PNG를 표시용으로, frames 전체를 재추출용으로 보존
+    const displayPng = hasGifFrames ? raw.frames[0].png_base64 : raw.png_base64;
     return {
         ...raw,
-        artType: raw.type || 'static',
+        artType: detectedArtType,
+        art_mime: hasGifFrames ? 'image/gif' : 'image/png',
+        gif_frames: hasGifFrames ? raw.frames : null,
         no: meta?.no ?? 9999,
         name_kr: meta?.name_kr ?? extractFallbackName(raw.source_path),
         name_en: meta?.name_en ?? '',
@@ -620,8 +632,8 @@ function enrichCard(raw) {
         rarity: meta?.rarity ?? 'Common',
         width: raw.width ?? (isAncient ? 606 : 1000),
         height: raw.height ?? (isAncient ? 852 : 760),
-        source_png_base64: raw.source_png_base64 || (raw.frames && raw.frames.length > 0 ? raw.frames[0].png_base64 : raw.png_base64) || '',
-        png_base64: (raw.frames && raw.frames.length > 0 ? raw.frames[0].png_base64 : raw.png_base64) || '',
+        source_png_base64: raw.source_png_base64 || displayPng || '',
+        png_base64: displayPng || '',
         adjust_zoom: raw.adjust_zoom ?? 1.0,
         adjust_offset_x: raw.adjust_offset_x ?? 0.0,
         adjust_offset_y: raw.adjust_offset_y ?? 0.0,
@@ -879,8 +891,10 @@ function openEditor(cardIndex) {
     const defaultArtSrc = `source/img/card_images/${charPrefix}_${(card.name_en || '').toLowerCase().replace(/ /g, '_')}.webp`;
 
     // 소스 이미지: source_png_base64(원본 미조정 이미지) 우선 사용
+    // GIF 카드의 경우 저장된 MIME 타입으로 올바른 data URL 재구성
     const sourceBase64 = card.source_png_base64 || card.png_base64;
-    const sourceSrc = sourceBase64 ? `data:image/png;base64,${sourceBase64}` : defaultArtSrc;
+    const artMime = card.art_mime || (card.artType === 'gif' ? 'image/gif' : 'image/png');
+    const sourceSrc = sourceBase64 ? `data:${artMime};base64,${sourceBase64}` : defaultArtSrc;
 
     // adjustState 초기화: 카드에 저장된 조정값 복원
     state.adjustState = {
@@ -1106,22 +1120,82 @@ function updateModalPreviewTransform() {
     ctx.drawImage(img, -cropX, -cropY, resizedW, resizedH);
 }
 
-function saveChanges() {
+/**
+ * 카드 아트(GIF 포함)를 캔버스에 렌더링하여 PNG base64로 변환
+ * GIF 애니메이션은 현재(첫) 프레임을 캡처하여 모드 export용 PNG로 사용
+ */
+async function renderCardToPngBase64(card) {
+    const mimeType = card.art_mime || (card.artType === 'gif' ? 'image/gif' : 'image/png');
+    const dataUrl = `data:${mimeType};base64,${card.png_base64}`;
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            const targetW = card.width || 1000;
+            const targetH = card.height || 760;
+            const canvas = document.createElement('canvas');
+            canvas.width = targetW;
+            canvas.height = targetH;
+            const ctx = canvas.getContext('2d', { alpha: true });
+            const zoom = card.adjust_zoom || 1.0;
+            const offsetX = card.adjust_offset_x || 0.0;
+            const offsetY = card.adjust_offset_y || 0.0;
+            const scaleX = targetW / img.naturalWidth;
+            const scaleY = targetH / img.naturalHeight;
+            const scaleFactor = Math.max(scaleX, scaleY) * zoom;
+            const resizedW = Math.round(img.naturalWidth * scaleFactor);
+            const resizedH = Math.round(img.naturalHeight * scaleFactor);
+            const extraW = resizedW - targetW;
+            const extraH = resizedH - targetH;
+            const clampedOffX = Math.max(-1.0, Math.min(1.0, offsetX));
+            const clampedOffY = Math.max(-1.0, Math.min(1.0, offsetY));
+            const cropX = Math.round(extraW * 0.5 + clampedOffX * extraW * 0.5);
+            const cropY = Math.round(extraH * 0.5 + clampedOffY * extraH * 0.5);
+            ctx.clearRect(0, 0, targetW, targetH);
+            if (card.background_color && card.background_color !== 'transparent') {
+                ctx.fillStyle = card.background_color;
+                ctx.fillRect(0, 0, targetW, targetH);
+            }
+            ctx.drawImage(img, -cropX, -cropY, resizedW, resizedH);
+            resolve(canvas.toDataURL('image/png').split(',')[1]);
+        };
+        img.onerror = () => resolve('');
+        img.src = dataUrl;
+    });
+}
+
+async function saveChanges() {
     const card = state.cards[state.editingCardIndex];
     if (!card) return;
 
     // 저장 시점에 애니메이션 여부에 따라 처리 분기
     if (state.adjustState.isAnimated) {
-        // 애니메이션은 원본 데이터를 그대로 씀 (Godot mod가 조정값을 활용할 것임)
-        card.png_base64 = state.adjustState.sourceDataUrl.split(',')[1];
+        const sourceDataUrl = state.adjustState.sourceDataUrl;
+        // MIME 타입 추출: data:[mime];base64,...
+        const colonIdx = sourceDataUrl.indexOf(':');
+        const semicolonIdx = sourceDataUrl.indexOf(';');
+        const gifMime = (colonIdx !== -1 && semicolonIdx !== -1 && semicolonIdx > colonIdx)
+            ? sourceDataUrl.slice(colonIdx + 1, semicolonIdx)
+            : 'image/gif';
+        card.png_base64 = sourceDataUrl.split(',')[1]; // GIF 원본 바이트
+        card.art_mime = gifMime;
         card.artType = 'gif';
+        // GIF의 현재(첫) 프레임을 PNG로 캡처하여 모드 export용 frames 배열에 저장
+        try {
+            const pngBase64 = await renderCardToPngBase64(card);
+            card.gif_frames = pngBase64 ? [{ png_base64: pngBase64, delay: 0.1 }] : null;
+        } catch (e) {
+            console.warn('GIF 프레임 PNG 캡처 실패:', e);
+            card.gif_frames = null;
+        }
     } else {
         const src = dom.modalPreview.toDataURL('image/png');
         card.png_base64 = src.split(',')[1];
         card.artType = 'static';
+        card.art_mime = 'image/png';
+        card.gif_frames = null;
     }
 
-    // 원본 소스 이미지 보존 (재조정 가능하도록)
+    // 원본 소스 이미지 보존 (재조정 가능하도록) — MIME 타입 포함 유지
     if (state.adjustState.sourceDataUrl?.startsWith('data:image')) {
         card.source_png_base64 = state.adjustState.sourceDataUrl.split(',')[1];
     } else {
@@ -1333,7 +1407,26 @@ function updateSelectionUI() {
 // ================================================================
 // 내보내기
 // ================================================================
-function exportJSON(selectedOnly = false) {
+
+/**
+ * GIF 카드의 frames 배열을 구성:
+ * 저장된 gif_frames가 있으면 사용, 없으면 png_base64에서 PNG 프레임 생성
+ */
+async function buildGifFrames(card) {
+    if (card.gif_frames && card.gif_frames.length > 0) {
+        return card.gif_frames;
+    }
+    // gif_frames가 없는 경우 (구 버전 저장 데이터 등) 실시간 캡처
+    try {
+        const pngBase64 = await renderCardToPngBase64(card);
+        return pngBase64 ? [{ png_base64: pngBase64, delay: 0.1 }] : [];
+    } catch (e) {
+        console.warn('GIF 프레임 생성 실패:', e);
+        return [];
+    }
+}
+
+async function exportJSON(selectedOnly = false) {
     let targetCards = state.cards;
 
     if (selectedOnly) {
@@ -1347,7 +1440,8 @@ function exportJSON(selectedOnly = false) {
         return;
     }
 
-    const overrides = modifiedCards.map(c => {
+    // GIF 프레임 생성이 비동기이므로 Promise.all로 처리
+    const overrides = await Promise.all(modifiedCards.map(async c => {
         const obj = {
             source_path: c.source_path,
             width: c.width,
@@ -1355,19 +1449,25 @@ function exportJSON(selectedOnly = false) {
             updated_at: c.updated_at || new Date().toISOString().slice(0, 19),
             type: c.artType || 'static',
             display_mode: c.display_mode || 'default',
-            frames: c.artType === 'gif' ? [] : [
-                {
-                    delay: 0.2,
-                    png_base64: c.png_base64
-                }
-            ],
-            // GIF인 경우 최상위에 gif_base64 필드를 사용하여 모드와의 호환성 확보 시도
-            // (사용자의 '추출 문제' 해결을 위해 명시적으로 분기)
-            gif_base64: c.artType === 'gif' ? c.png_base64 : undefined,
-            png_base64: c.artType === 'gif' ? undefined : c.png_base64,
         };
-        // 에디터 재수정을 위해 커스텀 데이터(원본 이미지, 조정값)도 추가로 내보냄 (모드에서는 무시됨)
+
+        if (c.artType === 'gif') {
+            // GIF: 각 프레임을 PNG로 변환하여 frames 배열로 추출 (모드 호환 형식)
+            const frames = await buildGifFrames(c);
+            if (frames.length > 0) {
+                obj.frames = frames;
+            } else {
+                // frames 생성 실패 시 정적으로 폴백
+                obj.png_base64 = c.png_base64;
+            }
+        } else {
+            // 정적 이미지: 모드는 최상위 png_base64만 사용 (frames 불필요)
+            obj.png_base64 = c.png_base64;
+        }
+
+        // 에디터 재수정을 위한 커스텀 필드 (모드에서는 무시됨)
         if (c.source_png_base64) obj.source_png_base64 = c.source_png_base64;
+        if (c.art_mime) obj.art_mime = c.art_mime;
         if (c.adjust_zoom !== undefined) obj.adjust_zoom = c.adjust_zoom;
         if (c.adjust_offset_x !== undefined) obj.adjust_offset_x = c.adjust_offset_x;
         if (c.adjust_offset_y !== undefined) obj.adjust_offset_y = c.adjust_offset_y;
@@ -1375,7 +1475,7 @@ function exportJSON(selectedOnly = false) {
             obj.background_color = c.background_color;
         }
         return obj;
-    });
+    }));
 
     const baseData = state.originalData || { format: 'card_art_bundle', version: 1 };
     const exportData = {
