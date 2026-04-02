@@ -34,6 +34,14 @@
     padding: 0;
 }
 
+/* 폰트 전역 상속: 버튼 등 폼 요소 포함 */
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+}
+
 img {
     user-select: none;
     -webkit-user-drag: none;
@@ -145,51 +153,6 @@ body {
     padding: 24px;
 }
 
-
-/* ── 업로드 드롭존 ── */
-.upload-section {
-    height: 60vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px dashed var(--border);
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.02);
-    transition: var(--transition);
-}
-
-.upload-section.drag-over,
-.upload-section:hover {
-    border-color: var(--accent);
-    background: rgba(124, 77, 255, 0.05);
-}
-
-.drop-content {
-    text-align: center;
-    max-width: 500px;
-}
-
-.drop-icon {
-    width: 64px;
-    height: 64px;
-    color: var(--text-muted);
-    margin-bottom: 24px;
-}
-
-.drop-content h2 {
-    font-size: 28px;
-    margin-bottom: 12px;
-}
-
-.drop-content h2 span {
-    color: var(--gold);
-}
-
-.drop-content p {
-    color: var(--text-muted);
-    margin-bottom: 32px;
-}
-
 /* ── 검색창 (사이드바 내) ── */
 .filter-group {
     display: flex;
@@ -254,11 +217,6 @@ body {
     pointer-events: none;
 }
 
-.toolbar-right,
-.filter-rail {
-    display: none;
-}
-
 .search-box {
     position: relative;
     width: 100%;
@@ -280,7 +238,6 @@ body {
     padding: 10px 10px 10px 44px;
     border-radius: 100px;
     color: white;
-    font-family: inherit;
     font-size: 13px;
     transition: var(--transition);
 }
@@ -318,17 +275,21 @@ body {
     row-gap: -10px;
 }
 
-/* ── STS2 카드 ── */
+/* ── STS2 카드 ──
+ * 성능:
+ *  - isolation: isolate → 스태킹 컨텍스트를 사전 생성하여 hover 시 z-index 재계산 비용 감소
+ *  - .sts2-card transform: translateZ(0) → GPU 컴포지터 레이어 고정으로 hover scale 지연 제거
+ */
 .card-item {
     background: transparent;
     border-radius: 12px;
-    transition: var(--transition);
     cursor: pointer;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     margin: -20px -12px;
+    isolation: isolate;
 }
 
 .sts2-card {
@@ -336,7 +297,8 @@ body {
     width: 100%;
     aspect-ratio: 273 / 380;
     transform-style: preserve-3d;
-    transition: transform 0.3s ease;
+    transform: translateZ(0);
+    transition: transform var(--transition);
 }
 
 .card-item:hover {
@@ -344,8 +306,8 @@ body {
 }
 
 .card-item:hover .sts2-card {
-    transform: scale(1.2);
-    transition: transform 0s;
+    transform: scale(1.2) translateZ(0);
+    transition: none;
 }
 
 .sts2-card .layer {
@@ -526,10 +488,7 @@ body {
     width: auto;
     aspect-ratio: 273 / 380;
     filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.8));
-    transform: none !important;
-}
-
-.card-large-preview .sts2-card:hover {
+    /* 모달 카드는 hover scale 불필요 */
     transform: none !important;
 }
 
@@ -580,15 +539,7 @@ body {
     margin-bottom: 6px;
 }
 
-.path-display {
-    font-family: 'Roboto Mono', monospace;
-    font-size: 11px;
-    padding: 8px;
-    background: #000;
-    border-radius: 4px;
-    color: var(--success);
-    word-break: break-all;
-}
+
 
 .size-display {
     font-size: 14px;
@@ -651,7 +602,6 @@ body {
     gap: 8px;
     padding: 10px 20px;
     border-radius: var(--radius);
-    font-family: inherit;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);

@@ -6,11 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STS2 Card Art Editor</title>
     <meta name="description" content="Slay the Spire 2 카드 이미지 아트팩 편집기">
-    <link rel="stylesheet" href="style.css">
+
+    <!-- 폰트 프리로드 (가장 먼저 로딩) -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/projectnoonnu/2410-3@1.0/Batang_Regular.woff" as="font"
+        type="font/woff" crossorigin>
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/projectnoonnu/2410-3@1.0/Batang_Bold.woff" as="font"
+        type="font/woff" crossorigin>
+
+    <!-- Google Fonts 프리커넥트 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Roboto+Mono&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap"
         rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
@@ -63,7 +72,7 @@
                         <button class="filter-chip" data-filter-value="Defect">디펙트</button>
                         <button class="filter-chip" data-filter-value="Colorless">무색</button>
                         <button class="filter-chip" data-filter-value="Ancient">고대의 존재</button>
-                        <button class="filter-chip" data-filter-value="misc">기타</button>
+                        <button class="filter-chip" data-filter-value="special">기타</button>
                     </div>
                 </div>
 
@@ -75,7 +84,7 @@
                         <button class="filter-chip" data-filter-value="Attack">공격</button>
                         <button class="filter-chip" data-filter-value="Skill">스킬</button>
                         <button class="filter-chip" data-filter-value="Power">파워</button>
-                        <button class="filter-chip" data-filter-value="misc">기타</button>
+                        <button class="filter-chip" data-filter-value="special">기타</button>
                     </div>
                 </div>
 
@@ -87,7 +96,7 @@
                         <button class="filter-chip" data-filter-value="Common">일반</button>
                         <button class="filter-chip" data-filter-value="Uncommon">고급</button>
                         <button class="filter-chip" data-filter-value="Rare">희귀</button>
-                        <button class="filter-chip" data-filter-value="misc">기타</button>
+                        <button class="filter-chip" data-filter-value="special">기타</button>
                     </div>
                 </div>
 
@@ -120,7 +129,25 @@
         <div class="modal-overlay"></div>
         <div class="modal-container">
             <div class="modal-body">
-                <div class="card-large-preview" id="cardLargePreview"></div>
+                <div class="card-large-preview" id="cardLargePreview">
+                    <div class="sts2-card">
+                        <img id="modalLayerBg" class="layer layer-bg">
+                        <img id="modalLayerFrame" class="layer layer-frame">
+                        <img id="modalLayerBanner" class="layer layer-banner">
+                        <img id="modalLayerType" class="layer layer-type">
+                        <img id="modalLayerOrb" class="layer layer-orb">
+                        <div class="layer layer-art">
+                            <img id="modalPreviewOriginal" class="hidden" style="position:absolute;width:100%;height:100%;object-fit:cover;">
+                            <img id="modalPreview" style="position:absolute;width:100%;height:100%;object-fit:cover;">
+                        </div>
+                        <div class="layer layer-text">
+                            <div id="modalTextName" class="card-name-overlay"></div>
+                        </div>
+                        <div class="layer layer-text">
+                            <div id="modalTextType" class="card-type-overlay"></div>
+                        </div>
+                    </div>
+                </div>
                 <div class="card-info">
                     <div class="modal-header">
                         <div>
@@ -128,11 +155,6 @@
                             <p id="modalNameKr" class="modal-card-name"></p>
                         </div>
                         <button class="btn-close" id="closeModal"><i data-lucide="x"></i></button>
-                    </div>
-
-                    <div class="info-group">
-                        <label>원본 경로</label>
-                        <div id="modalPath" class="path-display">res://images/...</div>
                     </div>
 
                     <div class="info-group">

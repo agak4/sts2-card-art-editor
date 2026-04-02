@@ -1,41 +1,69 @@
 'use strict';
 
 // ================================================================
-// 카드 데이터베이스 (cards.csv 임베드)
-// [no, name_kr, name_en, character, type, rarity]
+// 상수 정의
 // ================================================================
+
+/** 카드 타입 한국어 표기 */
+const CARD_TYPE_KO = {
+    Attack: '공격',
+    Skill: '스킬',
+    Power: '파워',
+    Status: '상태이상',
+    Curse: '저주',
+};
+
+/** 카드 프레임 이미지 경로 접두사 */
+const FRAME_PREFIX = 'source/img/card_frame/273px-StS2_';
+
+/** 고유 프레임을 사용하는 특수 캐릭터 그룹 (Status, Curse 등) */
+const SPECIAL_CHARACTERS = new Set(['Status', 'Curse', 'Event', 'Quest', 'Token']);
+
+/** 필터에서 '기타(special)'로 분류되는 카드 타입 */
+const SPECIAL_TYPES = new Set(['Status', 'Curse', 'Quest']);
+
+/** 필터에서 '기타(special)'로 분류되는 희귀도 */
+const SPECIAL_RARITIES = new Set(['Starter', 'Ancient', 'Misc']);
+
+/** 선택 시 희귀도 필터를 비활성화하는 캐릭터 필터값 */
+const RARITY_DISABLED_CHARS = new Set(['Ancient', 'special']);
+
+/** 모달 토글 버튼 아이콘 (lucide.createIcons 재호출 없이 사용) */
+const SVG_EYE = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const SVG_IMAGE = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`;
+
+const DIR_TO_CHARACTER = {
+    ironclad: 'Ironclad', silent: 'Silent', regent: 'Regent',
+    necrobinder: 'Necrobinder', defect: 'Defect', colorless: 'Colorless',
+    ancient: 'Ancient', status: 'Status', curse: 'Curse',
+    event: 'Event', quest: 'Quest', token: 'Token',
+};
+
 // ================================================================
-// 카드 DB 구축 및 조회 (cards.json 파일로부터 비동기 로드)
+// 카드 DB
 // ================================================================
 let CARDS_DB = [];
 const CHAR_NAME_MAP = new Map();
 const NAME_MAP = new Map();
 
-// 조회키: 특수문자 제거 후 소문자 (정규표현식 미사용)
+/** 특수문자 제거 후 소문자 조회 키 생성 */
 function toKey(str) {
     if (!str) return '';
     let result = '';
-    const lowerStr = str.toLowerCase();
-    for (let i = 0; i < lowerStr.length; i++) {
-        const char = lowerStr[i];
-        if ((char >= 'a' && char <= 'z') || (char >= '0' && char <= '9')) {
-            result += char;
-        }
+    const lower = str.toLowerCase();
+    for (let i = 0; i < lower.length; i++) {
+        const c = lower[i];
+        if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')) result += c;
     }
     return result;
 }
 
-/**
- * cards.json 파일로부터 카드 데이터베이스를 구축합니다.
- */
+/** cards.json으로부터 카드 DB 구축 */
 async function fetchCardDatabase() {
     try {
         const response = await fetch('cards.json');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         CARDS_DB = await response.json();
-
         CARDS_DB.forEach(card => {
             const nk = toKey(card.name_en);
             if (!nk) return;
@@ -48,77 +76,45 @@ async function fetchCardDatabase() {
     }
 }
 
-const DIR_TO_CHARACTER = {
-    ironclad: 'Ironclad', silent: 'Silent', regent: 'Regent',
-    necrobinder: 'Necrobinder', defect: 'Defect', colorless: 'Colorless',
-    ancient: 'Ancient', status: 'Status', curse: 'Curse',
-    event: 'Event', quest: 'Quest', token: 'Token'
-};
-
-/**
- * source_path로부터 cards.csv 레코드를 찾아 반환
- * @param {string} sourcePath e.g. "res://images/packed/card_portraits/ironclad/anger.png"
- */
+/** source_path로부터 카드 메타데이터 검색 */
 function findCardMeta(sourcePath) {
-    // res:// 제거 (문자열 리터럴 교체 사용)
-    let path = sourcePath;
-    if (path.indexOf('res://') === 0) {
-        path = path.substring(6);
-    }
+    let path = sourcePath.startsWith('res://') ? sourcePath.substring(6) : sourcePath;
     const segs = path.split('/');
     const fullFileName = segs.pop() || '';
-
-    // 확장자 제거 (가장 마지막 . 기점으로 자름)
-    const lastDotIdx = fullFileName.lastIndexOf('.');
-    const fileName = lastDotIdx !== -1 ? fullFileName.substring(0, lastDotIdx) : fullFileName;
-
+    const lastDot = fullFileName.lastIndexOf('.');
+    const fileName = lastDot !== -1 ? fullFileName.substring(0, lastDot) : fullFileName;
     const dirName = (segs.pop() || '').toLowerCase();
     const character = DIR_TO_CHARACTER[dirName] || '';
     const fileKey = toKey(fileName);
 
-    // 1차: 캐릭터+파일명 조합
+    // 1차: 캐릭터 + 파일명 조합
     const combinedKey = `${toKey(character)}:${fileKey}`;
     if (CHAR_NAME_MAP.has(combinedKey)) return CHAR_NAME_MAP.get(combinedKey);
 
     // 2차: 파일명만
     if (NAME_MAP.has(fileKey)) return NAME_MAP.get(fileKey);
 
-    // 3차: 파일명 끝의 숫자 접미사 제거 후 재시도 (ex. anger_2 -> anger)
-    let endIdx = fileKey.length;
-    while (endIdx > 0 && fileKey[endIdx - 1] >= '0' && fileKey[endIdx - 1] <= '9') {
-        endIdx--;
-    }
-    const trimmedKey = fileKey.substring(0, endIdx);
-
+    // 3차: 숫자 접미사 제거 후 재시도 (ex. anger_2 → anger)
+    let end = fileKey.length;
+    while (end > 0 && fileKey[end - 1] >= '0' && fileKey[end - 1] <= '9') end--;
+    const trimmedKey = fileKey.substring(0, end);
     if (trimmedKey && trimmedKey !== fileKey) {
-        const combinedTrimmedKey = `${toKey(character)}:${trimmedKey}`;
-        if (CHAR_NAME_MAP.has(combinedTrimmedKey)) return CHAR_NAME_MAP.get(combinedTrimmedKey);
+        const ck2 = `${toKey(character)}:${trimmedKey}`;
+        if (CHAR_NAME_MAP.has(ck2)) return CHAR_NAME_MAP.get(ck2);
         if (NAME_MAP.has(trimmedKey)) return NAME_MAP.get(trimmedKey);
     }
-
     return null;
 }
-
-
-// ================================================================
-// 필터 설정
-// ================================================================
-const MISC_CHARACTER = new Set(['Status', 'Curse', 'Event', 'Quest', 'Token']);
-const MISC_TYPE = new Set(['Status', 'Curse', 'Quest']);
-const MISC_RARITY = new Set(['Starter', 'Ancient', 'Misc']);
-// 이 캐릭터 필터 선택 시 희귀도 필터 비활성화
-const RARITY_DISABLED_CHARS = new Set(['Ancient', 'misc']);
 
 // ================================================================
 // 상태
 // ================================================================
 const state = {
     originalData: null,
-    cards: [],          // 원본 artpack 카드 배열 (메타 enriched)
-    filteredCards: [],
+    cards: [],
     editingCardIndex: -1,
     isDirty: false,
-    filters: { character: 'all', type: 'all', rarity: 'all' }
+    filters: { character: 'all', type: 'all', rarity: 'all' },
 };
 
 // ================================================================
@@ -138,10 +134,8 @@ function initDom() {
         addCardBtn: $('addCardBtn'),
         importBtn: $('importBtn'),
         appLoading: $('appLoading'),
-        // Modal
         editModal: $('editModal'),
         cardLargePreview: $('cardLargePreview'),
-        modalPath: $('modalPath'),
         modalSize: $('modalSize'),
         modalNameKr: $('modalNameKr'),
         zoomSlider: $('zoomSlider'),
@@ -152,34 +146,117 @@ function initDom() {
         offsetYVal: $('offsetYVal'),
         imageInput: $('imageInput'),
         toggleOriginalBtn: $('toggleOriginalBtn'),
+        // 모달 레이어 참조 추가
+        modalLayerBg: $('modalLayerBg'),
+        modalLayerFrame: $('modalLayerFrame'),
+        modalLayerBanner: $('modalLayerBanner'),
+        modalLayerType: $('modalLayerType'),
+        modalLayerOrb: $('modalLayerOrb'),
+        modalPreview: $('modalPreview'),
+        modalPreviewOriginal: $('modalPreviewOriginal'),
+        modalTextName: $('modalTextName'),
+        modalTextType: $('modalTextType'),
     };
+}
+
+// ================================================================
+// 카드 에셋 조회
+// ================================================================
+
+/** 캐릭터/타입/희귀도 조합에 맞는 카드 프레임 에셋 경로를 반환 */
+function getCardAssets(character, cardType, rarity) {
+    const p = FRAME_PREFIX;
+    const rarityMap = { Starter: 'Common', Common: 'Common', Uncommon: 'Uncommon', Rare: 'Rare', Ancient: 'Rare', Misc: 'Uncommon' };
+    const r = rarityMap[rarity] || 'Common';
+
+    if (SPECIAL_CHARACTERS.has(character)) {
+        const t = character === 'Status' ? 'Status' : character === 'Curse' ? 'Curse' : 'Quest';
+        const bgFile = character === 'Status' ? `${p}BgSkillColorless.png` : `${p}Bg${t}.png`;
+        return { bg: bgFile, frame: `${p}Frame${t}.png`, banner: `${p}Banner${t}.png`, orb: '', type: `${p}Type${r}.png` };
+    }
+
+    const c = character === 'Ancient' ? 'Colorless' : character;
+    const t = ['Attack', 'Skill', 'Power'].includes(cardType) ? cardType : 'Skill';
+    return {
+        bg: `${p}Bg${t}${c}.png`,
+        frame: `${p}Frame${t}${r}.png`,
+        banner: `${p}Banner${r}.png`,
+        orb: `${p}Card${c}Orb.png`,
+        type: `${p}Type${r}.png`,
+    };
+}
+
+/** 카드 아트 이미지 src 반환 (커스텀 base64 우선) */
+function getCardArtSrc(card) {
+    if (card?.png_base64) return `data:image/png;base64,${card.png_base64}`;
+    const character = (card?.character || 'colorless').toLowerCase();
+    const nameEn = (card?.name_en || '').toLowerCase().replace(/ /g, '_');
+    if (character === 'ancient' && nameEn === 'apparition') {
+        return 'source/img/card_images/silent_apparition.webp';
+    }
+    return `source/img/card_images/${character}_${nameEn}.webp`;
+}
+
+// ================================================================
+// 공유 카드 렌더링 함수
+// ================================================================
+
+/**
+ * 카드 프레임 레이어 HTML 생성 (그리드 카드 / 모달 공용)
+ * @param {object} assets  getCardAssets() 반환값
+ * @param {string} artContent  layer-art 내부에 들어갈 HTML 문자열
+ */
+function buildCardFrameHTML(assets, artContent) {
+    const fallback = 'source/img/card_frame/273px-StS2_AncientCardHighlight.png';
+    return `
+        <img src="${assets.bg}"     class="layer layer-bg"     onerror="this.onerror=null;this.src='${fallback}'">
+        <img src="${assets.frame}"  class="layer layer-frame"  onerror="this.onerror=null;this.src='${fallback}'">
+        <img src="${assets.banner}" class="layer layer-banner" onerror="this.onerror=null;this.src='${fallback}'">
+        <img src="${assets.type}"   class="layer layer-type"   onerror="this.onerror=null;this.src='${fallback}'">
+        ${assets.orb ? `<img src="${assets.orb}" class="layer layer-orb" onerror="this.onerror=null;this.src='${fallback}'">` : ''}
+        <div class="layer layer-art">${artContent}</div>
+    `;
+}
+
+/**
+ * 카드 이름·타입 텍스트 레이어 HTML 생성
+ */
+function buildCardTextHTML(card) {
+    const typeKo = CARD_TYPE_KO[card.cardType] || card.cardType;
+    return `
+        <div class="layer layer-text">
+            <div class="card-name-overlay">${card.name_kr || card.name_en}</div>
+        </div>
+        <div class="layer layer-text">
+            <div class="card-type-overlay">${typeKo}</div>
+        </div>
+    `;
 }
 
 // ================================================================
 // 초기화
 // ================================================================
+
 function getBaseSourcePath(card) {
     const charDir = Object.keys(DIR_TO_CHARACTER).find(k => DIR_TO_CHARACTER[k] === card.character) || 'colorless';
     return `res://images/packed/card_portraits/${charDir}/${(card.name_en || '').toLowerCase().replace(/ /g, '_')}.png`;
 }
 
 function initAllCards() {
-    state.cards = CARDS_DB.map(card => {
-        return {
-            source_path: getBaseSourcePath(card),
-            type: 'static',
-            artType: 'static',
-            no: card.no,
-            name_kr: card.name_kr,
-            name_en: card.name_en,
-            character: card.character,
-            cardType: card.cardType,
-            rarity: card.rarity,
-            width: 1000,
-            height: 760,
-            png_base64: ''
-        };
-    });
+    state.cards = CARDS_DB.map(card => ({
+        source_path: getBaseSourcePath(card),
+        type: 'static',
+        artType: 'static',
+        no: card.no,
+        name_kr: card.name_kr,
+        name_en: card.name_en,
+        character: card.character,
+        cardType: card.cardType,
+        rarity: card.rarity,
+        width: 1000,
+        height: 760,
+        png_base64: '',
+    }));
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -187,12 +264,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     bindEvents();
     lucide.createIcons();
 
-    // 로딩 화면 표시
     dom.appLoading.classList.remove('hidden');
 
-    // 카드 DB 로드
     await fetchCardDatabase();
-
     initAllCards();
 
     const saved = await loadFromDB();
@@ -209,60 +283,52 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    state.filteredCards = [...state.cards];
-
-    // 이미지 전체 프리로드
+    // 이미지 전체 사전 로딩 (lazy 로딩 미사용)
     await preloadAllAssets();
 
-    // 로딩 화면 숨김
     dom.appLoading.classList.add('hidden');
-
     renderUI();
 });
 
-// 모든 카드 소스 및 프레임 프리로드 함수
+/** 모든 카드 에셋과 아트 이미지를 미리 로드 */
 async function preloadAllAssets() {
     const uniqueUrls = new Set();
     state.cards.forEach(card => {
         const assets = getCardAssets(card.character, card.cardType, card.rarity);
         Object.values(assets).forEach(url => { if (url) uniqueUrls.add(url); });
-
         uniqueUrls.add(getCardArtSrc(card));
+        // 커스텀 이미지가 있더라도 원본 경로도 프리로드
         uniqueUrls.add(getCardArtSrc({ ...card, png_base64: '' }));
     });
 
-    const promises = Array.from(uniqueUrls).map(url => {
-        return new Promise(resolve => {
+    await Promise.all(Array.from(uniqueUrls).map(url =>
+        new Promise(resolve => {
             const img = new Image();
-            img.onload = resolve;
-            img.onerror = resolve;
+            img.onload = img.onerror = resolve;
             img.src = url;
-        });
-    });
-    await Promise.all(promises);
+        })
+    ));
 }
 
 // ================================================================
 // 이벤트 바인딩
 // ================================================================
 function bindEvents() {
-    dom.fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFileUpload(e.target.files[0]); });
+    dom.fileInput.addEventListener('change', e => {
+        if (e.target.files[0]) handleFileUpload(e.target.files[0]);
+    });
 
-    // 헤더 버튼
     dom.importBtn.onclick = () => dom.fileInput.click();
     dom.addCardBtn.onclick = addNewCard;
     dom.exportBtn.onclick = exportJSON;
 
-    // 검색
-    dom.searchInput.addEventListener('input', () => { filterCards(); });
+    dom.searchInput.addEventListener('input', filterCards);
 
-    // 필터 칩
     document.querySelectorAll('.chip-list').forEach(group => {
         const groupName = group.dataset.filterGroup;
-        const chips = group.querySelectorAll('.filter-chip');
-        chips.forEach(chip => {
+        group.querySelectorAll('.filter-chip').forEach(chip => {
             chip.onclick = () => {
-                chips.forEach(c => c.classList.remove('active'));
+                group.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
                 state.filters[groupName] = chip.dataset.filterValue;
                 if (groupName === 'character') syncRarityFilterState();
@@ -271,7 +337,6 @@ function bindEvents() {
         });
     });
 
-    // 모달
     $('closeModal').onclick = closeModal;
     $('cancelEdit').onclick = closeModal;
     document.querySelector('.modal-overlay').addEventListener('click', closeModal);
@@ -279,28 +344,12 @@ function bindEvents() {
     $('resetCardBtn').onclick = resetCurrentCard;
     $('uploadImageBtn').onclick = () => dom.imageInput.click();
     dom.imageInput.addEventListener('change', handleImageUpload);
+    dom.toggleOriginalBtn.onclick = toggleOriginalView;
 
-    // 원본 보기 토글 (완전히 교체 표시)
-    dom.toggleOriginalBtn.onclick = () => {
-        const isShowingOriginal = !dom.modalPreview.classList.contains('hidden');
-        if (isShowingOriginal) {
-            dom.modalPreview.classList.add('hidden');
-            dom.modalPreviewOriginal.classList.remove('hidden');
-            dom.toggleOriginalBtn.innerHTML = '<i data-lucide="image"></i> 커스텀 대상 보기';
-        } else {
-            dom.modalPreview.classList.remove('hidden');
-            dom.modalPreviewOriginal.classList.add('hidden');
-            dom.toggleOriginalBtn.innerHTML = '<i data-lucide="eye"></i> 원본(Original) 대상 보기';
-        }
-        lucide.createIcons();
-    };
+    [dom.zoomSlider, dom.offsetXSlider, dom.offsetYSlider].forEach(s =>
+        s.addEventListener('input', updateModalPreviewTransform)
+    );
 
-    // 슬라이더
-    [dom.zoomSlider, dom.offsetXSlider, dom.offsetYSlider].forEach(s => {
-        s.addEventListener('input', updateModalPreviewTransform);
-    });
-
-    // 페이지 이탈 경고
     window.addEventListener('beforeunload', e => {
         if (state.isDirty) { e.preventDefault(); e.returnValue = ''; }
     });
@@ -321,9 +370,7 @@ async function handleFileUpload(file) {
         }
 
         state.originalData = data;
-        // 기존 카드 리스트에 업로드된 정보를 덮어씌움
-        const overrides = data.overrides || [];
-        overrides.forEach(ov => {
+        (data.overrides || []).forEach(ov => {
             const fileCard = enrichCard(ov);
             const target = state.cards.find(c => c.source_path === fileCard.source_path);
             if (target) {
@@ -331,14 +378,11 @@ async function handleFileUpload(file) {
                 target.updated_at = fileCard.updated_at;
                 target.artType = fileCard.artType;
             } else {
-                // 새로운 카드 경로라면 맨 끝에 추가
                 state.cards.push(fileCard);
             }
         });
 
-        state.filteredCards = [...state.cards];
         state.isDirty = false;
-
         await saveToDB({ originalData: state.originalData, cards: state.cards });
         renderUI();
     } catch (err) {
@@ -349,15 +393,12 @@ async function handleFileUpload(file) {
     }
 }
 
-/**
- * artpack의 카드 객체에 CSV 메타데이터를 병합
- */
+/** artpack 카드 객체에 DB 메타데이터를 병합 */
 function enrichCard(raw) {
     const meta = findCardMeta(raw.source_path || '');
     return {
         ...raw,
-        artType: raw.type || 'static', // artpack의 type (static/animated)
-        // CSV 메타
+        artType: raw.type || 'static',
         no: meta?.no ?? 9999,
         name_kr: meta?.name_kr ?? extractFallbackName(raw.source_path),
         name_en: meta?.name_en ?? '',
@@ -406,127 +447,58 @@ function renderUI() {
     lucide.createIcons();
 }
 
+/** 수정된 카드 수 업데이트 */
 function updateStats() {
-    dom.cardCountEl.textContent = state.cards.length;
+    dom.cardCountEl.textContent = state.cards.filter(c => c.png_base64).length;
 }
 
 function renderCardGrid() {
     if (dom.cardGrid.children.length === 0) {
-        // 최초 1회만 DOM 생성 (no 기준 정렬 됨)
         state.cards.sort((a, b) => (a.no || 9999) - (b.no || 9999));
         const fragment = document.createDocumentFragment();
         state.cards.forEach(card => {
-            if (!card.domNode) {
-                card.domNode = createCardElement(card);
-            }
+            card.domNode = createCardElement(card);
             fragment.appendChild(card.domNode);
         });
         dom.cardGrid.appendChild(fragment);
     }
-
-    // 실제 요소 표시는 filterCards()의 display 토글을 사용함
     filterCards();
 }
 
+/** 카드 DOM을 새로 생성해 교체 (저장/리셋 후 호출) */
 function replaceCardDOM(card) {
-    if (card.domNode) {
-        // 기존 DOM 상태 저장
-        const isHidden = card.domNode.style.display === 'none';
-        const newDom = createCardElement(card);
-        newDom.style.display = isHidden ? 'none' : '';
-        dom.cardGrid.replaceChild(newDom, card.domNode);
-        card.domNode = newDom;
-    }
+    if (!card.domNode) return;
+    const isHidden = card.domNode.style.display === 'none';
+    const newDom = createCardElement(card);
+    newDom.style.display = isHidden ? 'none' : '';
+    dom.cardGrid.replaceChild(newDom, card.domNode);
+    card.domNode = newDom;
 }
 
-function createCardElement(card, index) {
+/** 카드 그리드 아이템 DOM 생성 */
+function createCardElement(card) {
     const div = document.createElement('div');
     div.className = 'card-item';
     div.onclick = () => openEditor(state.cards.indexOf(card));
 
-    const { character, cardType, rarity, name_kr, name_en, no } = card;
-    const assets = getCardAssets(character, cardType, rarity);
+    const assets = getCardAssets(card.character, card.cardType, card.rarity);
+    const artSrc = getCardArtSrc(card);
+    const fallback = 'source/img/card_frame/273px-StS2_AncientCardHighlight.png';
+    const artContent = `<img src="${artSrc}" alt="${card.name_en || card.name_kr}" onerror="this.onerror=null;this.src='${fallback}'">`;
 
-    let artSrc = getCardArtSrc(card);
-
-    const CARD_TYPE_KO = {
-        'Attack': '공격',
-        'Skill': '스킬',
-        'Power': '파워',
-        'Status': '상태이상',
-        'Curse': '저주'
-    };
-    const cardTypeKo = CARD_TYPE_KO[cardType] || cardType;
-
-    div.innerHTML = `
-    <div class="sts2-card">
-      <img src="${assets.bg}" class="layer layer-bg">
-      <img src="${assets.frame}" class="layer layer-frame">
-      <img src="${assets.banner}" class="layer layer-banner">
-      <img src="${assets.type}" class="layer layer-type">
-      ${assets.orb ? `<img src="${assets.orb}" class="layer layer-orb">` : ''}
-      <div class="layer layer-art">
-        <img src="${artSrc}" alt="${name_en || name_kr}"
-             onerror="this.onerror=null;this.src='source/img/card_frame/273px-StS2_AncientCardHighlight.png'">
-      </div>
-      <div class="layer layer-text">
-        <div class="card-name-overlay">${name_kr || name_en}</div>
-      </div>
-      <div class="layer layer-text">
-        <div class="card-type-overlay">${cardTypeKo}</div>
-      </div>
-    </div>
-  `;
+    const cardEl = document.createElement('div');
+    cardEl.className = 'sts2-card';
+    cardEl.innerHTML = buildCardFrameHTML(assets, artContent) + buildCardTextHTML(card);
 
     if (card.png_base64) {
         const badge = document.createElement('div');
         badge.className = 'badge';
         badge.textContent = '수정됨';
-        div.querySelector('.sts2-card').appendChild(badge);
+        cardEl.appendChild(badge);
     }
 
+    div.appendChild(cardEl);
     return div;
-}
-
-function getCardAssets(character, cardType, rarity) {
-    const p = 'source/img/card_frame/273px-StS2_';
-    const miscChars = MISC_CHARACTER;
-    const isMisc = miscChars.has(character);
-
-    const rarityMap = { Starter: 'Common', Common: 'Common', Uncommon: 'Uncommon', Rare: 'Rare', Ancient: 'Rare', Misc: 'Uncommon' };
-    const r = rarityMap[rarity] || 'Common';
-
-    if (isMisc) {
-        const t = character === 'Status' ? 'Status' : character === 'Curse' ? 'Curse' : 'Quest';
-        const bgFile = character === 'Status' ? `${p}BgSkillColorless.png` : `${p}Bg${t}.png`;
-        return { bg: bgFile, frame: `${p}Frame${t}.png`, banner: `${p}Banner${t}.png`, orb: '', type: `${p}Type${r}.png` };
-    }
-
-    const c = character === 'Ancient' ? 'Colorless' : character;
-    const t = ['Attack', 'Skill', 'Power'].includes(cardType) ? cardType : 'Skill';
-
-    return {
-        bg: `${p}Bg${t}${c}.png`,
-        frame: `${p}Frame${t}${r}.png`,
-        banner: `${p}Banner${r}.png`,
-        orb: `${p}Card${c}Orb.png`,
-        type: `${p}Type${r}.png`
-    };
-}
-
-function initLazyLoading() {
-    const imgs = document.querySelectorAll('img.lazy');
-    const obs = new IntersectionObserver(entries => {
-        entries.forEach(e => {
-            if (e.isIntersecting) {
-                const img = e.target;
-                img.src = img.dataset.src;
-                img.classList.remove('lazy');
-                obs.unobserve(img);
-            }
-        });
-    }, { rootMargin: '300px' });
-    imgs.forEach(img => obs.observe(img));
 }
 
 // ================================================================
@@ -535,11 +507,8 @@ function initLazyLoading() {
 function syncRarityFilterState() {
     const rarityGroup = document.querySelector('.rarity-group');
     const isDisabled = RARITY_DISABLED_CHARS.has(state.filters.character);
-
     rarityGroup.classList.toggle('filter-locked', isDisabled);
-
     if (isDisabled) {
-        // 희귀도 필터를 '전체'로 강제 초기화
         state.filters.rarity = 'all';
         rarityGroup.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
         rarityGroup.querySelector('[data-filter-value="all"]')?.classList.add('active');
@@ -551,43 +520,28 @@ function filterCards() {
     const { character, type, rarity } = state.filters;
     const rarityDisabled = RARITY_DISABLED_CHARS.has(character);
 
-    let visibleCount = 0;
     state.cards.forEach(card => {
-        const c = card.character || '';
-        const t = card.cardType || '';
-        const r = card.rarity || '';
-
-        // 캐릭터 필터
         const matchChar = character === 'all' ? true
-            : character === 'misc' ? MISC_CHARACTER.has(c)
-                : c === character;
+            : character === 'special' ? SPECIAL_CHARACTERS.has(card.character)
+                : card.character === character;
 
-        // 타입 필터
         const matchType = type === 'all' ? true
-            : type === 'misc' ? MISC_TYPE.has(t)
-                : t === type;
+            : type === 'special' ? SPECIAL_TYPES.has(card.cardType)
+                : card.cardType === type;
 
-        // 희귀도 필터 (비활성화 시 무시)
         const matchRarity = rarityDisabled || rarity === 'all' ? true
-            : rarity === 'misc' ? MISC_RARITY.has(r)
-                : r === rarity;
+            : rarity === 'special' ? SPECIAL_RARITIES.has(card.rarity)
+                : card.rarity === rarity;
 
-        // 검색
         const matchSearch = !query
             || (card.name_kr || '').toLowerCase().includes(query)
             || (card.name_en || '').toLowerCase().includes(query)
             || (card.source_path || '').toLowerCase().includes(query);
 
-        const isVisible = matchChar && matchType && matchRarity && matchSearch;
-
         if (card.domNode) {
-            card.domNode.style.display = isVisible ? '' : 'none';
+            card.domNode.style.display = (matchChar && matchType && matchRarity && matchSearch) ? '' : 'none';
         }
-
-        if (isVisible) visibleCount++;
     });
-
-    state.filteredCards = state.cards; // 하위 호환성을 위해 유지
 }
 
 // ================================================================
@@ -597,7 +551,6 @@ function addNewCard() {
     const path = prompt('추가할 카드의 원본 경로를 입력하세요:', 'res://images/packed/card_portraits/colorless/');
     if (!path) return;
 
-    const meta = findCardMeta(path);
     const newCard = enrichCard({
         source_path: path,
         width: 1000,
@@ -608,11 +561,9 @@ function addNewCard() {
     });
 
     state.cards.push(newCard);
-    state.filteredCards = [...state.cards];
     state.isDirty = true;
     saveToDB({ originalData: state.originalData, cards: state.cards });
 
-    // 새 카드의 DOM 생성 및 추가
     newCard.domNode = createCardElement(newCard);
     dom.cardGrid.appendChild(newCard.domNode);
 
@@ -627,68 +578,75 @@ function addNewCard() {
 function openEditor(cardIndex) {
     const card = state.cards[cardIndex];
     if (!card) return;
-
     state.editingCardIndex = cardIndex;
 
-    let charPrefix = (card.character || '').toLowerCase();
-    let imgFileName = `${charPrefix}_${(card.name_en || '').toLowerCase().replace(/ /g, '_')}.webp`;
-    let fallbackSrc = `source/img/card_frame/273px-StS2_AncientCardHighlight.png`;
-    let defaultArtSrc = `source/img/card_images/${imgFileName}`;
+    const fallbackSrc = 'source/img/card_frame/273px-StS2_AncientCardHighlight.png';
+    const charPrefix = (card.character || '').toLowerCase();
+    const defaultArtSrc = `source/img/card_images/${charPrefix}_${(card.name_en || '').toLowerCase().replace(/ /g, '_')}.webp`;
+    const artSrc = card.png_base64 ? `data:image/png;base64,${card.png_base64}` : defaultArtSrc;
 
-    const artSrc = card.png_base64
-        ? `data:image/png;base64,${card.png_base64}`
-        : defaultArtSrc;
-
-    // 카드의 모든 프레임 요소를 모달용으로 렌더링
     const assets = getCardAssets(card.character, card.cardType, card.rarity);
-    const CARD_TYPE_KO = { 'Attack': '공격', 'Skill': '스킬', 'Power': '파워', 'Status': '상태이상', 'Curse': '저주' };
-    const cardTypeKo = CARD_TYPE_KO[card.cardType] || card.cardType;
 
-    dom.cardLargePreview.innerHTML = `
-      <div class="sts2-card">
-        <img src="${assets.bg}" class="layer layer-bg">
-        <img src="${assets.frame}" class="layer layer-frame">
-        <img src="${assets.banner}" class="layer layer-banner">
-        <img src="${assets.type}" class="layer layer-type">
-        ${assets.orb ? `<img src="${assets.orb}" class="layer layer-orb">` : ''}
-        <div class="layer layer-art">
-          <img id="modalPreviewOriginal" class="hidden" src="${defaultArtSrc}" onerror="this.onerror=null;this.src='${fallbackSrc}'" style="position:absolute; width:100%; height:100%; object-fit:cover;">
-          <img id="modalPreview" src="${artSrc}" onerror="this.onerror=null;this.src='${fallbackSrc}'" style="position:absolute; width:100%; height:100%; object-fit:cover;">
-        </div>
-        <div class="layer layer-text">
-          <div class="card-name-overlay">${card.name_kr || card.name_en}</div>
-        </div>
-        <div class="layer layer-text">
-          <div class="card-type-overlay">${cardTypeKo}</div>
-        </div>
-      </div>
-    `;
+    // 이미지 경로 업데이트 (src가 다를 때만 업데이트하여 캐시 활용 극대화)
+    const updateSrc = (img, src) => { 
+        if (!src) { img.src = ''; return; }
+        // 브라우저의 img.src는 항상 절대경로를 반환하므로, URL 객체로 변환하여 비교
+        const absSrc = new URL(src, window.location.href).href;
+        if (img.src !== absSrc) {
+            img.src = src; 
+            img.onerror = () => { img.src = fallbackSrc; img.onerror = null; };
+        }
+    };
 
-    // DOM 참조 동적 갱신
-    dom.modalPreviewOriginal = document.getElementById('modalPreviewOriginal');
-    dom.modalPreview = document.getElementById('modalPreview');
+    updateSrc(dom.modalLayerBg, assets.bg);
+    updateSrc(dom.modalLayerFrame, assets.frame);
+    updateSrc(dom.modalLayerBanner, assets.banner);
+    updateSrc(dom.modalLayerType, assets.type);
+    
+    if (assets.orb) {
+        dom.modalLayerOrb.classList.remove('hidden');
+        updateSrc(dom.modalLayerOrb, assets.orb);
+    } else {
+        dom.modalLayerOrb.classList.add('hidden');
+    }
 
-    dom.modalPath.textContent = card.source_path || 'N/A';
+    updateSrc(dom.modalPreviewOriginal, defaultArtSrc);
+    updateSrc(dom.modalPreview, artSrc);
+
+    // 텍스트 업데이트
+    dom.modalTextName.innerText = card.name_kr || card.name_en;
+    dom.modalTextType.innerText = CARD_TYPE_KO[card.cardType] || card.cardType;
+
     dom.modalSize.textContent = `${card.width || 1000} × ${card.height || 760}`;
     dom.modalNameKr.textContent = card.name_kr ? `${card.name_kr} (${card.name_en || ''})` : (card.name_en || '');
 
+    // 슬라이더 초기화
     dom.zoomSlider.value = 100;
     dom.offsetXSlider.value = 0;
     dom.offsetYSlider.value = 0;
-    updateModalPreviewTransform(); // 초기 값 표시 동기화
-    dom.modalPreview.style.transform = '';
+    updateModalPreviewTransform();
 
-    // Reset toggle state
+    // 토글 버튼 초기 상태 (인라인 SVG로 lucide.createIcons 호출 불필요)
     dom.modalPreview.classList.remove('hidden');
-    dom.toggleOriginalBtn.innerHTML = '<i data-lucide="eye"></i> 원본(Original) 대상 보기';
+    dom.modalPreviewOriginal.classList.add('hidden');
+    dom.toggleOriginalBtn.innerHTML = `${SVG_EYE} 원본(Original) 대상 보기`;
 
     dom.editModal.classList.remove('hidden');
-    lucide.createIcons();
 }
 
 function closeModal() {
     dom.editModal.classList.add('hidden');
     dom.imageInput.value = '';
+}
+
+/** 원본/커스텀 이미지 토글 */
+function toggleOriginalView() {
+    const isShowingCustom = !dom.modalPreview.classList.contains('hidden');
+    dom.modalPreview.classList.toggle('hidden', isShowingCustom);
+    dom.modalPreviewOriginal.classList.toggle('hidden', !isShowingCustom);
+    dom.toggleOriginalBtn.innerHTML = isShowingCustom
+        ? `${SVG_IMAGE} 커스텀 대상 보기`
+        : `${SVG_EYE} 원본(Original) 대상 보기`;
 }
 
 function handleImageUpload(e) {
@@ -706,18 +664,15 @@ function updateModalPreviewTransform() {
     const zoom = dom.zoomSlider.value;
     const x = dom.offsetXSlider.value;
     const y = dom.offsetYSlider.value;
-    
     dom.zoomVal.setAttribute('data-value', `${zoom}%`);
     dom.offsetXVal.setAttribute('data-value', `${x}px`);
     dom.offsetYVal.setAttribute('data-value', `${y}px`);
-    
     dom.modalPreview.style.transform = `scale(${zoom / 100}) translate(${x}px, ${y}px)`;
 }
 
 function saveChanges() {
     const card = state.cards[state.editingCardIndex];
     if (!card) return;
-
     const src = dom.modalPreview.src;
     if (src.startsWith('data:image')) {
         card.png_base64 = src.split(',')[1];
@@ -725,6 +680,7 @@ function saveChanges() {
         state.isDirty = true;
         saveToDB({ originalData: state.originalData, cards: state.cards });
         replaceCardDOM(card);
+        updateStats();
     }
     closeModal();
 }
@@ -737,6 +693,7 @@ function resetCurrentCard() {
     state.isDirty = true;
     saveToDB({ originalData: state.originalData, cards: state.cards });
     replaceCardDOM(card);
+    updateStats();
     closeModal();
 }
 
@@ -744,14 +701,10 @@ function resetCurrentCard() {
 // 내보내기
 // ================================================================
 function exportJSON() {
-    // 수정된(커스텀 이미지가 있는) 카드만 내보내기
-    const modifiedCards = state.cards.filter(c => c.png_base64 && c.png_base64.length > 0);
-
-    // artType → type 으로 복원 (artpack 포맷 유지)
-    const overrides = modifiedCards.map(card => {
-        const { artType, no, name_kr, name_en, character, cardType, rarity, ...rest } = card;
-        return { ...rest, type: artType };
-    });
+    const modifiedCards = state.cards.filter(c => c.png_base64?.length > 0);
+    const overrides = modifiedCards.map(({ artType, no, name_kr, name_en, character, cardType, rarity, domNode, ...rest }) => ({
+        ...rest, type: artType,
+    }));
 
     const exportData = {
         ...(state.originalData || { format: 'card_art_bundle' }),
@@ -790,40 +743,15 @@ function openDB() {
     });
 }
 
-/**
- * 카드의 아트 이미지 소스 경로를 반환합니다.
- */
-function getCardArtSrc(card) {
-    if (card && card.png_base64) return `data:image/png;base64,${card.png_base64}`;
-
-    const character = (card && card.character) || 'colorless';
-    const nameEn = (card && card.name_en) || '';
-    const fileName = nameEn.toLowerCase().replace(/ /g, '_');
-
-    // Ancient 카드는 종종 다른 캐릭터 배경 이미지나 Colorless를 사용함
-    // 영체화(Apparition)는 사일런트 이미지를 사용함
-    if (character === 'Ancient' && fileName === 'apparition') {
-        return `source/img/card_images/silent_apparition.webp`;
-    }
-
-    const charPrefix = character.toLowerCase();
-    return `source/img/card_images/${charPrefix}_${fileName}.webp`;
-}
-
 async function saveToDB(value) {
     try {
         const db = await openDB();
         const tx = db.transaction('AppData', 'readwrite');
-
-        // domNode는 IndexedDB에 저장할 수 없으므로 제외 (복제 오류 방지)
+        // domNode는 직렬화 불가 → 제외
         const safeValue = {
             ...value,
-            cards: (value.cards || []).map(c => {
-                const { domNode, ...rest } = c;
-                return rest;
-            })
+            cards: (value.cards || []).map(({ domNode, ...rest }) => rest),
         };
-
         tx.objectStore('AppData').put(safeValue, 'currentState');
         return new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
     } catch (e) { console.warn('IndexedDB 저장 실패:', e); }
@@ -843,9 +771,4 @@ async function loadFromDB() {
 // ================================================================
 function showLoading(show) {
     dom.appLoading.classList.toggle('hidden', !show);
-}
-
-function debounce(fn, ms) {
-    let t;
-    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
 }
