@@ -174,6 +174,7 @@ function initDom() {
         cancelSelectBtn: $('cancelSelectBtn'),
         selectAllBtn: $('selectAllBtn'),
         exportSelectedBtn: $('exportSelectedBtn'),
+        exportImageBtn: $('exportImageBtn'),
         selectedCount: $('selectedCount'),
         modalPreviewAnimated: $('modalPreviewAnimated'),
         bgColorPicker: $('bgColorPicker'),
@@ -483,7 +484,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await preloadAllAssets();
 
     dom.appLoading.classList.add('hidden');
-    
+
     // 이전에 저장된 뱃지 표시 설정 불러오기
     const savedBadgeShow = localStorage.getItem('sts2_show_badge');
     if (savedBadgeShow !== null) {
@@ -491,7 +492,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         dom.badgeToggle.checked = state.showModifiedBadge;
         dom.cardGrid.classList.toggle('hide-badges', !state.showModifiedBadge);
     }
-    
+
     renderUI();
     startGlobalAnimationLoop();
 });
@@ -530,6 +531,7 @@ function bindEvents() {
     dom.cancelSelectBtn.onclick = cancelSelectMode;
     dom.selectAllBtn.onclick = selectAllVisibleCards;
     dom.exportSelectedBtn.onclick = () => exportJSON(true);
+    dom.exportImageBtn.onclick = exportSelectedAsImage;
     dom.importMergeBtn.onclick = () => {
         if (state.pendingImportData) processImport(state.pendingImportData, true);
         hideImportChoiceModal();
@@ -586,12 +588,12 @@ function bindEvents() {
     [dom.zoomSlider, dom.offsetXSlider, dom.offsetYSlider].forEach(s =>
         s.addEventListener('input', updateModalPreviewTransform)
     );
-    
+
     // 뱃지 표시 토글
     dom.badgeToggle.addEventListener('change', (e) => {
         state.showModifiedBadge = e.target.checked;
         dom.cardGrid.classList.toggle('hide-badges', !state.showModifiedBadge);
-        
+
         // 설정 저장 (선택 사항)
         localStorage.setItem('sts2_show_badge', state.showModifiedBadge);
     });
@@ -1525,6 +1527,7 @@ function updateSelectionUI() {
     const count = state.selectedCards.size;
     dom.selectedCount.textContent = count;
     dom.exportSelectedBtn.disabled = count === 0;
+    dom.exportImageBtn.disabled = count === 0;
 
     const visibleIndices = state.cards
         .map((card, i) => ({ card, i }))
@@ -1787,6 +1790,96 @@ async function exportJSON(selectedOnly = false) {
         showLoading(false);
         state.isDirty = false;
         saveToDB({ originalData: state.originalData, cards: state.cards });
+    }
+}
+
+async function exportSelectedAsImage() {
+    const selectedIndices = Array.from(state.selectedCards).sort((a, b) => {
+        const noA = state.cards[a].no || 9999;
+        const noB = state.cards[b].no || 9999;
+        return noA - noB;
+    });
+
+    if (selectedIndices.length === 0) return;
+
+    showLoading(true, '이미지를 생성하는 중입니다...');
+
+    const container = document.createElement('div');
+    container.className = 'card-grid';
+    container.style.position = 'fixed';
+    container.style.left = '0';
+    container.style.top = '0';
+    container.style.zIndex = '-9999';
+    container.style.opacity = '0';
+    container.style.pointerEvents = 'none';
+    container.style.background = 'transparent';
+    container.style.padding = '40px';
+
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = 'repeat(5, max-content)';
+    container.style.gap = '0';
+    container.style.width = 'fit-content';
+
+    document.body.appendChild(container);
+
+    selectedIndices.forEach(idx => {
+        const card = state.cards[idx];
+        const nodeClone = card.domNode.cloneNode(true);
+
+        nodeClone.classList.remove('selected');
+        const badge = nodeClone.querySelector('.badge');
+        if (badge) badge.remove();
+
+        nodeClone.style.display = 'flex';
+        nodeClone.style.margin = '-20px -12px';
+
+        container.appendChild(nodeClone);
+    });
+
+    try {
+        if (!window.htmlToImage) {
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js';
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const dataUrl = await htmlToImage.toPng(container, {
+            pixelRatio: 1,
+            style: {
+                opacity: '1'
+            }
+        });
+
+        const a = document.createElement('a');
+        a.href = dataUrl;
+
+        const now = new Date();
+        const dateStr = now.getFullYear().toString() +
+            (now.getMonth() + 1).toString().padStart(2, '0') +
+            now.getDate().toString().padStart(2, '0') +
+            now.getHours().toString().padStart(2, '0') +
+            now.getMinutes().toString().padStart(2, '0') +
+            now.getSeconds().toString().padStart(2, '0');
+
+        a.download = `selected_cards_${dateStr}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+    } catch (e) {
+        console.error(e);
+        alert('이미지 생성 중 오류가 발생했습니다.');
+    } finally {
+        if (document.body.contains(container)) {
+            document.body.removeChild(container);
+        }
+        showLoading(false);
     }
 }
 

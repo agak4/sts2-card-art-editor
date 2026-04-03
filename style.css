@@ -1159,14 +1159,14 @@ body.select-mode .card-item {
 
 /* ── 앱 로딩 ── */
 .app-loading {
-    position: absolute;
+    position: fixed;
     inset: 0;
     background: rgba(15, 17, 26, 0.4);
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 100;
+    z-index: 9999;
 }
 
 .loader-content {
