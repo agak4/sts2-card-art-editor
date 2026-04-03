@@ -366,7 +366,7 @@ body.dragging {
     --card-name: #FFF6E2;
     --card-type: #272727;
     position: relative;
-    width: 100%;
+    width: 273px;
     aspect-ratio: 273 / 380;
     transform-style: preserve-3d;
     transform: translateZ(0);
@@ -1262,18 +1262,30 @@ body.select-mode .card-item {
 }
 
 /* ── 반응형 ── */
-@media (max-width: 1000px) {
-    .modal-body {
-        grid-template-columns: 1fr;
-    }
-
+@media (max-width: 1750px) {
     .card-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 250px);
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 1500px) {
     .card-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 250px);
+    }
+}
+
+@media (max-width: 1200px) {
+    .card-grid {
+        grid-template-columns: repeat(3, 250px);
+    }
+
+    .filter-sidebar {
+        width: 220px;
+    }
+}
+
+@media (max-width: 1000px) {
+    .card-grid {
+        grid-template-columns: repeat(2, 250px);
     }
 }
