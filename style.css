@@ -342,9 +342,10 @@ body.dragging {
 
 .card-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5, 250px);
     column-gap: -20px;
     row-gap: -10px;
+    justify-content: center;
 }
 
 /* STS2 카드 */
@@ -1287,5 +1288,11 @@ body.select-mode .card-item {
 @media (max-width: 1000px) {
     .card-grid {
         grid-template-columns: repeat(2, 250px);
+    }
+}
+
+@media (max-width: 780px) {
+    .card-grid {
+        grid-template-columns: repeat(1, 250px);
     }
 }
