@@ -264,7 +264,10 @@
                     <i data-lucide="check-square"></i> 현재 목록 전체 선택
                 </button>
                 <button id="exportSelectedBtn" class="btn btn-primary" disabled>
-                    <i data-lucide="download"></i> 선택 항목 내보내기
+                    <i data-lucide="download"></i> 선택 항목 내보내기 (.json)
+                </button>
+                <button id="exportSelectedPngBtn" class="btn btn-secondary" disabled>
+                    <i data-lucide="image"></i> PNG 한 장으로 합치기
                 </button>
             </div>
         </div>
@@ -292,6 +295,36 @@
                         <i data-lucide="refresh-cw"></i> 작업 초기화 후 불러오기
                     </button>
                     <button id="cancelImportBtn" class="btn btn-secondary btn-full">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PNG 통합 내보내기 확인 모달 -->
+    <div id="exportPngChoiceModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-container mini-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="header-with-icon">
+                        <i data-lucide="image" class="text-gold"></i>
+                        <h3>PNG 통합 내보내기 설정</h3>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <p>선택된 카드 중 어떤 이미지를 내보낼까요?</p><br>
+                    <p>총 <span id="exportTotalCount">0</span>장 선택됨 (<span id="exportModifiedCount">0</span>장 수정됨)</p>
+                </div>
+                <div class="modal-footer vertical-stack">
+                    <div class="button-group">
+                        <button id="exportAllSelectedPngBtn" class="btn btn-primary btn-full">
+                            <i data-lucide="layers"></i> 모든 카드 내보내기
+                        </button>
+                        <button id="exportModifiedOnlyPngBtn" class="btn btn-secondary btn-full">
+                            <i data-lucide="sparkles"></i> 수정본만 내보내기
+                        </button>
+                    </div>
+                    <button id="cancelExportPngBtn" class="btn btn-danger btn-full">취소</button>
                 </div>
             </div>
         </div>
