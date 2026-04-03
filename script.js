@@ -255,7 +255,6 @@ function getCardAssets(character, cardType, rarity) {
 function getCardArtSrc(card) {
     if (card?.blobUrl) return card.blobUrl;
     if (card?.png_base64 && !card.blobUrl) {
-        // 백오프: 직접 호출되지 않았더라도 비상시를 위해 업데이트 시도 (드문 경우)
         updateCardBlobUrl(card);
         if (card.blobUrl) return card.blobUrl;
     }
@@ -289,12 +288,12 @@ function updateCardBlobUrl(card) {
 
     if (card.artType === 'gif' && card.gif_frames && card.gif_frames.length > 0) {
         card.frameBlobUrls = card.gif_frames.map(f => {
-            const blob = base64ToBlob(f.png_base64, 'image/webp');
+            const blob = base64ToBlob(f.png_base64, 'image/png');
             return URL.createObjectURL(blob);
         });
         card.blobUrl = card.frameBlobUrls[0];
     } else if (card.png_base64) {
-        let actualMime = card.art_mime || 'image/webp';
+        let actualMime = card.art_mime || 'image/png';
         if (card.png_base64.startsWith('iVBORw0KGgo')) actualMime = 'image/png';
         else if (card.png_base64.startsWith('UklGR')) actualMime = 'image/webp';
         else if (card.png_base64.startsWith('R0lGOD')) actualMime = 'image/gif';
@@ -311,8 +310,6 @@ function updateCardBlobUrl(card) {
 
 /**
  * 카드 프레임 레이어 HTML 생성 (그리드 카드 / 모달 공용)
- * @param {object} assets  getCardAssets() 반환값
- * @param {string} artContent  layer-art 내부에 들어갈 HTML 문자열
  */
 function buildCardFrameHTML(assets, artContent) {
     const fallback = 'source/img/card_frame/273px-StS2_AncientCardHighlight.png';
@@ -473,7 +470,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     target.display_mode = savedCard.display_mode || 'default';
                     target.updated_at = savedCard.updated_at;
                     target.artType = savedCard.artType || 'static';
-                    target.art_mime = savedCard.art_mime || (target.artType === 'gif' ? 'image/gif' : 'image/webp');
+                    target.art_mime = savedCard.art_mime || (target.artType === 'gif' ? 'image/gif' : 'image/png');
                     target.gif_frames = savedCard.gif_frames || null;
                     updateCardBlobUrl(target);
                 }
@@ -495,7 +492,6 @@ async function preloadAllAssets() {
         const assets = getCardAssets(card.character, card.cardType, card.rarity);
         Object.values(assets).forEach(url => { if (url) uniqueUrls.add(url); });
         uniqueUrls.add(getCardArtSrc(card));
-        // 커스텀 이미지가 있더라도 원본 경로도 프리로드
         uniqueUrls.add(getCardArtSrc({ ...card, png_base64: '' }));
     });
 
@@ -614,7 +610,6 @@ async function handleFileUpload(file) {
             return;
         }
 
-        // 수정된 카드가 있는지 확인
         const hasModified = state.cards.some(c => c.png_base64);
         if (hasModified) {
             state.pendingImportData = data;
@@ -642,7 +637,6 @@ async function processImport(data, isMerge = true) {
                 target = state.cards.find(c => c.name_en === fileCard.name_en);
             }
             if (target) {
-                // 덮어씌우기 모드이거나 기존에 수정본이 없으면 적용
                 if (isMerge || !target.png_base64) {
                     target.png_base64 = fileCard.png_base64;
                     target.source_png_base64 = fileCard.source_png_base64 || fileCard.png_base64;
@@ -652,7 +646,7 @@ async function processImport(data, isMerge = true) {
                     target.display_mode = fileCard.display_mode || 'default';
                     target.updated_at = fileCard.updated_at;
                     target.artType = fileCard.artType;
-                    target.art_mime = fileCard.art_mime || (fileCard.artType === 'gif' ? 'image/gif' : 'image/webp');
+                    target.art_mime = fileCard.art_mime || (fileCard.artType === 'gif' ? 'image/gif' : 'image/png');
                     target.gif_frames = fileCard.gif_frames || null;
                     updateCardBlobUrl(target);
                 }
@@ -834,16 +828,47 @@ function createCardElement(card) {
     const offX = card.adjust_offset_x || 0.0;
     const offY = card.adjust_offset_y || 0.0;
 
-    const artStyle = `
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transform: translate(-50%, -50%) translate(${offX * 50}%, ${offY * 50}%) scale(${zoom});
-        transform-origin: center;
-    `;
+    // 정적 이미지는 이미 구워진 캔버스 결과물(png_base64)이 반환되므로 이중 줌 방지
+    // 단, GIF (애니메이션)는 원본이 반환되므로 정밀 퍼센트(%) 좌표형 렌더링으로 일치시킴
+    const isGif = card.artType === 'gif';
+    let artStyle = `position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover;`;
+
+    if (isGif && card.source_width && card.source_height) {
+        // 모달과 수학적으로 완벽히 동일한 정밀 퍼센트(%) 좌표 계산
+        const targetW = card.width || 1000;
+        const targetH = card.height || 760;
+        const coverScale = Math.max(targetW / card.source_width, targetH / card.source_height);
+        const totalScale = coverScale * zoom;
+        const rW = card.source_width * totalScale;
+        const rH = card.source_height * totalScale;
+        const cx = targetW / 2 + offX * (targetW / 2);
+        const cy = targetH / 2 + offY * (targetH / 2);
+
+        const leftPct = ((cx - rW / 2) / targetW) * 100;
+        const topPct = ((cy - rH / 2) / targetH) * 100;
+        const widthPct = (rW / targetW) * 100;
+        const heightPct = (rH / targetH) * 100;
+
+        artStyle = `
+            position: absolute;
+            left: ${leftPct}%;
+            top: ${topPct}%;
+            width: ${widthPct}%;
+            height: ${heightPct}%;
+            object-fit: fill;
+        `;
+    } else if (isGif) {
+        // 해상도 정보가 없는 기존 GIF 데이터용 임시 폴백
+        artStyle = `
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: translate(calc(-50% + ${offX * 50 / Math.max(0.1, zoom)}%), calc(-50% + ${offY * 50 / Math.max(0.1, zoom)}%)) scale(${zoom});
+        `;
+    }
 
     const artImgId = `art-img-${index}`;
     const artContent = `
@@ -912,7 +937,6 @@ function filterCards() {
         }
     });
 
-    // 필터링이 완료된 후 하단의 선택 버튼 상태 최신화
     if (state.isSelectMode) updateSelectionUI();
 }
 
@@ -934,7 +958,6 @@ async function unloadArtPack() {
 
     showLoading(true, '초기 상태로 되돌리고 있습니다...');
     try {
-        // 모든 Blob URL 해제
         state.cards.forEach(c => {
             if (c.blobUrl) URL.revokeObjectURL(c.blobUrl);
             c.blobUrl = null;
@@ -943,17 +966,14 @@ async function unloadArtPack() {
         state.originalData = null;
         state.isDirty = false;
 
-        // 초기 카드로 리셋 (png_base64 등 모든 수정 필드 클리어)
         initAllCards();
 
-        // DB 캐시 초기화
         const db = await openDB();
         const tx = db.transaction('AppData', 'readwrite');
         tx.objectStore('AppData').delete('currentState');
 
         await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
 
-        // 그리드 초기화 (기존 DOM 노드 제거 후 다시 렌더링)
         dom.cardGrid.innerHTML = '';
         renderUI();
     } catch (err) {
@@ -966,6 +986,29 @@ async function unloadArtPack() {
 // ================================================================
 // 모달 에디터
 // ================================================================
+
+/**
+ * [FIX] 캔버스/모달 미리보기 초기화 헬퍼
+ * 이전 카드의 잔상이 남지 않도록 모달 표시 전에 호출
+ */
+function clearModalPreviews() {
+    // 캔버스 초기화
+    const canvas = dom.modalPreview;
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width || 10, canvas.height || 10);
+    }
+    // 애니메이션 이미지 초기화
+    if (dom.modalPreviewAnimated) {
+        dom.modalPreviewAnimated.src = '';
+        dom.modalPreviewAnimated.classList.add('hidden');
+    }
+    // 정적 캔버스 숨기기
+    if (dom.modalPreview) {
+        dom.modalPreview.classList.add('hidden');
+    }
+}
+
 function openEditor(cardIndex) {
     const card = state.cards[cardIndex];
     if (!card) return;
@@ -994,7 +1037,14 @@ function openEditor(cardIndex) {
         isFrameBased: isFrameBased
     };
 
+    // [FIX] 배경색 UI 동기화 (markDirty=false: 열기 시에는 dirty 마킹 안 함)
     updateBackgroundColor(state.adjustState.backgroundColor, false);
+
+    // [FIX] 배경색 칩 활성화 상태 동기화
+    const bgColor = state.adjustState.backgroundColor;
+    document.querySelectorAll('.color-chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.color === bgColor);
+    });
 
     const assets = getCardAssets(card.character, card.cardType, card.rarity);
 
@@ -1033,9 +1083,6 @@ function openEditor(cardIndex) {
     dom.offsetXSlider.value = Math.round((card.adjust_offset_x ?? 0.0) * 100);
     dom.offsetYSlider.value = Math.round((card.adjust_offset_y ?? 0.0) * 100);
 
-    dom.modalPreview.classList.remove('hidden');
-    dom.modalPreviewOriginal.classList.add('hidden');
-
     // 토글 스위치 초기화 (커스텀 활성화)
     dom.toggleOriginalBtn.classList.remove('is-original');
     dom.toggleOriginalBtn.querySelectorAll('.toggle-option').forEach(opt => {
@@ -1044,23 +1091,36 @@ function openEditor(cardIndex) {
 
     dom.cardLargePreview.querySelector('.sts2-card').className = `sts2-card ${card.rarity ? `rarity-${card.rarity.toLowerCase()}` : ''}`;
 
+    // [FIX] 이전 카드 잔상 방지: 먼저 미리보기 초기화
+    clearModalPreviews();
+
     requestAnimationFrame(async () => {
-        dom.editModal.classList.remove('hidden');
+        // [FIX] 이미지를 완전히 로드한 후에 모달을 표시 (flash 방지)
         try {
             state.adjustState.sourceDataUrl = sourceSrc;
             state.adjustState.sourceImage = await loadSourceImage(sourceSrc);
-            updateModalPreviewTransform();
+            if (state.adjustState.sourceImage) {
+                state.adjustState.sourceWidth = state.adjustState.sourceImage.naturalWidth;
+                state.adjustState.sourceHeight = state.adjustState.sourceImage.naturalHeight;
+            }
         } catch (err) {
-            state.adjustState.sourceDataUrl = defaultArtSrc;
-            state.adjustState.sourceImage = await loadSourceImage(defaultArtSrc);
-            updateModalPreviewTransform();
+            try {
+                state.adjustState.sourceDataUrl = defaultArtSrc;
+                state.adjustState.sourceImage = await loadSourceImage(defaultArtSrc);
+            } catch (e2) {
+                state.adjustState.sourceImage = null;
+            }
         }
+
+        dom.editModal.classList.remove('hidden');
+        updateModalPreviewTransform();
     });
 }
 
 function closeModal() {
     dom.editModal.classList.add('hidden');
     dom.imageInput.value = '';
+    state.editingCardIndex = -1;
 }
 
 function toggleOriginalView() {
@@ -1068,7 +1128,6 @@ function toggleOriginalView() {
     dom.modalPreview.classList.toggle('hidden', isShowingCustom);
     dom.modalPreviewOriginal.classList.toggle('hidden', !isShowingCustom);
 
-    // UI 상태 업데이트
     dom.toggleOriginalBtn.classList.toggle('is-original', isShowingCustom);
     dom.toggleOriginalBtn.querySelectorAll('.toggle-option').forEach(opt => {
         opt.classList.toggle('active');
@@ -1087,6 +1146,8 @@ function handleImageUpload(e) {
         state.adjustState.isAnimated = isAnimated;
         state.adjustState.isFrameBased = false;
         state.adjustState.sourceImage = await loadSourceImage(dataUrl);
+        state.adjustState.sourceWidth = state.adjustState.sourceImage.naturalWidth;
+        state.adjustState.sourceHeight = state.adjustState.sourceImage.naturalHeight;
         state.adjustState.zoom = 1.0;
         state.adjustState.offsetX = 0.0;
         state.adjustState.offsetY = 0.0;
@@ -1099,7 +1160,7 @@ function handleImageUpload(e) {
     reader.readAsDataURL(file);
 }
 
-/** 현재 편집된 이미지의 원본 소스를 다운로드 (줌/오프셋 미반영) */
+/** 현재 편집된 이미지의 원본 소스를 다운로드 */
 function downloadCustomImage() {
     const card = state.cards[state.editingCardIndex];
     if (!card) return;
@@ -1110,7 +1171,6 @@ function downloadCustomImage() {
         return;
     }
 
-    // MIME 타입에 따른 확장자 결정
     let ext = 'webp';
     if (dataUrl.includes('image/gif')) ext = 'gif';
     else if (dataUrl.includes('image/png')) ext = 'png';
@@ -1135,7 +1195,6 @@ function updateBackgroundColor(color, markDirty = true) {
     const layerArt = dom.cardLargePreview.querySelector('.layer-art');
     if (layerArt) {
         layerArt.style.backgroundColor = isTransparent ? '' : color;
-        // 체커보드 패턴 (투명일 때만 노출)
         if (isTransparent) {
             layerArt.classList.add('checkerboard');
         } else {
@@ -1145,14 +1204,21 @@ function updateBackgroundColor(color, markDirty = true) {
 
     if (markDirty) state.isDirty = true;
 
-    // 만약 캔버스 모드라면 즉시 재렌더링
-    if (!state.adjustState.isAnimated) {
+    // [FIX] sourceImage가 준비된 경우에만 캔버스 업데이트
+    if (!state.adjustState.isAnimated && state.adjustState.sourceImage) {
         updateModalPreviewTransform();
     }
 }
 
 /**
- * 캐싱된 이미지를 사용하여 Canvas에 미세조정 결과를 즉시 렌더링 (점멸 방지)
+ * [FIX] 캔버스/애니메이션 미리보기 업데이트
+ *
+ * 핵심 수정: 그리드 카드의 CSS transform과 동일한 수식으로 통일
+ *   CSS: translate(-50%,-50%) translate(offX*50%, offY*50%) scale(zoom) + object-fit:cover
+ *   Canvas: cx = W/2 + offsetX * W/2, cy = H/2 + offsetY * H/2 (이미지 중심 위치)
+ *
+ * 이전 코드의 cropX/cropY 방식은 오프셋 방향이 CSS와 반대였고
+ * 확대율도 다르게 계산되어 그리드 카드와 모달 간 시각적 불일치가 발생했음.
  */
 function updateModalPreviewTransform() {
     const zoomRaw = parseInt(dom.zoomSlider.value, 10);
@@ -1178,28 +1244,43 @@ function updateModalPreviewTransform() {
     const targetW = card?.width || 1000;
     const targetH = card?.height || 760;
 
-    // 1. 애니메이션 모드 (GIF 등)
+    // ── 애니메이션 모드 (GIF 등) ──
+    // Canvas 렌더링과 단 1픽셀의 오차도 없이 시각적 일치를 위해
+    // 부모 컨테이너(100%) 비율 기준 절대 퍼센트롤 계산하여 위치/크기를 고정합니다.
     if (state.adjustState.isAnimated) {
         dom.modalPreview.classList.add('hidden');
         dom.modalPreviewAnimated.classList.remove('hidden');
 
         const animImg = dom.modalPreviewAnimated;
         animImg.src = state.adjustState.sourceDataUrl;
+        
+        // 캔버스와 동일한 크기/좌표 렌더링 수학
+        const coverScale = Math.max(targetW / img.naturalWidth, targetH / img.naturalHeight);
+        const totalScale = coverScale * zoom;
+        const rW = img.naturalWidth * totalScale;
+        const rH = img.naturalHeight * totalScale;
 
-        // 그리드와 동일한 퍼센트 기반 수식으로 통일 (object-fit: cover 가 전제)
-        // transform: translate(-50%, -50%) 가 기본 정렬이고, 추가 이동은 translate(X%, Y%)로 처리
-        animImg.style.width = '100%';
-        animImg.style.height = '100%';
-        animImg.style.objectFit = 'cover';
+        const cx = targetW / 2 + offsetX * (targetW / 2);
+        const cy = targetH / 2 + offsetY * (targetH / 2);
+
+        // 컨테이너 단위 대비 상대 좌표(%)로 변환
+        const leftPct = ((cx - rW / 2) / targetW) * 100;
+        const topPct = ((cy - rH / 2) / targetH) * 100;
+        const widthPct = (rW / targetW) * 100;
+        const heightPct = (rH / targetH) * 100;
+
         animImg.style.position = 'absolute';
-        animImg.style.left = '50%';
-        animImg.style.top = '50%';
-        animImg.style.transform = `translate(-50%, -50%) translate(${offsetX * 50}%, ${offsetY * 50}%) scale(${zoom})`;
-        animImg.style.transformOrigin = 'center';
+        animImg.style.left = `${leftPct}%`;
+        animImg.style.top = `${topPct}%`;
+        animImg.style.width = `${widthPct}%`;
+        animImg.style.height = `${heightPct}%`;
+        animImg.style.objectFit = 'fill';
+        animImg.style.transform = 'none';
         return;
     }
 
-    // 2. 정적 이미지 모드 (Canvas)
+    // ── 정적 이미지 모드 (Canvas) ──
+    // CSS object-fit:cover + translate(offX*50%, offY*50%) + scale(zoom) 수식과 동일하게 구현
     dom.modalPreviewAnimated.classList.add('hidden');
     dom.modalPreview.classList.remove('hidden');
 
@@ -1207,21 +1288,6 @@ function updateModalPreviewTransform() {
     canvas.width = targetW;
     canvas.height = targetH;
     const ctx = canvas.getContext('2d', { alpha: true });
-
-    const scaleX = targetW / img.naturalWidth;
-    const scaleY = targetH / img.naturalHeight;
-    const scaleFactor = Math.max(scaleX, scaleY) * zoom;
-
-    const resizedW = Math.round(img.naturalWidth * scaleFactor);
-    const resizedH = Math.round(img.naturalHeight * scaleFactor);
-
-    const extraW = resizedW - targetW;
-    const extraH = resizedH - targetH;
-
-    const clampedOffX = Math.max(-1.0, Math.min(1.0, offsetX));
-    const clampedOffY = Math.max(-1.0, Math.min(1.0, offsetY));
-    const cropX = Math.round(extraW * 0.5 + clampedOffX * extraW * 0.5);
-    const cropY = Math.round(extraH * 0.5 + clampedOffY * extraH * 0.5);
 
     ctx.clearRect(0, 0, targetW, targetH);
 
@@ -1231,12 +1297,25 @@ function updateModalPreviewTransform() {
         ctx.fillRect(0, 0, targetW, targetH);
     }
 
-    ctx.drawImage(img, -cropX, -cropY, resizedW, resizedH);
+    // CSS object-fit: cover 등가 계산: 컨테이너를 꽉 채우는 최소 스케일
+    const coverScale = Math.max(targetW / img.naturalWidth, targetH / img.naturalHeight);
+    // zoom 적용
+    const totalScale = coverScale * zoom;
+    const rW = img.naturalWidth * totalScale;
+    const rH = img.naturalHeight * totalScale;
+
+    // 이미지 중심 위치: CSS translate(offX*50%, offY*50%)와 동일
+    // offX=0 → 컨테이너 중앙, offX=1 → 오른쪽으로 W/2 이동 (왼쪽 콘텐츠 노출)
+    const cx = targetW / 2 + offsetX * (targetW / 2);
+    const cy = targetH / 2 + offsetY * (targetH / 2);
+
+    ctx.drawImage(img, cx - rW / 2, cy - rH / 2, rW, rH);
 }
 
 /**
- * 카드 아트(GIF 포함)를 캔버스에 렌더링하여 PNG base64로 변환
- * GIF 애니메이션은 현재(첫) 프레임을 캡처하여 모드 export용 PNG로 사용
+ * [FIX] 카드 아트를 캔버스에 렌더링하여 PNG base64로 변환
+ * updateModalPreviewTransform과 동일한 수식 사용
+ * [IMPORTANT] 모드 호환성을 위해 반드시 image/png로 출력해야 함
  */
 async function renderCardToPngBase64(card) {
     const mimeType = card.art_mime || (card.artType === 'gif' ? 'image/gif' : 'image/png');
@@ -1250,27 +1329,28 @@ async function renderCardToPngBase64(card) {
             canvas.width = targetW;
             canvas.height = targetH;
             const ctx = canvas.getContext('2d', { alpha: true });
+
             const zoom = card.adjust_zoom || 1.0;
             const offsetX = card.adjust_offset_x || 0.0;
             const offsetY = card.adjust_offset_y || 0.0;
-            const scaleX = targetW / img.naturalWidth;
-            const scaleY = targetH / img.naturalHeight;
-            const scaleFactor = Math.max(scaleX, scaleY) * zoom;
-            const resizedW = Math.round(img.naturalWidth * scaleFactor);
-            const resizedH = Math.round(img.naturalHeight * scaleFactor);
-            const extraW = resizedW - targetW;
-            const extraH = resizedH - targetH;
-            const clampedOffX = Math.max(-1.0, Math.min(1.0, offsetX));
-            const clampedOffY = Math.max(-1.0, Math.min(1.0, offsetY));
-            const cropX = Math.round(extraW * 0.5 + clampedOffX * extraW * 0.5);
-            const cropY = Math.round(extraH * 0.5 + clampedOffY * extraH * 0.5);
+
             ctx.clearRect(0, 0, targetW, targetH);
             if (card.background_color && card.background_color !== 'transparent') {
                 ctx.fillStyle = card.background_color;
                 ctx.fillRect(0, 0, targetW, targetH);
             }
-            ctx.drawImage(img, -cropX, -cropY, resizedW, resizedH);
-            resolve(canvas.toDataURL('image/webp').split(',')[1]);
+
+            // updateModalPreviewTransform과 동일한 수식
+            const coverScale = Math.max(targetW / img.naturalWidth, targetH / img.naturalHeight);
+            const totalScale = coverScale * zoom;
+            const rW = img.naturalWidth * totalScale;
+            const rH = img.naturalHeight * totalScale;
+            const cx = targetW / 2 + offsetX * (targetW / 2);
+            const cy = targetH / 2 + offsetY * (targetH / 2);
+
+            ctx.drawImage(img, cx - rW / 2, cy - rH / 2, rW, rH);
+            // [IMPORTANT] 모드 호환성을 위해 반드시 image/png로 출력
+            resolve(canvas.toDataURL('image/png').split(',')[1]);
         };
         img.onerror = () => resolve('');
         img.src = dataUrl;
@@ -1296,10 +1376,11 @@ async function saveChanges() {
             card.gif_frames = null;
         }
     } else {
-        const src = dom.modalPreview.toDataURL('image/webp');
+        // [IMPORTANT] 모드 호환성을 위해 image/png로 저장
+        const src = dom.modalPreview.toDataURL('image/png');
         card.png_base64 = src.split(',')[1];
         card.artType = 'static';
-        card.art_mime = 'image/webp';
+        card.art_mime = 'image/png';
         card.gif_frames = null;
     }
 
@@ -1313,6 +1394,12 @@ async function saveChanges() {
     card.adjust_offset_x = state.adjustState.offsetX;
     card.adjust_offset_y = state.adjustState.offsetY;
     card.background_color = state.adjustState.backgroundColor;
+    
+    if (state.adjustState.sourceImage) {
+        card.source_width = state.adjustState.sourceImage.naturalWidth;
+        card.source_height = state.adjustState.sourceImage.naturalHeight;
+    }
+
     card.updated_at = new Date().toISOString().slice(0, 19).replace('T', ' ');
     state.isDirty = true;
 
@@ -1332,6 +1419,8 @@ function resetCurrentCard() {
     card.adjust_zoom = 1.0;
     card.adjust_offset_x = 0.0;
     card.adjust_offset_y = 0.0;
+    // [FIX] 배경색도 초기값(transparent)으로 리셋
+    card.background_color = 'transparent';
     updateCardBlobUrl(card);
     state.isDirty = true;
     saveToDB({ originalData: state.originalData, cards: state.cards });
@@ -1356,7 +1445,7 @@ function toggleSelectMode() {
 
     if (state.isSelectMode) {
         dom.selectionRemote.classList.remove('hidden');
-        updateSelectionUI(); // 진입 시 버튼 상태 초기화
+        updateSelectionUI();
     } else {
         cancelSelectMode();
     }
@@ -1372,15 +1461,12 @@ function cancelSelectMode() {
 
 function handleCardMouseDown(index, e) {
     if (!state.isSelectMode) return;
-
-    // 마우스 왼쪽 버튼 클릭 시에만 활성화
     if (e.button !== 0) return;
 
     state.isDraggingSelection = true;
     state.dragStartIndex = index;
     state.dragInitialSelection = new Set(state.selectedCards);
 
-    // 드래그 행동 결정: 이미 선택되어 있었다면 이번 드래그는 '해제' 모드
     if (state.selectedCards.has(index)) {
         state.dragAction = 'deselect';
         state.selectedCards.delete(index);
@@ -1390,14 +1476,11 @@ function handleCardMouseDown(index, e) {
     }
 
     updateSelectionUI();
-
-    // 드래그 중 텍스트 선택 방지
     e.preventDefault();
 }
 
 function handleCardMouseEnter(index) {
     if (!state.isSelectMode || !state.isDraggingSelection) return;
-
     updateSelectionRange(state.dragStartIndex, index);
 }
 
@@ -1408,12 +1491,7 @@ function stopDragSelection() {
     state.dragAction = null;
 }
 
-/**
- * 시작 인덱스와 끝 인덱스 사이의 '보이는' 카드들을 모두 선택 상태로 업데이트
- * Shift-Click과 유사한 동작 수행
- */
 function updateSelectionRange(startIdx, endIdx) {
-    // 가시적인 모든 카드의 인덱스를 순서대로 추출
     const visibleCardIndices = state.cards
         .map((card, i) => ({ card, i }))
         .filter(item => item.card.domNode && item.card.domNode.style.display !== 'none')
@@ -1425,13 +1503,9 @@ function updateSelectionRange(startIdx, endIdx) {
     if (startPos === -1 || endPos === -1) return;
 
     const [realStart, realEnd] = startPos <= endPos ? [startPos, endPos] : [endPos, startPos];
-
-    // 이번 드래그에 해당하는 범위
     const currentRangeIndices = new Set(visibleCardIndices.slice(realStart, realEnd + 1));
 
-    // 드래그 시작 전의 상태에서 현재 범위를 추가하거나 제거 (dragAction 에 따름)
     const newSelection = new Set(state.dragInitialSelection);
-
     currentRangeIndices.forEach(idx => {
         if (state.dragAction === 'deselect') {
             newSelection.delete(idx);
@@ -1444,13 +1518,6 @@ function updateSelectionRange(startIdx, endIdx) {
     updateSelectionUI();
 }
 
-function handleCardClick(index, div) {
-    // mousedown/mouseenter 기반 로직으로 대체되었으므로 legacy 대응만 유지
-    if (!state.isSelectMode) {
-        openEditor(index);
-    }
-}
-
 function selectAllVisibleCards() {
     const visibleIndices = state.cards
         .map((card, i) => ({ card, i }))
@@ -1460,10 +1527,8 @@ function selectAllVisibleCards() {
     const isAllSelected = visibleIndices.length > 0 && visibleIndices.every(idx => state.selectedCards.has(idx));
 
     if (isAllSelected) {
-        // 이미 전체 선택된 상태라면 -> 전체 해제
         visibleIndices.forEach(idx => state.selectedCards.delete(idx));
     } else {
-        // 아니면 -> 전체 선택
         visibleIndices.forEach(idx => state.selectedCards.add(idx));
     }
 
@@ -1475,7 +1540,6 @@ function updateSelectionUI() {
     dom.selectedCount.textContent = count;
     dom.exportSelectedBtn.disabled = count === 0;
 
-    // 가시적인 모든 카드의 인덱스와 그 선택 상태 파악
     const visibleIndices = state.cards
         .map((card, i) => ({ card, i }))
         .filter(item => item.card.domNode && item.card.domNode.style.display !== 'none')
@@ -1483,21 +1547,18 @@ function updateSelectionUI() {
 
     const isAllSelected = visibleIndices.length > 0 && visibleIndices.every(idx => state.selectedCards.has(idx));
 
-    // 하단 버튼이 전체 선택인지 전체 선택 해제인지 동적 전환
     if (isAllSelected) {
         dom.selectAllBtn.innerHTML = `<i data-lucide="minus-square"></i> 현재 목록 전체 선택 해제`;
     } else {
         dom.selectAllBtn.innerHTML = `<i data-lucide="check-square"></i> 현재 목록 전체 선택`;
     }
 
-    // Lucide 아이콘 재생성 (버튼 컨테이너의 아이콘만 재생성)
     if (window.lucide) lucide.createIcons({
         attrs: { class: 'lucide' },
         nameAttr: 'data-lucide',
         icons: undefined
     }, dom.selectAllBtn);
 
-    // UI 동기화 방어 로직 (개별 카드 클래스 갱신)
     state.cards.forEach((card, index) => {
         if (card.domNode) {
             if (state.selectedCards.has(index)) {
@@ -1514,7 +1575,8 @@ function updateSelectionUI() {
 // ================================================================
 
 /**
- * GIF 카드의 frames 배열을 구성:
+ * [FIX] GIF 카드의 frames 배열 구성
+ * canvas 렌더링 수식을 updateModalPreviewTransform과 동일하게 통일
  */
 async function buildGifFrames(card) {
     if (card.gif_frames && card.gif_frames.length > 0 && !state.isDirty) {
@@ -1556,17 +1618,15 @@ async function buildGifFrames(card) {
             outCanvas.height = targetH;
             const outCtx = outCanvas.getContext('2d', { alpha: true });
 
-            const scaleX = targetW / gifW;
-            const scaleY = targetH / gifH;
-            const scaleFactor = Math.max(scaleX, scaleY) * zoom;
-            const resizedW = Math.round(gifW * scaleFactor);
-            const resizedH = Math.round(gifH * scaleFactor);
-            const extraW = resizedW - targetW;
-            const extraH = resizedH - targetH;
-            const clampedOffX = Math.max(-1.0, Math.min(1.0, offsetX));
-            const clampedOffY = Math.max(-1.0, Math.min(1.0, offsetY));
-            const cropX = Math.round(extraW * 0.5 + clampedOffX * extraW * 0.5);
-            const cropY = Math.round(extraH * 0.5 + clampedOffY * extraH * 0.5);
+            // [FIX] updateModalPreviewTransform과 동일한 수식
+            const coverScale = Math.max(targetW / gifW, targetH / gifH);
+            const totalScale = coverScale * zoom;
+            const rW = gifW * totalScale;
+            const rH = gifH * totalScale;
+            const cx = targetW / 2 + offsetX * (targetW / 2);
+            const cy = targetH / 2 + offsetY * (targetH / 2);
+            const drawX = cx - rW / 2;
+            const drawY = cy - rH / 2;
 
             const resultFrames = [];
             let previousImageData = null;
@@ -1604,15 +1664,12 @@ async function buildGifFrames(card) {
                     outCtx.fillRect(0, 0, targetW, targetH);
                 }
 
-                outCtx.drawImage(rawCanvas, -cropX, -cropY, resizedW, resizedH);
+                outCtx.drawImage(rawCanvas, drawX, drawY, rW, rH);
 
                 const pngBase64 = outCanvas.toDataURL('image/png').split(',')[1];
                 const delaySec = Math.max(0.01, (frame.delay || 100) / 1000);
 
-                resultFrames.push({
-                    png_base64: pngBase64,
-                    delay: delaySec
-                });
+                resultFrames.push({ png_base64: pngBase64, delay: delaySec });
             }
 
             card.gif_frames = resultFrames;
@@ -1624,33 +1681,31 @@ async function buildGifFrames(card) {
             outCanvas.height = targetH;
             const outCtx = outCanvas.getContext('2d', { alpha: true });
 
+            // [FIX] updateModalPreviewTransform과 동일한 수식
             const resultFrames = [];
 
             for (let i = 0; i < card.gif_frames.length; i++) {
                 const f = card.gif_frames[i];
-                const img = await loadSourceImage(`data:image/webp;base64,${f.png_base64}`);
+                // [FIX] 저장된 프레임 포맷에 관계없이 로드 시도 (데이터 MIME 스니핑 활용)
+                const img = await loadSourceImage(`data:image/png;base64,${f.png_base64}`);
 
-                const scaleX = targetW / img.naturalWidth;
-                const scaleY = targetH / img.naturalHeight;
-                const scaleFactor = Math.max(scaleX, scaleY) * zoom;
-                const resizedW = Math.round(img.naturalWidth * scaleFactor);
-                const resizedH = Math.round(img.naturalHeight * scaleFactor);
-                const extraW = resizedW - targetW;
-                const extraH = resizedH - targetH;
-                const clampedOffX = Math.max(-1.0, Math.min(1.0, offsetX));
-                const clampedOffY = Math.max(-1.0, Math.min(1.0, offsetY));
-                const cropX = Math.round(extraW * 0.5 + clampedOffX * extraW * 0.5);
-                const cropY = Math.round(extraH * 0.5 + clampedOffY * extraH * 0.5);
+                const coverScale = Math.max(targetW / img.naturalWidth, targetH / img.naturalHeight);
+                const totalScale = coverScale * zoom;
+                const rW = img.naturalWidth * totalScale;
+                const rH = img.naturalHeight * totalScale;
+                const cx = targetW / 2 + offsetX * (targetW / 2);
+                const cy = targetH / 2 + offsetY * (targetH / 2);
 
                 outCtx.clearRect(0, 0, targetW, targetH);
                 if (card.background_color && card.background_color !== 'transparent') {
                     outCtx.fillStyle = card.background_color;
                     outCtx.fillRect(0, 0, targetW, targetH);
                 }
-                outCtx.drawImage(img, -cropX, -cropY, resizedW, resizedH);
+                outCtx.drawImage(img, cx - rW / 2, cy - rH / 2, rW, rH);
 
+                // [IMPORTANT] 모드 호환성을 위해 프레임도 반드시 image/png로 출력
                 resultFrames.push({
-                    png_base64: outCanvas.toDataURL('image/webp').split(',')[1],
+                    png_base64: outCanvas.toDataURL('image/png').split(',')[1],
                     delay: f.delay
                 });
             }
@@ -1695,6 +1750,10 @@ async function exportJSON(selectedOnly = false) {
                 type: c.artType || 'static',
                 display_mode: c.display_mode || 'default',
                 updated_at: c.updated_at || new Date().toISOString().slice(0, 19),
+                source_png_base64: c.source_png_base64 || c.png_base64 || '',
+                adjust_zoom: parseFloat(c.adjust_zoom ?? 1.0),
+                adjust_offset_x: parseFloat(c.adjust_offset_x ?? 0.0),
+                adjust_offset_y: parseFloat(c.adjust_offset_y ?? 0.0),
             };
 
             if (c.artType === 'gif') {
@@ -1773,7 +1832,6 @@ async function saveToDB(value) {
     try {
         const db = await openDB();
         const tx = db.transaction('AppData', 'readwrite');
-        // domNode는 직렬화 불가 → 제외
         const safeValue = {
             ...value,
             cards: (value.cards || []).map(({ domNode, ...rest }) => rest),
@@ -1795,7 +1853,7 @@ async function loadFromDB() {
 // ================================================================
 // 유틸
 // ================================================================
-/** 로딩 레이어 표시 제어 (메시지 포함) */
+/** 로딩 레이어 표시 제어 */
 function showLoading(show, message = '에셋 로딩 중...') {
     const textEl = document.getElementById('loadingText');
     if (textEl) textEl.textContent = message;
@@ -1812,7 +1870,7 @@ function loadSourceImage(url) {
     });
 }
 
-/** 커스텀 스크롤바 위치 업데이트 (rAF 내부에서 실행 권장) */
+/** 커스텀 스크롤바 위치 업데이트 */
 function updateCustomScrollbar() {
     const { contentArea, scrollbarThumb, customScrollbar } = dom;
     if (!contentArea || !scrollbarThumb || !customScrollbar) {
@@ -1839,7 +1897,6 @@ function updateCustomScrollbar() {
     const scrollRatio = Math.min(1, Math.max(0, scrollTop / maxScroll));
     const thumbTop = scrollRatio * maxThumbMove;
 
-    // GPU 가속을 위해 top 대신 transform: translate3d 사용
     scrollbarThumb.style.transform = `translate3d(-50%, ${thumbTop}px, 0)`;
 
     state.isScrollUpdating = false;
@@ -1856,7 +1913,7 @@ function startScrollbarDrag(e) {
     window.addEventListener('mousemove', handleScrollbarDrag);
     window.addEventListener('mouseup', stopScrollbarDrag);
 
-    e.preventDefault(); // 텍스트 선택 방지
+    e.preventDefault();
 }
 
 /** 스크롤바 드래그 진행 */

@@ -1,0 +1,321 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://mods/card_art_editor/inspect_card_art_editor.gd" id="1_l4t0m"]
+
+[node name="CardArtEditorOverlay" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+z_index = 100
+mouse_filter = 2
+script = ExtResource("1_l4t0m")
+
+[node name="EditArtButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 165.0
+offset_top = 445.0
+offset_right = 455.0
+offset_bottom = 505.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "카드 이미지 수정"
+
+[node name="EditorPopup" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -360.0
+offset_right = 320.0
+offset_bottom = 360.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="EditorPopup"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="RootVBox" type="VBoxContainer" parent="EditorPopup/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TitleLabel" type="Label" parent="EditorPopup/MarginContainer/RootVBox"]
+layout_mode = 2
+text = "카드 이미지 편집기"
+
+[node name="CurrentCardLabel" type="Label" parent="EditorPopup/MarginContainer/RootVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "현재 카드: 확인 불가"
+autowrap_mode = 3
+
+[node name="HintLabel" type="Label" parent="EditorPopup/MarginContainer/RootVBox"]
+layout_mode = 2
+text = "불러온 이미지는 현재 카드 규격에 맞게 자동으로 중앙 크롭 및 리사이즈됩니다."
+autowrap_mode = 3
+
+[node name="ModeTabs" type="TabContainer" parent="EditorPopup/MarginContainer/RootVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 430)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AIGeneration" type="VBoxContainer" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ApiKeyLabel" type="Label" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/AIGeneration"]
+layout_mode = 2
+text = "Gemini API Key"
+
+[node name="ApiKeyInput" type="LineEdit" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/AIGeneration"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "AIza..."
+
+[node name="ModelLabel" type="Label" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/AIGeneration"]
+layout_mode = 2
+text = "Model"
+
+[node name="ModelInput" type="LineEdit" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/AIGeneration"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "gemini-2.0-flash-preview-image-generation"
+
+[node name="QualityLabel" type="Label" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/AIGeneration"]
+layout_mode = 2
+text = "Quality"
+
+[node name="QualitySelect" type="OptionButton" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/AIGeneration"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="PromptLabel" type="Label" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/AIGeneration"]
+layout_mode = 2
+text = "Prompt"
+
+[node name="PromptInput" type="TextEdit" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/AIGeneration"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 210)
+layout_mode = 2
+placeholder_text = "Describe the new illustration style, subject details, lighting, or mood."
+
+[node name="GenerateButton" type="Button" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/AIGeneration"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Generate From Current Art"
+
+[node name="UploadImage" type="VBoxContainer" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="UploadHintLabel" type="Label" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/UploadImage"]
+layout_mode = 2
+text = "PNG, JPG, WebP 이미지를 선택할 수 있습니다. 현재 카드 규격에 맞게 자동 변환됩니다."
+autowrap_mode = 3
+
+[node name="ChooseImageButton" type="Button" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/UploadImage"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "파일에서 불러오기"
+
+[node name="ImportPackButton" type="Button" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/UploadImage"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "아트팩 불러오기"
+
+[node name="ImportModButton" type="Button" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/UploadImage"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Import Mod Images"
+
+[node name="ExportPackButton" type="Button" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/UploadImage"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "아트팩 내보내기"
+
+[node name="ExportCurrentPngButton" type="Button" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/UploadImage"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Save Current Card PNG"
+
+[node name="SelectedFileLabel" type="Label" parent="EditorPopup/MarginContainer/RootVBox/ModeTabs/UploadImage"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "선택된 파일 없음"
+autowrap_mode = 3
+
+[node name="StatusLabel" type="Label" parent="EditorPopup/MarginContainer/RootVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "이 카드의 이미지를 수정할 준비가 되었습니다."
+autowrap_mode = 3
+
+[node name="FooterRow" type="HBoxContainer" parent="EditorPopup/MarginContainer/RootVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RestoreButton" type="Button" parent="EditorPopup/MarginContainer/RootVBox/FooterRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "현재 카드 원복"
+
+[node name="RestoreAllButton" type="Button" parent="EditorPopup/MarginContainer/RootVBox/FooterRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "전체 원복"
+
+[node name="FooterSpacer" type="Control" parent="EditorPopup/MarginContainer/RootVBox/FooterRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CloseButton" type="Button" parent="EditorPopup/MarginContainer/RootVBox/FooterRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "닫기"
+
+[node name="UploadFileDialog" type="FileDialog" parent="."]
+unique_name_in_owner = true
+title = "카드 이미지 선택"
+
+[node name="ExportFileDialog" type="FileDialog" parent="."]
+unique_name_in_owner = true
+title = "카드 아트팩 저장"
+
+[node name="FileBrowserPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -520.0
+offset_top = -300.0
+offset_right = 520.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+z_index = 110
+
+[node name="MarginContainer" type="MarginContainer" parent="FileBrowserPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="RootVBox" type="VBoxContainer" parent="FileBrowserPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="FileBrowserTitle" type="Label" parent="FileBrowserPanel/MarginContainer/RootVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "이미지 파일 선택"
+
+[node name="PathRow" type="HBoxContainer" parent="FileBrowserPanel/MarginContainer/RootVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BrowserPathInput" type="LineEdit" parent="FileBrowserPanel/MarginContainer/RootVBox/PathRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "폴더 경로 입력"
+
+[node name="BrowserPickFolderButton" type="Button" parent="FileBrowserPanel/MarginContainer/RootVBox/PathRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "이동"
+
+[node name="BrowserUpButton" type="Button" parent="FileBrowserPanel/MarginContainer/RootVBox/PathRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "상위"
+
+[node name="BrowserRefreshButton" type="Button" parent="FileBrowserPanel/MarginContainer/RootVBox/PathRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "새로고침"
+
+[node name="ContentRow" type="HSplitContainer" parent="FileBrowserPanel/MarginContainer/RootVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BrowserItemList" type="ItemList" parent="FileBrowserPanel/MarginContainer/RootVBox/ContentRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(620, 360)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="PreviewVBox" type="VBoxContainer" parent="FileBrowserPanel/MarginContainer/RootVBox/ContentRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="BrowserPreview" type="TextureRect" parent="FileBrowserPanel/MarginContainer/RootVBox/ContentRow/PreviewVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 280)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BrowserPreviewLabel" type="Label" parent="FileBrowserPanel/MarginContainer/RootVBox/ContentRow/PreviewVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "미리보기를 표시할 파일을 선택하세요."
+autowrap_mode = 3
+
+[node name="FooterRow" type="HBoxContainer" parent="FileBrowserPanel/MarginContainer/RootVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="FooterSpacer" type="Control" parent="FileBrowserPanel/MarginContainer/RootVBox/FooterRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BrowserOpenButton" type="Button" parent="FileBrowserPanel/MarginContainer/RootVBox/FooterRow"]
+unique_name_in_owner = true
+layout_mode = 2
+disabled = true
+text = "열기"
+
+[node name="BrowserCancelButton" type="Button" parent="FileBrowserPanel/MarginContainer/RootVBox/FooterRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "취소"
