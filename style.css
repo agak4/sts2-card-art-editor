@@ -167,11 +167,10 @@ body {
 /* 커스텀 스크롤바 */
 .custom-scrollbar {
     position: absolute;
-    top: 50px;
-    right: 20px;
+    top: 100px;
+    right: 55px;
     width: 40px;
-    height: calc(100vh - 100px);
-    display: flex;
+    height: calc(100vh - 209px);
     justify-content: center;
     pointer-events: none;
     z-index: 1000;
@@ -188,10 +187,9 @@ body {
     position: absolute;
     top: 0;
     left: 50%;
-    /* 초기 위치 고정, 이동은 transform으로 수행 (GPU 가속) */
     transform: translate3d(-50%, 0, 0);
-    width: 40px;
-    height: 60px;
+    width: 42px;
+    height: 64px;
     background: url('source/img/static/scroll_handle.webp') center/100% 100% no-repeat;
     pointer-events: auto;
     cursor: grab;
@@ -278,6 +276,87 @@ body.dragging {
     color: var(--gold);
     font-weight: 700;
     pointer-events: none;
+}
+
+/* 뱃지 가시성 제어 */
+#cardGrid.hide-badges .badge {
+    display: none;
+}
+
+.badge-toggle-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: var(--transition);
+}
+
+.badge-toggle-group:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(212, 175, 55, 0.3);
+}
+
+.badge-toggle-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.badge-toggle-group:hover .badge-toggle-label {
+    color: white;
+}
+
+/* 프리미엄 스위치 스타일 (사이드바용) */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: .4s;
+    border-radius: 24px;
+    border: 1px solid var(--border);
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--text-muted);
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: rgba(212, 175, 55, 0.2);
+    border-color: var(--gold);
+}
+
+input:checked+.slider:before {
+    transform: translateX(20px);
+    background-color: var(--gold);
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
 }
 
 .search-box {

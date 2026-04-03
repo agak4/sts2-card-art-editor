@@ -112,6 +112,7 @@ const state = {
     editingCardIndex: -1,
     isDirty: false,
     filters: { character: 'Ironclad', type: 'all', rarity: 'all' },
+    showModifiedBadge: true,
     adjustState: { zoom: 1.0, offsetX: 0.0, offsetY: 0.0, sourceDataUrl: null, sourceImage: null, isAnimated: false, backgroundColor: 'transparent' },
     pendingImportData: null,
     isDraggingScrollbar: false,
@@ -182,6 +183,7 @@ function initDom() {
         importResetBtn: $('importResetBtn'),
         cancelImportBtn: $('cancelImportBtn'),
         downloadImageBtn: $('downloadImageBtn'),
+        badgeToggle: $('badgeToggle'),
     };
 }
 
@@ -481,6 +483,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     await preloadAllAssets();
 
     dom.appLoading.classList.add('hidden');
+    
+    // 이전에 저장된 뱃지 표시 설정 불러오기
+    const savedBadgeShow = localStorage.getItem('sts2_show_badge');
+    if (savedBadgeShow !== null) {
+        state.showModifiedBadge = savedBadgeShow === 'true';
+        dom.badgeToggle.checked = state.showModifiedBadge;
+        dom.cardGrid.classList.toggle('hide-badges', !state.showModifiedBadge);
+    }
+    
     renderUI();
     startGlobalAnimationLoop();
 });
@@ -575,6 +586,15 @@ function bindEvents() {
     [dom.zoomSlider, dom.offsetXSlider, dom.offsetYSlider].forEach(s =>
         s.addEventListener('input', updateModalPreviewTransform)
     );
+    
+    // 뱃지 표시 토글
+    dom.badgeToggle.addEventListener('change', (e) => {
+        state.showModifiedBadge = e.target.checked;
+        dom.cardGrid.classList.toggle('hide-badges', !state.showModifiedBadge);
+        
+        // 설정 저장 (선택 사항)
+        localStorage.setItem('sts2_show_badge', state.showModifiedBadge);
+    });
 
     window.addEventListener('beforeunload', e => {
         if (state.isDirty) { e.preventDefault(); e.returnValue = ''; }
