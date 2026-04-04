@@ -148,6 +148,11 @@
                     </div>
                 </div>
 
+                <!-- 패치노트 버튼 -->
+                <button id="patchnotesBtn" class="patchnotes-btn" title="패치노트">
+                    <img src="source/img/static/patchnotes_icon.png" alt="Patch Notes">
+                </button>
+
                 <!-- 스크롤바 -->
                 <div class="custom-scrollbar" id="customScrollbar">
                     <div class="scrollbar-track"></div>
@@ -290,6 +295,36 @@
                 <button id="exportImageBtn" class="btn btn-secondary" disabled>
                     <i data-lucide="image"></i> 이미지로 저장
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 패치노트 모달 -->
+    <div id="patchnotesModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-container patchnotes-modal-container">
+            <div class="modal-header">
+                <div class="header-with-icon">
+                    <i data-lucide="scroll" class="text-gold"></i>
+                    <h3>패치노트</h3>
+                </div>
+                <button class="btn-close" id="closePatchnotes"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body patchnotes-modal-body">
+                <div class="patchnotes-scroll-wrapper">
+                    <div id="patchnotesContent" class="patchnotes-content-area">
+                        <!-- 패치노트 내용이 동적으로 생성됨 -->
+                    </div>
+                    
+                    <!-- 모달 내부 스크롤바 -->
+                    <div class="custom-scrollbar modal-scrollbar" id="modalScrollbar">
+                        <div class="scrollbar-track"></div>
+                        <div class="scrollbar-thumb" id="modalScrollbarThumb"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary btn-full" id="confirmPatchnotes">확인</button>
             </div>
         </div>
     </div>

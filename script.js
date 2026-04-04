@@ -126,6 +126,11 @@ const state = {
     dragStartIndex: -1,
     dragInitialSelection: new Set(),
     dragAction: null, // 'select' | 'deselect'
+    isDraggingModalScrollbar: false,
+    isModalScrollUpdating: false,
+    modalStartY: 0,
+    modalStartScrollTop: 0,
+    patchnotes: null,
 };
 
 // ================================================================
@@ -187,6 +192,14 @@ function initDom() {
         downloadImageBtn: $('downloadImageBtn'),
         badgeToggle: $('badgeToggle'),
         onlyModifiedToggle: $('onlyModifiedToggle'),
+        // 패치노트 전용
+        patchnotesBtn: $('patchnotesBtn'),
+        patchnotesModal: $('patchnotesModal'),
+        patchnotesContent: $('patchnotesContent'),
+        closePatchnotes: $('closePatchnotes'),
+        confirmPatchnotes: $('confirmPatchnotes'),
+        modalScrollbar: $('modalScrollbar'),
+        modalScrollbarThumb: $('modalScrollbarThumb'),
     };
 }
 
@@ -521,6 +534,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     renderUI();
     startGlobalAnimationLoop();
+    initPatchnotes();
 });
 
 /** 모든 카드 에셋과 아트 이미지를 미리 로드 */
@@ -663,7 +677,28 @@ function bindEvents() {
     window.addEventListener('mouseup', () => {
         if (state.isDraggingSelection) stopDragSelection();
         if (state.isDraggingScrollbar) stopScrollbarDrag();
+        if (state.isDraggingModalScrollbar) stopModalScrollbarDrag();
     });
+
+    // 패치노트 관련
+    dom.patchnotesBtn.onclick = () => {
+        if (dom.patchnotesModal.classList.contains('hidden')) {
+            openPatchnotesModal(false);
+        } else {
+            closePatchnotesModal();
+        }
+    };
+    dom.closePatchnotes.onclick = closePatchnotesModal;
+    dom.confirmPatchnotes.onclick = closePatchnotesModal;
+    dom.patchnotesModal.querySelector('.modal-overlay').onclick = closePatchnotesModal;
+
+    dom.patchnotesContent.addEventListener('scroll', () => {
+        if (!state.isModalScrollUpdating) {
+            state.isModalScrollUpdating = true;
+            requestAnimationFrame(updateModalScrollbar);
+        }
+    });
+    dom.modalScrollbarThumb.addEventListener('mousedown', startModalScrollbarDrag);
 }
 
 // ================================================================
@@ -1980,6 +2015,171 @@ function showLoading(show, message = '에셋 로딩 중...') {
     const textEl = document.getElementById('loadingText');
     if (textEl) textEl.textContent = message;
     dom.appLoading.classList.toggle('hidden', !show);
+}
+
+/** 스크롤바 드래그 종료 */
+function stopScrollbarDrag() {
+    state.isDraggingScrollbar = false;
+    document.body.classList.remove('dragging');
+
+    window.removeEventListener('mousemove', handleScrollbarDrag);
+    window.removeEventListener('mouseup', stopScrollbarDrag);
+}
+
+// ================================================================
+// 패치노트 시스템
+// ================================================================
+
+/** 패치노트 초기화 및 자동 팝업 체크 */
+async function initPatchnotes() {
+    try {
+        const response = await fetch('patchnotes.json');
+        if (!response.ok) throw new Error('패치노트 로딩 실패');
+        const patchnotesData = await response.json();
+        // 데이터가 유효한 배열인지 확인
+        if (Array.isArray(patchnotesData) && patchnotesData.length > 0) {
+            state.patchnotes = patchnotesData;
+
+            const latestVersion = state.patchnotes[0].version;
+            const lastVersion = localStorage.getItem('sts2_last_patchnote_version');
+            if (lastVersion !== latestVersion) {
+                openPatchnotesModal(true);
+            }
+        }
+    } catch (err) {
+        console.error('Patchnotes load failed:', err);
+    }
+}
+
+/** 패치노트 모달 열기 */
+function openPatchnotesModal(isAuto = false) {
+    if (!state.patchnotes) return;
+
+    renderPatchnotesContent();
+    dom.patchnotesModal.classList.remove('hidden');
+    lucide.createIcons({
+        attrs: { class: 'lucide' },
+        nameAttr: 'data-lucide',
+        icons: undefined
+    }, dom.patchnotesModal);
+
+    // 열린 직후 스크롤바 상태 갱신
+    setTimeout(updateModalScrollbar, 50);
+
+    if (isAuto) {
+        // 자동 팝업 시 최신 버전 저장 (한 번 닫으면 해당 버전은 안 뜸)
+        const latestVersion = state.patchnotes[0].version;
+        localStorage.setItem('sts2_last_patchnote_version', latestVersion);
+    }
+}
+
+/** 패치노트 모달 닫기 */
+function closePatchnotesModal() {
+    dom.patchnotesModal.classList.add('hidden');
+    // 버튼 클릭으로 열었을 때도 닫으면 최신 버전을 확인한 것으로 간주
+    if (state.patchnotes && state.patchnotes.length > 0) {
+        const latestVersion = state.patchnotes[0].version;
+        localStorage.setItem('sts2_last_patchnote_version', latestVersion);
+    }
+}
+
+/** 패치노트 내용 렌더링 */
+function renderPatchnotesContent() {
+    if (!state.patchnotes || state.patchnotes.length === 0) return;
+
+    let html = state.patchnotes.map(group => {
+        const { version, date, notes } = group;
+        return `
+            <div class="patchnote-group">
+                <div class="patchnote-header">
+                    <span class="patchnote-version">Ver ${version}</span>
+                    <span class="patchnote-date">${date}</span>
+                </div>
+                ${notes.map(note => `
+                    <div class="patchnote-section">
+                        <div class="patchnote-title">${note.title}</div>
+                        <ul class="patchnote-list">
+                            ${note.items.map(item => `<li class="patchnote-item">${item}</li>`).join('')}
+                        </ul>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }).join('');
+    
+    dom.patchnotesContent.innerHTML = html;
+}
+
+/** 모달 전용 스크롤바 업데이트 */
+function updateModalScrollbar() {
+    const { patchnotesContent, modalScrollbarThumb, modalScrollbar } = dom;
+    if (!patchnotesContent || !modalScrollbarThumb || !modalScrollbar) {
+        state.isModalScrollUpdating = false;
+        return;
+    }
+
+    const scrollHeight = patchnotesContent.scrollHeight;
+    const clientHeight = patchnotesContent.clientHeight;
+    const scrollTop = patchnotesContent.scrollTop;
+
+    if (scrollHeight <= clientHeight + 1) {
+        modalScrollbar.style.display = 'none';
+        state.isModalScrollUpdating = false;
+        return;
+    }
+    modalScrollbar.style.display = 'flex';
+
+    const trackHeight = modalScrollbar.clientHeight;
+    const thumbHeight = modalScrollbarThumb.clientHeight;
+    const maxScroll = scrollHeight - clientHeight;
+    const maxThumbMove = trackHeight - thumbHeight;
+
+    const scrollRatio = Math.min(1, Math.max(0, scrollTop / maxScroll));
+    const thumbTop = scrollRatio * maxThumbMove;
+
+    modalScrollbarThumb.style.transform = `translate3d(-50%, ${thumbTop}px, 0)`;
+    state.isModalScrollUpdating = false;
+}
+
+/** 모달 스크롤바 드래그 시작 */
+function startModalScrollbarDrag(e) {
+    state.isDraggingModalScrollbar = true;
+    state.modalStartY = e.clientY;
+    state.modalStartScrollTop = dom.patchnotesContent.scrollTop;
+
+    document.body.classList.add('dragging');
+
+    window.addEventListener('mousemove', handleModalScrollbarDrag);
+    window.addEventListener('mouseup', stopModalScrollbarDrag);
+
+    e.preventDefault();
+}
+
+/** 모달 스크롤바 드래그 진행 */
+function handleModalScrollbarDrag(e) {
+    if (!state.isDraggingModalScrollbar) return;
+
+    const deltaY = e.clientY - state.modalStartY;
+    const { patchnotesContent, modalScrollbar, modalScrollbarThumb } = dom;
+
+    const trackHeight = modalScrollbar.clientHeight;
+    const thumbHeight = modalScrollbarThumb.clientHeight;
+    const maxThumbMove = trackHeight - thumbHeight;
+    const maxScroll = patchnotesContent.scrollHeight - patchnotesContent.clientHeight;
+
+    if (maxThumbMove <= 0 || maxScroll <= 0) return;
+
+    const scrollDelta = (deltaY / maxThumbMove) * maxScroll;
+    patchnotesContent.scrollTop = state.modalStartScrollTop + scrollDelta;
+}
+
+/** 모달 스크롤바 드래그 종료 */
+function stopModalScrollbarDrag() {
+    state.isDraggingModalScrollbar = false;
+    document.body.classList.remove('dragging');
+
+    window.removeEventListener('mousemove', handleModalScrollbarDrag);
+    window.removeEventListener('mouseup', stopModalScrollbarDrag);
 }
 
 /** 이미지 URL로부터 Image 객체를 생성하여 Promise 반환 */
