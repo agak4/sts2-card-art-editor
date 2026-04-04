@@ -113,6 +113,7 @@ const state = {
     isDirty: false,
     filters: { character: 'Ironclad', type: 'all', rarity: 'all' },
     showModifiedBadge: true,
+    showOnlyModified: false,
     adjustState: { zoom: 1.0, offsetX: 0.0, offsetY: 0.0, sourceDataUrl: null, sourceImage: null, isAnimated: false, backgroundColor: 'transparent' },
     pendingImportData: null,
     isDraggingScrollbar: false,
@@ -185,6 +186,7 @@ function initDom() {
         cancelImportBtn: $('cancelImportBtn'),
         downloadImageBtn: $('downloadImageBtn'),
         badgeToggle: $('badgeToggle'),
+        onlyModifiedToggle: $('onlyModifiedToggle'),
     };
 }
 
@@ -511,6 +513,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         dom.badgeToggle.checked = state.showModifiedBadge;
         dom.cardGrid.classList.toggle('hide-badges', !state.showModifiedBadge);
     }
+    const savedOnlyModified = localStorage.getItem('sts2_only_modified');
+    if (savedOnlyModified !== null) {
+        state.showOnlyModified = savedOnlyModified === 'true';
+        dom.onlyModifiedToggle.checked = state.showOnlyModified;
+    }
 
     renderUI();
     startGlobalAnimationLoop();
@@ -615,6 +622,27 @@ function bindEvents() {
 
         // 설정 저장 (선택 사항)
         localStorage.setItem('sts2_show_badge', state.showModifiedBadge);
+    });
+    // 수정된 카드만 보기 토글
+    dom.onlyModifiedToggle.addEventListener('change', (e) => {
+        state.showOnlyModified = e.target.checked;
+        filterCards();
+        localStorage.setItem('sts2_only_modified', state.showOnlyModified);
+    });
+
+    // 그룹 영역 클릭 시 토글
+    document.querySelectorAll('.badge-toggle-group').forEach(group => {
+        group.addEventListener('click', (e) => {
+            // input이나 slider 자체를 클릭한 경우는 기본 동작에 맡김 (중복 토글 방지)
+            if (e.target.tagName === 'INPUT' || e.target.classList.contains('slider')) return;
+
+            const input = group.querySelector('input[type="checkbox"]');
+            if (input) {
+                input.checked = !input.checked;
+                // change 이벤트를 수동으로 발생시켜 기존 리스너 작동 유도
+                input.dispatchEvent(new Event('change'));
+            }
+        });
     });
 
     window.addEventListener('beforeunload', e => {
@@ -973,8 +1001,10 @@ function filterCards() {
             || (card.name_en || '').toLowerCase().includes(query)
             || (card.source_path || '').toLowerCase().includes(query);
 
+        const matchModified = !state.showOnlyModified || !!card.png_base64;
+
         if (card.domNode) {
-            card.domNode.style.display = (matchChar && matchType && matchRarity && matchSearch) ? '' : 'none';
+            card.domNode.style.display = (matchChar && matchType && matchRarity && matchSearch && matchModified) ? '' : 'none';
         }
     });
 

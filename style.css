@@ -208,13 +208,11 @@ body {
     transform: translateX(-50%) scale(0.96);
 }
 
-/* 드래그 상태 전역 스타일 */
 body.dragging {
     user-select: none !important;
     cursor: grabbing !important;
 }
 
-/* 검색창 및 필터 */
 .filter-group {
     display: flex;
     flex-direction: column;
@@ -285,6 +283,7 @@ body.dragging {
 
 .badge-toggle-group {
     display: flex;
+    cursor: pointer;
     align-items: center;
     justify-content: space-between;
     padding: 10px 14px;
