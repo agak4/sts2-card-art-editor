@@ -746,7 +746,7 @@
   {
     "no": 94,
     "name_kr": "불의의 일격",
-    "name_en": "Backstab",
+    "name_en": "Sucker Punch",
     "character": "Silent",
     "cardType": "Attack",
     "rarity": "Common"
@@ -762,7 +762,7 @@
   {
     "no": 96,
     "name_kr": "재주넘기",
-    "name_en": "Backflip",
+    "name_en": "Flick-Flack",
     "character": "Silent",
     "cardType": "Attack",
     "rarity": "Common"
