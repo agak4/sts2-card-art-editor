@@ -63,7 +63,7 @@ body {
 }
 
 .filter-sidebar {
-    width: 320px;
+    width: 330px;
     flex-shrink: 0;
     position: sticky;
     top: 0;
@@ -74,14 +74,13 @@ body {
     padding: 20px 15px;
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    gap: 15px;
 }
 
 .logo {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: 8px;
     width: 100%;
 }
 
