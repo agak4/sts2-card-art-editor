@@ -269,6 +269,25 @@ function getCardArtSrc(card) {
     return `source/img/card_images/${character}_${nameEn}.webp`;
 }
 
+/**
+ * 캔버스 데이터를 고효율압축 PNG Base64로 추출 (Godot/libpng 급 압축)
+ */
+function compressCanvasToPngBase64(canvas) {
+    if (!window.UPNG || !window.pako) {
+        return canvas.toDataURL('image/png').split(',')[1];
+    }
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pngBuffer = UPNG.encode([imgData.data.buffer], canvas.width, canvas.height, 0);
+    const bytes = new Uint8Array(pngBuffer);
+    let binary = '';
+    const chunk = 8192;
+    for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    }
+    return btoa(binary);
+}
+
 /** base64 문자열을 Blob 객체로 변환 */
 function base64ToBlob(base64, type = 'image/webp') {
     if (!base64) return null;
@@ -1340,7 +1359,7 @@ async function renderCardToPngBase64(card) {
             const cy = targetH / 2 + offsetY * (targetH / 2);
 
             ctx.drawImage(img, cx - rW / 2, cy - rH / 2, rW, rH);
-            resolve(canvas.toDataURL('image/png').split(',')[1]);
+            resolve(compressCanvasToPngBase64(canvas));
         };
         img.onerror = () => resolve('');
         img.src = dataUrl;
@@ -1366,8 +1385,7 @@ async function saveChanges() {
             card.gif_frames = null;
         }
     } else {
-        const src = dom.modalPreview.toDataURL('image/png');
-        card.png_base64 = src.split(',')[1];
+        card.png_base64 = compressCanvasToPngBase64(dom.modalPreview);
         card.artType = 'static';
         card.art_mime = 'image/png';
         card.gif_frames = null;
@@ -1686,7 +1704,7 @@ async function buildGifFrames(card) {
                 outCtx.drawImage(img, cx - rW / 2, cy - rH / 2, rW, rH);
 
                 resultFrames.push({
-                    png_base64: outCanvas.toDataURL('image/png').split(',')[1],
+                    png_base64: compressCanvasToPngBase64(outCanvas),
                     delay: f.delay
                 });
             }
@@ -1731,11 +1749,14 @@ async function exportJSON(selectedOnly = false) {
                 type: c.artType || 'static',
                 display_mode: c.display_mode || 'default',
                 updated_at: c.updated_at || new Date().toISOString().slice(0, 19),
-                source_png_base64: c.source_png_base64 || c.png_base64 || '',
                 adjust_zoom: parseFloat(c.adjust_zoom ?? 1.0),
                 adjust_offset_x: parseFloat(c.adjust_offset_x ?? 0.0),
                 adjust_offset_y: parseFloat(c.adjust_offset_y ?? 0.0),
             };
+
+            if (c.source_png_base64 && c.source_png_base64 !== c.png_base64) {
+                obj.source_png_base64 = c.source_png_base64;
+            }
 
             if (c.artType === 'gif') {
                 let frames = c.gif_frames;

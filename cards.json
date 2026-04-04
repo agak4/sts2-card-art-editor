@@ -570,7 +570,7 @@
   {
     "no": 72,
     "name_kr": "원투 펀치",
-    "name_en": "One-Two Punch",
+    "name_en": "One Two Punch",
     "character": "Ironclad",
     "cardType": "Skill",
     "rarity": "Rare"
@@ -762,7 +762,7 @@
   {
     "no": 96,
     "name_kr": "재주넘기",
-    "name_en": "Flick-Flack",
+    "name_en": "Flick Flack",
     "character": "Silent",
     "cardType": "Attack",
     "rarity": "Common"
@@ -1098,7 +1098,7 @@
   {
     "no": 138,
     "name_kr": "괜찮은 전략",
-    "name_en": "Well-Laid Plans",
+    "name_en": "Well Laid Plans",
     "character": "Silent",
     "cardType": "Power",
     "rarity": "Uncommon"
@@ -3298,7 +3298,7 @@
   {
     "no": 413,
     "name_kr": "다중 시전",
-    "name_en": "Multi-Cast",
+    "name_en": "Multi Cast",
     "character": "Defect",
     "cardType": "Skill",
     "rarity": "Rare"
