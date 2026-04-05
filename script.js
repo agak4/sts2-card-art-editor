@@ -706,9 +706,28 @@ function bindEvents() {
 // ================================================================
 async function handleFileUpload(file) {
     showLoading(true, '아트팩 데이터를 처리 중입니다...');
+    
+    let text;
     try {
-        const text = await readFileAsText(file);
-        const data = JSON.parse(text);
+        text = await readFileAsText(file);
+    } catch (err) {
+        console.error('파일 읽기 오류:', err);
+        alert(`파일을 읽지 못했습니다: ${err.message}`);
+        showLoading(false);
+        return;
+    }
+
+    let data;
+    try {
+        data = JSON.parse(text);
+    } catch (err) {
+        console.error('JSON 파싱 오류:', err);
+        alert(`올바른 JSON 형식이 아닙니다: ${err.message}`);
+        showLoading(false);
+        return;
+    }
+
+    try {
         if (data.format !== 'card_art_bundle') {
             alert('올바른 STS2 아트팩 형식이 아닙니다. (format: card_art_bundle 필요)');
             return;
@@ -722,8 +741,8 @@ async function handleFileUpload(file) {
             processImport(data);
         }
     } catch (err) {
-        console.error('파일 업로드 오류:', err);
-        alert('파일을 읽는 중 오류가 발생했습니다: ' + err.message);
+        console.error('데이터 처리 오류:', err);
+        alert(`데이터를 처리하는 중 오류가 발생했습니다: ${err.message}`);
     } finally {
         showLoading(false);
     }
@@ -1817,8 +1836,9 @@ async function exportJSON(selectedOnly = false) {
     showLoading(true, '아트팩을 생성하는 중입니다. (GIF가 포함된 경우 다소 시간이 걸립니다.)');
     await new Promise(resolve => setTimeout(resolve, 50));
 
+    let overrides;
     try {
-        const overrides = await Promise.all(modifiedCards.map(async c => {
+        overrides = await Promise.all(modifiedCards.map(async c => {
             const obj = {
                 display_mode: c.display_mode || 'default',
                 height: c.height || 760,
@@ -1853,7 +1873,14 @@ async function exportJSON(selectedOnly = false) {
 
             return obj;
         }));
+    } catch (e) {
+        console.error('데이터 생성 오류:', e);
+        alert(`아트팩 데이터 생성 중 오류가 발생했습니다: ${e.message}`);
+        showLoading(false);
+        return;
+    }
 
+    try {
         const baseData = state.originalData || { format: 'card_art_bundle', version: 1 };
         const exportData = {
             ...baseData,
@@ -1883,7 +1910,8 @@ async function exportJSON(selectedOnly = false) {
         URL.revokeObjectURL(url);
 
     } catch (e) {
-        alert('내보내기 중 오류가 발생했습니다.');
+        console.error('파일 저장 오류:', e);
+        alert(`파일 다운로드 시도가 실패했습니다: ${e.message}`);
     } finally {
         showLoading(false);
         state.isDirty = false;
@@ -1944,16 +1972,33 @@ async function exportSelectedAsImage() {
                 document.head.appendChild(script);
             });
         }
+    } catch (e) {
+        console.error('라이브러리 로드 오류:', e);
+        alert(`이미지 생성 라이브러리를 불러오지 못했습니다: ${e.message}`);
+        if (document.body.contains(container)) document.body.removeChild(container);
+        showLoading(false);
+        return;
+    }
 
-        await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-        const dataUrl = await htmlToImage.toPng(container, {
+    let dataUrl;
+    try {
+        dataUrl = await htmlToImage.toPng(container, {
             pixelRatio: 1,
             style: {
                 opacity: '1'
             }
         });
+    } catch (e) {
+        console.error('렌더링 오류:', e);
+        alert(`이미지 렌더링 과정에서 오류가 발생했습니다: ${e.message}`);
+        if (document.body.contains(container)) document.body.removeChild(container);
+        showLoading(false);
+        return;
+    }
 
+    try {
         const a = document.createElement('a');
         a.href = dataUrl;
 
@@ -1971,8 +2016,8 @@ async function exportSelectedAsImage() {
         document.body.removeChild(a);
 
     } catch (e) {
-        console.error(e);
-        alert('이미지 생성 중 오류가 발생했습니다.');
+        console.error('이미지 저장 오류:', e);
+        alert(`이미지 저장에 실패했습니다: ${e.message}`);
     } finally {
         if (document.body.contains(container)) {
             document.body.removeChild(container);
