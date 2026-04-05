@@ -706,7 +706,7 @@ function bindEvents() {
 // ================================================================
 async function handleFileUpload(file) {
     showLoading(true, '아트팩 데이터를 처리 중입니다...');
-    
+
     let text;
     try {
         text = await readFileAsText(file);
@@ -1833,12 +1833,30 @@ async function exportJSON(selectedOnly = false) {
         return;
     }
 
-    showLoading(true, '아트팩을 생성하는 중입니다. (GIF가 포함된 경우 다소 시간이 걸립니다.)');
+    showLoading(true, `아트팩을 생성하는 중입니다... (0/${modifiedCards.length})`);
     await new Promise(resolve => setTimeout(resolve, 50));
 
-    let overrides;
+    const jsonParts = [];
+
+    const baseData = { ...(state.originalData || { format: 'card_art_bundle', version: 1 }) };
+    delete baseData.overrides;
+
+    const headerObj = {
+        ...baseData,
+        format: 'card_art_bundle',
+        version: baseData.version || 1,
+        exported_at: new Date().toISOString().slice(0, 19),
+        count: modifiedCards.length,
+    };
+    jsonParts.push(`${JSON.stringify(headerObj).slice(0, -1)},"overrides":[`);
+
     try {
-        overrides = await Promise.all(modifiedCards.map(async c => {
+        for (let i = 0; i < modifiedCards.length; i++) {
+            const c = modifiedCards[i];
+            showLoading(true, `아트팩을 생성하는 중입니다... (${i + 1}/${modifiedCards.length})`);
+
+            if (i % 5 === 0) await new Promise(resolve => setTimeout(resolve, 10));
+
             const obj = {
                 display_mode: c.display_mode || 'default',
                 height: c.height || 760,
@@ -1871,25 +1889,15 @@ async function exportJSON(selectedOnly = false) {
                 obj.png_base64 = c.png_base64;
             }
 
-            return obj;
-        }));
-    } catch (e) {
-        console.error('데이터 생성 오류:', e);
-        alert(`아트팩 데이터 생성 중 오류가 발생했습니다: ${e.message}`);
-        showLoading(false);
-        return;
-    }
+            jsonParts.push(JSON.stringify(obj));
+            if (i < modifiedCards.length - 1) {
+                jsonParts.push(',');
+            }
 
-    try {
-        const baseData = state.originalData || { format: 'card_art_bundle', version: 1 };
-        const exportData = {
-            ...baseData,
-            format: 'card_art_bundle',
-            version: baseData.version || 1,
-            exported_at: new Date().toISOString().slice(0, 19),
-            count: overrides.length,
-            overrides,
-        };
+            obj.frames = null;
+        }
+
+        jsonParts.push(']}');
 
         const now = new Date();
         const dateStr = now.getFullYear().toString() +
@@ -1899,11 +1907,11 @@ async function exportJSON(selectedOnly = false) {
             now.getMinutes().toString().padStart(2, '0') +
             now.getSeconds().toString().padStart(2, '0');
 
-        const blob = new Blob([JSON.stringify(exportData, null, '\t')], { type: 'application/json' });
+        const blob = new Blob(jsonParts, { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `artpack_${overrides.length}_${dateStr}.cardartpack.json`;
+        a.download = `artpack_${modifiedCards.length}_${dateStr}.cardartpack.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -1916,6 +1924,7 @@ async function exportJSON(selectedOnly = false) {
         showLoading(false);
         state.isDirty = false;
         saveToDB({ originalData: state.originalData, cards: state.cards });
+        jsonParts.length = 0;
     }
 }
 
