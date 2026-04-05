@@ -1743,7 +1743,7 @@ async function buildGifFrames(card) {
 
                 outCtx.drawImage(rawCanvas, drawX, drawY, rW, rH);
 
-                const pngBase64 = outCanvas.toDataURL('image/webp', 0.8).split(',')[1];
+                const pngBase64 = compressCanvasToPngBase64(outCanvas);
                 const delaySec = Math.max(0.01, (frame.delay || 100) / 1000);
 
                 resultFrames.push({ png_base64: pngBase64, delay: delaySec });
@@ -1779,7 +1779,7 @@ async function buildGifFrames(card) {
                 outCtx.drawImage(img, cx - rW / 2, cy - rH / 2, rW, rH);
 
                 resultFrames.push({
-                    png_base64: outCanvas.toDataURL('image/webp', 0.8).split(',')[1],
+                    png_base64: compressCanvasToPngBase64(outCanvas),
                     delay: f.delay
                 });
             }
@@ -1820,10 +1820,12 @@ async function exportJSON(selectedOnly = false) {
     try {
         const overrides = await Promise.all(modifiedCards.map(async c => {
             const obj = {
-                source_path: c.source_path,
-                type: c.artType || 'static',
                 display_mode: c.display_mode || 'default',
-                updated_at: c.updated_at || new Date().toISOString().slice(0, 19),
+                height: c.height || 760,
+                source_path: c.source_path,
+                type: c.artType === 'gif' ? 'animated_gif' : (c.artType || 'static'),
+                updated_at: (c.updated_at || new Date().toISOString().slice(0, 19)).replace(' ', 'T'),
+                width: c.width || 1000,
                 adjust_zoom: parseFloat(c.adjust_zoom ?? 1.0),
                 adjust_offset_x: parseFloat(c.adjust_offset_x ?? 0.0),
                 adjust_offset_y: parseFloat(c.adjust_offset_y ?? 0.0),
