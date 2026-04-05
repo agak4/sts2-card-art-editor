@@ -1,10 +1,10 @@
 'use strict';
 
 // ================================================================
-// 상수 정의
+// 상수
 // ================================================================
 
-/** 카드 타입 한국어 표기 */
+// 카드 타입 한글 표기
 const CARD_TYPE_KO = {
     Attack: '공격',
     Skill: '스킬',
@@ -13,22 +13,22 @@ const CARD_TYPE_KO = {
     Curse: '저주',
 };
 
-/** 카드 프레임 이미지 경로 접두사 */
+// 카드 프레임 경로
 const FRAME_PREFIX = 'source/img/card_frame/273px-StS2_';
 
-/** 고유 프레임을 사용하는 특수 캐릭터 그룹 (Status, Curse 등) */
+// 특수 캐릭터 그룹
 const SPECIAL_CHARACTERS = new Set(['Status', 'Curse', 'Event', 'Quest', 'Token']);
 
-/** 필터에서 '기타(special)'로 분류되는 카드 타입 */
+// 특수 카드 타입
 const SPECIAL_TYPES = new Set(['Status', 'Curse', 'Quest']);
 
-/** 필터에서 '기타(special)'로 분류되는 희귀도 */
+// 특수 희귀도
 const SPECIAL_RARITIES = new Set(['Starter', 'Ancient', 'Misc']);
 
-/** 선택 시 희귀도 필터를 비활성화하는 캐릭터 필터값 */
+// 캐릭터 필터 비활성 조건
 const RARITY_DISABLED_CHARS = new Set(['Ancient', 'special']);
 
-/** 모달 토글 버튼 아이콘 (lucide.createIcons 재호출 없이 사용) */
+// 모달 아이콘 SVG
 const SVG_EYE = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
 const SVG_IMAGE = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`;
 
@@ -46,7 +46,11 @@ let CARDS_DB = [];
 const CHAR_NAME_MAP = new Map();
 const NAME_MAP = new Map();
 
-/** 특수문자 제거 후 소문자 조회 키 생성 */
+/**
+ * 문자열에서 특수문자를 제거하고 소문자로 변환하여 조회용 키를 생성합니다.
+ * @param {string} str - 변환할 원본 문자열
+ * @returns {string} 특수문자가 제거된 소문자 키 문자열
+ */
 function toKey(str) {
     if (!str) return '';
     let result = '';
@@ -58,7 +62,10 @@ function toKey(str) {
     return result;
 }
 
-/** cards.json으로부터 카드 DB 구축 */
+/**
+ * cards.json 파일로부터 전체 카드 데이터베이스를 비동기로 로드하고 인덱싱합니다.
+ * @returns {Promise<void>} 로드 완료 시점을 나타내는 Promise
+ */
 async function fetchCardDatabase() {
     try {
         const response = await fetch('cards.json');
@@ -76,7 +83,11 @@ async function fetchCardDatabase() {
     }
 }
 
-/** source_path로부터 카드 메타데이터 검색 */
+/**
+ * 주어진 파일 경로 정보를 바탕으로 카드 메타데이터를 검색하여 반환합니다.
+ * @param {string} sourcePath - 검색할 카드의 리소스 경로 (res://... 또는 실제 경로)
+ * @returns {object|null} 일치하는 카드 메타데이터 객체 또는 없을 경우 null
+ */
 function findCardMeta(sourcePath) {
     let path = sourcePath.startsWith('res://') ? sourcePath.substring(6) : sourcePath;
     const segs = path.split('/');
@@ -125,12 +136,13 @@ const state = {
     isDraggingSelection: false,
     dragStartIndex: -1,
     dragInitialSelection: new Set(),
-    dragAction: null, // 'select' | 'deselect'
+    dragAction: null,
     isDraggingModalScrollbar: false,
     isModalScrollUpdating: false,
     modalStartY: 0,
     modalStartScrollTop: 0,
-    patchnotes: null,
+    changelog: null,
+    lastAction: null,
 };
 
 // ================================================================
@@ -139,6 +151,10 @@ const state = {
 const $ = id => document.getElementById(id);
 let dom = {};
 
+/**
+ * 애플리케이션에서 사용하는 주요 DOM 엘리먼트들을 조회하여 dom 객체에 바인딩합니다.
+ * @returns {void}
+ */
 function initDom() {
     dom = {
         fileInput: $('fileInput'),
@@ -184,7 +200,6 @@ function initDom() {
         selectedCount: $('selectedCount'),
         modalPreviewAnimated: $('modalPreviewAnimated'),
         bgColorPicker: $('bgColorPicker'),
-        // 불러오기 확인 모달
         importChoiceModal: $('importChoiceModal'),
         importMergeBtn: $('importMergeBtn'),
         importResetBtn: $('importResetBtn'),
@@ -192,22 +207,29 @@ function initDom() {
         downloadImageBtn: $('downloadImageBtn'),
         badgeToggle: $('badgeToggle'),
         onlyModifiedToggle: $('onlyModifiedToggle'),
-        // 패치노트 전용
-        patchnotesBtn: $('patchnotesBtn'),
-        patchnotesModal: $('patchnotesModal'),
-        patchnotesContent: $('patchnotesContent'),
-        closePatchnotes: $('closePatchnotes'),
-        confirmPatchnotes: $('confirmPatchnotes'),
+        changelogBtn: $('changelogBtn'),
+        changelogModal: $('changelogModal'),
+        changelogContent: $('changelogContent'),
+        closeChangelog: $('closeChangelog'),
+        confirmChangelog: $('confirmChangelog'),
         modalScrollbar: $('modalScrollbar'),
         modalScrollbarThumb: $('modalScrollbarThumb'),
+        dropOverlay: $('dropOverlay'),
+        toast: $('toast'),
     };
 }
 
 // ================================================================
-// 카드 에셋 조회
+// 에셋 조회
 // ================================================================
 
-/** 캐릭터/타입/희귀도 조합에 맞는 카드 프레임 에셋 경로를 반환 */
+/**
+ * 캐릭터, 카드 타입, 희귀도 정보를 조합하여 해당 카드에 필요한 이미지 에셋 경로들을 반환합니다.
+ * @param {string} character - 캐릭터 명칭 (Ironclad, Silent 등)
+ * @param {string} cardType - 카드 타입 (Attack, Skill, Power 등)
+ * @param {string} rarity - 카드 희귀도 (Common, Uncommon, Rare 등)
+ * @returns {object} 배경, 프레임, 배너, 오브, 타입 강조 이미지를 포함하는 경로 객체
+ */
 function getCardAssets(character, cardType, rarity) {
     const p = FRAME_PREFIX;
     const rarityMap = { Starter: 'Common', Common: 'Common', Uncommon: 'Uncommon', Rare: 'Rare', Ancient: 'Rare', Misc: 'Uncommon' };
@@ -269,7 +291,11 @@ function getCardAssets(character, cardType, rarity) {
     };
 }
 
-/** 카드 아트 이미지 src 반환 (커스텀 Blob URL 우선) */
+/**
+ * 카드 객체의 상태를 확인하여 적절한 아트 이미지의 소스 경로(URL 또는 Blob URL)를 반환합니다.
+ * @param {object} card - 카드 데이터 객체
+ * @returns {string} 이미지 소스로 사용할 수 있는 URL 문자열
+ */
 function getCardArtSrc(card) {
     if (card?.blobUrl) return card.blobUrl;
     if (card?.png_base64 && !card.blobUrl) {
@@ -285,7 +311,9 @@ function getCardArtSrc(card) {
 }
 
 /**
- * 캔버스 데이터를 고효율압축 PNG Base64로 추출 (Godot/libpng 급 압축)
+ * 캔버스 엘리먼트의 내용을 UPNG.js와 pako를 사용하여 고효율 압축 PNG Base64 문자열로 변환합니다.
+ * @param {HTMLCanvasElement} canvas - 변환할 원본 캔버스 엘리먼트
+ * @returns {string} 압축된 PNG 데이터의 Base64 문자열 (헤더 제외)
  */
 function compressCanvasToPngBase64(canvas) {
     if (!window.UPNG || !window.pako) {
@@ -303,7 +331,12 @@ function compressCanvasToPngBase64(canvas) {
     return btoa(binary);
 }
 
-/** base64 문자열을 Blob 객체로 변환 */
+/**
+ * Base64로 인코딩된 이미지 데이터를 지정된 MIME 타입의 Blob 객체로 변환합니다.
+ * @param {string} base64 - Base64 인코딩된 이미지 데이터
+ * @param {string} [type='image/webp'] - 결과 Blob의 MIME 타입
+ * @returns {Blob|null} 생성된 Blob 객체 또는 입력값이 없을 경우 null
+ */
 function base64ToBlob(base64, type = 'image/webp') {
     if (!base64) return null;
     const binary = atob(base64);
@@ -312,7 +345,12 @@ function base64ToBlob(base64, type = 'image/webp') {
     return new Blob([array], { type });
 }
 
-/** 카드 객체의 Blob URL 갱신 및 관리 (GIF/PNG MIME 타입 분기) */
+/**
+ * 카드 객체에 포함된 이미지 데이터를 기반으로 브라우저의 Blob URL을 갱신합니다.
+ * 기존 URL이 있을 경우 메모리 해제를 위해 해제(revoke) 작업을 먼저 수행합니다.
+ * @param {object} card - 갱신할 카드 객체
+ * @returns {void}
+ */
 function updateCardBlobUrl(card) {
     if (card.blobUrl) {
         URL.revokeObjectURL(card.blobUrl);
@@ -346,7 +384,10 @@ function updateCardBlobUrl(card) {
 // ================================================================
 
 /**
- * 카드 프레임 레이어 HTML 생성 (그리드 카드 / 모달 공용)
+ * 카드 프레임을 구성하는 각 레이어(배경, 프레임, 배너 등)의 HTML 문자열을 생성합니다.
+ * @param {object} assets - 각 레이어 이미지 경로를 담은 객체
+ * @param {string} artContent - 카드 아트 영역에 들어갈 HTML 콘텐츠 (img 태그 등)
+ * @returns {string} 구성된 HTML 문자열
  */
 function buildCardFrameHTML(assets, artContent) {
     const fallback = 'source/img/card_frame/273px-StS2_AncientCardHighlight.png';
@@ -361,7 +402,9 @@ function buildCardFrameHTML(assets, artContent) {
 }
 
 /**
- * 카드 이름·타입 텍스트 레이어 HTML 생성
+ * 카드 위에 표시될 텍스트 레이어(이름, 타입)의 HTML 문자열을 생성합니다.
+ * @param {object} card - 카드 데이터 객체
+ * @returns {string} 구성된 HTML 문자열
  */
 function buildCardTextHTML(card) {
     const name = card.name_kr || card.name_en;
@@ -377,14 +420,23 @@ function buildCardTextHTML(card) {
 }
 
 // ================================================================
-// 초기화 프로세스
+// 초기화
 // ================================================================
 
+/**
+ * 카드의 캐릭터 정보를 바탕으로 게임 내 기본 리소스 경로(res://)를 추론하여 반환합니다.
+ * @param {object} card - 카드 객체
+ * @returns {string} 추론된 리소스 경로 문자열
+ */
 function getBaseSourcePath(card) {
     const charDir = Object.keys(DIR_TO_CHARACTER).find(k => DIR_TO_CHARACTER[k] === card.character) || 'colorless';
     return `res://images/packed/card_portraits/${charDir}/${(card.name_en || '').toLowerCase().replace(/ /g, '_')}.png`;
 }
 
+/**
+ * 로드된 전체 카드 DB를 순회하며 편집용 초기 상태를 가진 카드 객체 배열을 생성합니다.
+ * @returns {void}
+ */
 function initAllCards() {
     state.cards = CARDS_DB.map(card => {
         const isAncient = card.rarity === 'Ancient';
@@ -418,6 +470,10 @@ const animationState = {
     rafId: null
 };
 
+/**
+ * 전역 애니메이션 루프를 시작합니다. 그리드와 모달 내의 GIF 카드 프레임을 일정 간격으로 갱신합니다.
+ * @returns {void}
+ */
 function startGlobalAnimationLoop() {
     if (animationState.rafId) cancelAnimationFrame(animationState.rafId);
     animationState.lastTime = performance.now();
@@ -534,10 +590,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     renderUI();
     startGlobalAnimationLoop();
-    initPatchnotes();
+    initChangelog();
 });
 
-/** 모든 카드 에셋과 아트 이미지를 미리 로드 */
+/**
+ * 현재 로드된 모든 카드의 기본 에셋과 현재 적용된 아트 이미지를 브라우저 캐시에 미리 로드합니다.
+ * @returns {Promise<void>} 모든 이미지 로드(또는 실패) 완료 시점을 나타내는 Promise
+ */
 async function preloadAllAssets() {
     const uniqueUrls = new Set();
     state.cards.forEach(card => {
@@ -559,6 +618,10 @@ async function preloadAllAssets() {
 // ================================================================
 // 이벤트 바인딩
 // ================================================================
+/**
+ * 버튼 클릭, 입력 변경, 스크롤, 드래그 앤 드롭 등 애플리케이션의 모든 UI 이벤트를 바인딩합니다.
+ * @returns {void}
+ */
 function bindEvents() {
     dom.fileInput.addEventListener('change', e => {
         if (e.target.files[0]) handleFileUpload(e.target.files[0]);
@@ -680,30 +743,65 @@ function bindEvents() {
         if (state.isDraggingModalScrollbar) stopModalScrollbarDrag();
     });
 
-    // 패치노트 관련
-    dom.patchnotesBtn.onclick = () => {
-        if (dom.patchnotesModal.classList.contains('hidden')) {
-            openPatchnotesModal(false);
+    // ChangeLog 관련
+    dom.changelogBtn.onclick = () => {
+        if (dom.changelogModal.classList.contains('hidden')) {
+            openChangelogModal(false);
         } else {
-            closePatchnotesModal();
+            closeChangelogModal();
         }
     };
-    dom.closePatchnotes.onclick = closePatchnotesModal;
-    dom.confirmPatchnotes.onclick = closePatchnotesModal;
-    dom.patchnotesModal.querySelector('.modal-overlay').onclick = closePatchnotesModal;
+    dom.closeChangelog.onclick = closeChangelogModal;
+    dom.confirmChangelog.onclick = closeChangelogModal;
+    dom.changelogModal.querySelector('.modal-overlay').onclick = closeChangelogModal;
 
-    dom.patchnotesContent.addEventListener('scroll', () => {
+    dom.changelogContent.addEventListener('scroll', () => {
         if (!state.isModalScrollUpdating) {
             state.isModalScrollUpdating = true;
-            requestAnimationFrame(updateModalScrollbar);
+            requestAnimationFrame(updateChangelogScrollbar);
         }
     });
-    dom.modalScrollbarThumb.addEventListener('mousedown', startModalScrollbarDrag);
+    dom.modalScrollbarThumb.addEventListener('mousedown', startChangelogScrollbarDrag);
+
+    // 드래그 앤 드롭 이미지 업로드
+    window.addEventListener('dragover', e => {
+        e.preventDefault();
+        if (state.editingCardIndex !== -1) {
+            dom.dropOverlay.classList.add('active');
+        }
+    });
+
+    window.addEventListener('dragleave', e => {
+        // 브라우저 밖으로 나가거나 캔버스 영역을 벗어날 때만 오버레이 제거
+        if (e.relatedTarget === null) {
+            dom.dropOverlay.classList.remove('active');
+        }
+    });
+
+    window.addEventListener('drop', e => {
+        e.preventDefault();
+        dom.dropOverlay.classList.remove('active');
+
+        if (state.editingCardIndex !== -1 && e.dataTransfer.files.length > 0) {
+            const file = e.dataTransfer.files[0];
+            if (file.type.startsWith('image/')) {
+                processImageFile(file);
+            }
+        }
+    });
+
+    // 드롭 오버레이 드래그 이벤트 전파 방지
+    dom.dropOverlay.addEventListener('dragenter', e => e.preventDefault());
 }
 
 // ================================================================
 // 파일 처리
 // ================================================================
+/**
+ * 사용자가 업로드한 JSON 파일을 읽고 파싱하여 아트팩 형식(card_art_bundle)인지 검증합니다.
+ * @param {File} file - 업로드된 JSON 파일 객체
+ * @returns {Promise<void>} 파일 처리 완료 시점을 나타내는 Promise
+ */
 async function handleFileUpload(file) {
     showLoading(true, '아트팩 데이터를 처리 중입니다...');
 
@@ -748,7 +846,12 @@ async function handleFileUpload(file) {
     }
 }
 
-/** 실제 데이터 적용 로직 */
+/**
+ * 파싱된 아트팩 데이터를 현재 상태에 적용합니다. 병합(Merge) 또는 초기화 후 적용을 선택할 수 있습니다.
+ * @param {object} data - 적용할 아트팩 데이터 객체
+ * @param {boolean} [isMerge=true] - 기존 수정사항 유지 여부 (true: 병합, false: 덮어쓰기)
+ * @returns {Promise<void>} 데이터 적용 및 UI 갱신 완료 시점을 나타내는 Promise
+ */
 async function processImport(data, isMerge = true) {
     showLoading(true, '데이터를 적용 중입니다...');
     try {
@@ -788,17 +891,28 @@ async function processImport(data, isMerge = true) {
     }
 }
 
+/**
+ * 아트팩 불러오기 시 기존 데이터와의 충돌을 해결하기 위한 선택 모달을 표시합니다.
+ * @returns {void}
+ */
 function showImportChoiceModal() {
     dom.importChoiceModal.classList.remove('hidden');
     lucide.createIcons();
 }
 
+/**
+ * 불러오기 선택 모달을 숨기고 대기 중인 데이터를 초기화합니다.
+ * @returns {void}
+ */
 function hideImportChoiceModal() {
     dom.importChoiceModal.classList.add('hidden');
     state.pendingImportData = null;
 }
 
-/** 현재 모든 수정 내용을 버리고 깨끗한 상태로 준비 */
+/**
+ * 모든 카드 객체의 상태를 초기화하고 IndexedDB 및 Blob URL을 포함한 모든 데이터를 삭제합니다.
+ * @returns {Promise<void>} 초기화 완료 시점을 나타내는 Promise
+ */
 async function resetToCleanState() {
     state.cards.forEach(c => {
         if (c.blobUrl) URL.revokeObjectURL(c.blobUrl);
@@ -811,7 +925,11 @@ async function resetToCleanState() {
     await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
 }
 
-/** artpack 카드 객체에 DB 메타데이터를 병합 */
+/**
+ * 외부에서 가져온 로우(raw) 카드 데이터에 로컬 DB의 메타데이터를 결합하여 완전한 카드 객체를 생성합니다.
+ * @param {object} raw - 외부 아트팩에서 추출한 개별 카드 데이터
+ * @returns {object} 메타데이터가 보완된 카드 객체
+ */
 function enrichCard(raw) {
     const meta = findCardMeta(raw.source_path || '');
     const isAncient = meta?.rarity === 'Ancient';
@@ -846,17 +964,32 @@ function enrichCard(raw) {
     };
 }
 
+/**
+ * 소스 경로에서 파일명을 추출하여 가독성 있는 기본 카드 이름으로 변환합니다. (폴백용)
+ * @param {string} sourcePath - 리소스 경로
+ * @returns {string} 변환된 이름 문자열
+ */
 function extractFallbackName(sourcePath) {
     if (!sourcePath) return 'Unknown';
     const file = sourcePath.split('/').pop()?.replace(/\.[^.]+$/, '') || 'unknown';
     return file.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
+/**
+ * 소스 경로의 디렉토리 정보를 바탕으로 카드의 캐릭터를 추론합니다.
+ * @param {string} sourcePath - 리소스 경로
+ * @returns {string} 추론된 캐릭터 명칭
+ */
 function inferCharacterFromPath(sourcePath) {
     const dir = (sourcePath || '').split('/').slice(-2, -1)[0]?.toLowerCase() || '';
     return DIR_TO_CHARACTER[dir] || 'Colorless';
 }
 
+/**
+ * 소스 경로에 포함된 키워드를 바탕으로 카드 타입을 추론합니다.
+ * @param {string} sourcePath - 리소스 경로
+ * @returns {string} 추론된 카드 타입 (Attack, Power, Skill 중 하나)
+ */
 function inferTypeFromPath(sourcePath) {
     const path = (sourcePath || '').toLowerCase();
     if (path.includes('attack')) return 'Attack';
@@ -864,6 +997,11 @@ function inferTypeFromPath(sourcePath) {
     return 'Skill';
 }
 
+/**
+ * File 객체를 읽어 문자열 텍스트로 반환하는 Promise 기반의 유틸리티 함수입니다.
+ * @param {File} file - 읽을 파일 객체
+ * @returns {Promise<string>} 파일 내용 문자열을 담은 Promise
+ */
 function readFileAsText(file) {
     return new Promise((resolve, reject) => {
         const r = new FileReader();
@@ -876,6 +1014,10 @@ function readFileAsText(file) {
 // ================================================================
 // UI 렌더링
 // ================================================================
+/**
+ * 전체 UI를 갱신합니다. 에디터 영역 표시, 버튼 상태, 통계, 그리드 렌더링 등을 아우릅니다.
+ * @returns {void}
+ */
 function renderUI() {
     dom.editorSection.classList.remove('hidden');
     updateGlobalButtons();
@@ -885,14 +1027,20 @@ function renderUI() {
     setTimeout(updateCustomScrollbar, 100);
 }
 
-/** 수정된 카드 수 업데이트 */
+/**
+ * 현재 수정된 카드의 개수를 계산하여 화면에 표시하고 관련 버튼들의 전역 상태를 업데이트합니다.
+ * @returns {void}
+ */
 function updateStats() {
     const modifiedCount = state.cards.filter(c => c.png_base64).length;
     dom.cardCountEl.textContent = modifiedCount;
     updateGlobalButtons();
 }
 
-/** 버튼 활성화 상태를 현재 데이터 상태에 맞춰 업데이트 */
+/**
+ * 현재 카드 데이터 상태(수정 여부, 아트팩 로드 여부 등)에 따라 상단 버튼들의 활성화 상태를 제어합니다.
+ * @returns {void}
+ */
 function updateGlobalButtons() {
     const hasModified = state.cards.some(c => c.png_base64);
     const hasArtpack = !!state.originalData;
@@ -902,6 +1050,10 @@ function updateGlobalButtons() {
     dom.unloadBtn.disabled = !hasArtpack && !hasModified;
 }
 
+/**
+ * 카드 그리드 영역을 데이터 기반으로 초기 렌더링하거나 필터링을 적용합니다.
+ * @returns {void}
+ */
 function renderCardGrid() {
     if (dom.cardGrid.children.length === 0) {
         state.cards.sort((a, b) => (a.no || 9999) - (b.no || 9999));
@@ -915,7 +1067,11 @@ function renderCardGrid() {
     filterCards();
 }
 
-/** 카드 DOM을 새로 생성해 교체 (저장/리셋 후 호출) */
+/**
+ * 특정 카드 객체의 개별 DOM 요소를 최신 상태로 재생성하여 교체합니다.
+ * @param {object} card - 교체할 카드 객체
+ * @returns {void}
+ */
 function replaceCardDOM(card) {
     if (!card.domNode) return;
     const isHidden = card.domNode.style.display === 'none';
@@ -925,7 +1081,11 @@ function replaceCardDOM(card) {
     card.domNode = newDom;
 }
 
-/** 카드 그리드 아이템 DOM 생성 */
+/**
+ * 개별 카드 객체를 기반으로 그리드에 표시될 DOM 엘리먼트(카드 아이템)를 생성하고 이벤트를 바인딩합니다.
+ * @param {object} card - 생성할 카드 객체
+ * @returns {HTMLDivElement} 생성된 카드 아이템 DOM 엘리먼트
+ */
 function createCardElement(card) {
     const div = document.createElement('div');
     const index = state.cards.indexOf(card);
@@ -942,6 +1102,30 @@ function createCardElement(card) {
         }
     });
 
+    div.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        if (!state.isSelectMode) {
+            div.classList.add('drag-over');
+        }
+    });
+
+    div.addEventListener('dragleave', (e) => {
+        div.classList.remove('drag-over');
+    });
+
+    div.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        div.classList.remove('drag-over');
+
+        if (!state.isSelectMode && e.dataTransfer.files.length > 0) {
+            const file = e.dataTransfer.files[0];
+            if (file.type.startsWith('image/')) {
+                processSilentImageDrop(file, index);
+            }
+        }
+    });
+
     const assets = getCardAssets(card.character, card.cardType, card.rarity);
     const artSrc = getCardArtSrc(card);
     const fallback = 'source/img/card_frame/273px-StS2_AncientCardHighlight.png';
@@ -951,13 +1135,10 @@ function createCardElement(card) {
     const offX = card.adjust_offset_x || 0.0;
     const offY = card.adjust_offset_y || 0.0;
 
-    // 정적 이미지는 이미 구워진 캔버스 결과물(png_base64)이 반환되므로 이중 줌 방지
-    // 단, GIF (애니메이션)는 원본이 반환되므로 정밀 퍼센트(%) 좌표형 렌더링으로 일치시킴
     const isGif = card.artType === 'gif';
     let artStyle = `position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover;`;
 
     if (isGif && card.source_width && card.source_height) {
-        // 모달과 수학적으로 완벽히 동일한 정밀 퍼센트(%) 좌표 계산
         const targetW = card.width || 1000;
         const targetH = card.height || 760;
         const coverScale = Math.max(targetW / card.source_width, targetH / card.source_height);
@@ -981,7 +1162,6 @@ function createCardElement(card) {
             object-fit: fill;
         `;
     } else if (isGif) {
-        // 해상도 정보가 없는 기존 GIF 데이터용 임시 폴백
         artStyle = `
             position: absolute;
             left: 50%;
@@ -1014,13 +1194,39 @@ function createCardElement(card) {
         cardEl.appendChild(badge);
     }
 
+    // 그리드용 드롭 오버레이 추가
+    const dropOverlay = document.createElement('div');
+    dropOverlay.className = 'drop-overlay';
+    dropOverlay.innerHTML = `
+        <div class="drop-overlay-content">
+            <i data-lucide="image-plus"></i>
+            <span>업로드</span>
+        </div>
+    `;
+    div.appendChild(dropOverlay);
+
     div.appendChild(cardEl);
+
+    // 오버레이 아이콘 생성 (새로 추가된 DOM에 대해서만)
+    if (window.lucide) {
+        lucide.createIcons({
+            attrs: { class: 'lucide' },
+            nameAttr: 'data-lucide',
+            icons: undefined
+        }, dropOverlay);
+    }
+
     return div;
 }
 
 // ================================================================
-// 필터링
+// 필터
 // ================================================================
+/**
+ * 선택된 캐릭터에 따라 희귀도 필터의 활성화 여부를 동기화합니다.
+ * 특정 캐릭터(Ancient 등)는 희귀도 필터가 비활성화됩니다.
+ * @returns {void}
+ */
 function syncRarityFilterState() {
     const rarityGroup = document.querySelector('.rarity-group');
     const isDisabled = RARITY_DISABLED_CHARS.has(state.filters.character);
@@ -1032,6 +1238,10 @@ function syncRarityFilterState() {
     }
 }
 
+/**
+ * 현재 설정된 모든 필터(캐릭터, 타입, 희귀도, 검색어)를 기반으로 카드 목록을 필터링하여 표시 여부를 결정합니다.
+ * @returns {void}
+ */
 function filterCards() {
     const query = dom.searchInput.value.toLowerCase();
     const { character, type, rarity } = state.filters;
@@ -1066,8 +1276,13 @@ function filterCards() {
 }
 
 // ================================================================
-// 아트팩 데이터 해제
+// 데이터 해제
 // ================================================================
+/**
+ * 현재 로드된 아트팩 데이터를 해제하고 앱을 초기 상태로 되돌립니다.
+ * 사용자 확인 절차를 거치며 모든 수정 사항이 삭제됩니다.
+ * @returns {Promise<void>} 해제 및 초기화 완료 시점을 나타내는 Promise
+ */
 async function unloadArtPack() {
     const hasModified = state.cards.some(c => c.png_base64);
     const hasArtpack = !!state.originalData;
@@ -1112,24 +1327,30 @@ async function unloadArtPack() {
 // 모달 에디터
 // ================================================================
 
+/**
+ * 모달 내의 캔버스 및 애니메이션 프리뷰 영역을 초기화하고 숨깁니다.
+ * @returns {void}
+ */
 function clearModalPreviews() {
-    // 캔버스 초기화
     const canvas = dom.modalPreview;
     if (canvas) {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width || 10, canvas.height || 10);
     }
-    // 애니메이션 이미지 초기화
     if (dom.modalPreviewAnimated) {
         dom.modalPreviewAnimated.src = '';
         dom.modalPreviewAnimated.classList.add('hidden');
     }
-    // 정적 캔버스 숨기기
     if (dom.modalPreview) {
         dom.modalPreview.classList.add('hidden');
     }
 }
 
+/**
+ * 특정 카드를 편집하기 위한 상세 에디터 모달을 엽니다.
+ * @param {number} cardIndex - 편집할 카드의 전체 카드 보관함 내 인덱스
+ * @returns {void}
+ */
 function openEditor(cardIndex) {
     const card = state.cards[cardIndex];
     if (!card) return;
@@ -1202,7 +1423,6 @@ function openEditor(cardIndex) {
     dom.offsetXSlider.value = Math.round((card.adjust_offset_x ?? 0.0) * 100);
     dom.offsetYSlider.value = Math.round((card.adjust_offset_y ?? 0.0) * 100);
 
-    // 토글 스위치 초기화
     dom.toggleOriginalBtn.classList.remove('is-original');
     dom.toggleOriginalBtn.querySelectorAll('.toggle-option').forEach(opt => {
         opt.classList.toggle('active', opt.classList.contains('left'));
@@ -1234,12 +1454,20 @@ function openEditor(cardIndex) {
     });
 }
 
+/**
+ * 편집 모달을 닫고 관련 입력 상태를 초기화합니다.
+ * @returns {void}
+ */
 function closeModal() {
     dom.editModal.classList.add('hidden');
     dom.imageInput.value = '';
     state.editingCardIndex = -1;
 }
 
+/**
+ * 상세 에디터에서 사용자가 편집 중인 이미지와 원본 게임 이미지를 비교해 볼 수 있도록 표시를 토글합니다.
+ * @returns {void}
+ */
 function toggleOriginalView() {
     const isShowingCustom = !dom.modalPreview.classList.contains('hidden');
     dom.modalPreview.classList.toggle('hidden', isShowingCustom);
@@ -1251,8 +1479,143 @@ function toggleOriginalView() {
     });
 }
 
+/**
+ * 파일 선택 창을 통해 업로드된 이미지 파일을 처리하는 핸들러입니다.
+ * @param {Event} e - 파일 입력 엘리먼트의 change 이벤트 객체
+ * @returns {void}
+ */
 function handleImageUpload(e) {
     const file = e.target.files[0];
+    if (file) processImageFile(file);
+}
+
+/**
+ * 화면 하단에 알림 메시지(토스트)를 표시합니다. 실행 취소 버튼을 포함할 수 있습니다.
+ * @param {string} message - 표시할 메시지 내용
+ * @param {boolean} [isUndoable=false] - 실행 취소 기능 제공 여부
+ * @returns {void}
+ */
+function showToast(message, isUndoable = false) {
+    const toast = dom.toast;
+    if (!toast) return;
+
+    let html = `<span>${message}</span>`;
+    if (isUndoable && state.lastAction) {
+        html += `<button class="toast-undo-btn" onclick="undoLastAction()">실행취소</button>`;
+    }
+
+    toast.innerHTML = html;
+    toast.classList.add('show');
+
+    if (state.toastTimer) clearTimeout(state.toastTimer);
+    state.toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+    }, 8000);
+}
+
+/**
+ * 가장 최근에 수행한 카드 이미지 변경 작업을 취소하고 이전 상태로 복구합니다.
+ * @returns {Promise<void>} 복구 및 DB 저장 완료 시점을 나타내는 Promise
+ */
+window.undoLastAction = async function () {
+    if (!state.lastAction) return;
+
+    const { index, previousData } = state.lastAction;
+
+    const currentDomNode = state.cards[index].domNode;
+    state.cards[index] = {
+        ...previousData,
+        domNode: currentDomNode
+    };
+
+    updateCardBlobUrl(state.cards[index]);
+    replaceCardDOM(state.cards[index]);
+    updateStats();
+
+    await saveToDB({ originalData: state.originalData, cards: state.cards });
+
+    if (dom.toast) dom.toast.classList.remove('show');
+    state.lastAction = null;
+};
+
+/**
+ * 그리드에서 드래그 앤 드롭으로 파일을 드롭했을 때, 편집기를 열지 않고 즉시 이미지를 적용합니다.
+ * @param {File} file - 드롭된 이미지 파일 객체
+ * @param {number} cardIndex - 이미지를 적용할 카드의 인덱스
+ * @returns {Promise<void>} 이미지 처리 및 적용 완료 시점을 나타내는 Promise
+ */
+async function processSilentImageDrop(file, cardIndex) {
+    if (!file) return;
+    const card = state.cards[cardIndex];
+    if (!card) return;
+
+    state.lastAction = {
+        index: cardIndex,
+        previousData: JSON.parse(JSON.stringify(card))
+    };
+
+    showLoading(true, '이미지를 적용하는 중...');
+
+    const reader = new FileReader();
+    reader.onload = async ev => {
+        const dataUrl = ev.target.result;
+        const isAnimated = file.type === 'image/gif' || file.type === 'image/webp' || file.name.toLowerCase().endsWith('.gif');
+
+        try {
+            const img = await loadSourceImage(dataUrl);
+            card.artType = isAnimated ? 'gif' : 'static';
+            card.art_mime = file.type || (isAnimated ? 'image/gif' : 'image/png');
+            card.adjust_zoom = 1.0;
+            card.adjust_offset_x = 0.0;
+            card.adjust_offset_y = 0.0;
+            card.background_color = 'transparent';
+            card.gif_frames = null;
+
+            if (isAnimated) {
+                card.png_base64 = dataUrl.split(',')[1];
+            } else {
+                const targetW = card.width || 1000;
+                const targetH = card.height || 760;
+                const canvas = document.createElement('canvas');
+                canvas.width = targetW;
+                canvas.height = targetH;
+                const ctx = canvas.getContext('2d', { alpha: true });
+
+                const coverScale = Math.max(targetW / img.naturalWidth, targetH / img.naturalHeight);
+                const rW = img.naturalWidth * coverScale;
+                const rH = img.naturalHeight * coverScale;
+                ctx.drawImage(img, (targetW - rW) / 2, (targetH - rH) / 2, rW, rH);
+
+                card.png_base64 = compressCanvasToPngBase64(canvas);
+            }
+
+            card.source_png_base64 = dataUrl.split(',')[1];
+            card.source_width = img.naturalWidth;
+            card.source_height = img.naturalHeight;
+            card.updated_at = new Date().toISOString().replace('T', ' ').slice(0, 19);
+
+            await saveToDB({ originalData: state.originalData, cards: state.cards });
+            updateCardBlobUrl(card); // Blob URL 갱신 추가
+            replaceCardDOM(card);
+            updateStats();
+            showToast(`${card.name_kr || card.name_en} 이미지가 변경되었습니다.`, true);
+        } catch (err) {
+            console.error('Silent drop error:', err);
+            alert('이미지 처리 중 오류가 발생했습니다.');
+            state.lastAction = null;
+        } finally {
+            showLoading(false);
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+/**
+ * 업로드된 이미지 파일을 읽어 에디터의 상태로 설정하고 프리뷰를 갱신합니다.
+ * @param {File} file - 읽을 이미지 파일 객체
+ * @returns {void}
+ */
+function processImageFile(file) {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = async ev => {
@@ -1277,7 +1640,10 @@ function handleImageUpload(e) {
     reader.readAsDataURL(file);
 }
 
-/** 현재 편집된 이미지의 원본 소스를 다운로드 */
+/**
+ * 사용자가 새로 업로드한 커스텀 이미지의 원본 파일을 브라우저를 통해 다운로드합니다.
+ * @returns {void}
+ */
 function downloadCustomImage() {
     const card = state.cards[state.editingCardIndex];
     if (!card) return;
@@ -1305,6 +1671,12 @@ function downloadCustomImage() {
     document.body.removeChild(a);
 }
 
+/**
+ * 상세 에디터 프리뷰 영역의 배경색을 업데이트합니다. 투명(Checkerboard) 모드도 포함합니다.
+ * @param {string} color - 설정할 배경색 문자열 (색상 코드 또는 'transparent')
+ * @param {boolean} [markDirty=true] - 변경 사항을 Dirty 상태로 표시할지 여부
+ * @returns {void}
+ */
 function updateBackgroundColor(color, markDirty = true) {
     state.adjustState.backgroundColor = color;
     const isTransparent = color === 'transparent';
@@ -1326,6 +1698,10 @@ function updateBackgroundColor(color, markDirty = true) {
     }
 }
 
+/**
+ * 상세 에디터에서 슬라이더를 통해 변경된 줌(Zoom) 및 오프셋(Offset) 값을 기반으로 프리뷰 이미지를 실시간으로 변형(Transform)합니다.
+ * @returns {void}
+ */
 function updateModalPreviewTransform() {
     const zoomRaw = parseInt(dom.zoomSlider.value, 10);
     const offsetXRaw = parseInt(dom.offsetXSlider.value, 10);
@@ -1350,9 +1726,6 @@ function updateModalPreviewTransform() {
     const targetW = card?.width || 1000;
     const targetH = card?.height || 760;
 
-    // ── 애니메이션 모드 (GIF 등) ──
-    // Canvas 렌더링과 단 1픽셀의 오차도 없이 시각적 일치를 위해
-    // 부모 컨테이너(100%) 비율 기준 절대 퍼센트롤 계산하여 위치/크기를 고정합니다.
     if (state.adjustState.isAnimated) {
         dom.modalPreview.classList.add('hidden');
         dom.modalPreviewAnimated.classList.remove('hidden');
@@ -1360,7 +1733,6 @@ function updateModalPreviewTransform() {
         const animImg = dom.modalPreviewAnimated;
         animImg.src = state.adjustState.sourceDataUrl;
 
-        // 캔버스와 동일한 크기/좌표 렌더링 수학
         const coverScale = Math.max(targetW / img.naturalWidth, targetH / img.naturalHeight);
         const totalScale = coverScale * zoom;
         const rW = img.naturalWidth * totalScale;
@@ -1369,7 +1741,6 @@ function updateModalPreviewTransform() {
         const cx = targetW / 2 + offsetX * (targetW / 2);
         const cy = targetH / 2 + offsetY * (targetH / 2);
 
-        // 컨테이너 단위 대비 상대 좌표(%)로 변환
         const leftPct = ((cx - rW / 2) / targetW) * 100;
         const topPct = ((cy - rH / 2) / targetH) * 100;
         const widthPct = (rW / targetW) * 100;
@@ -1385,7 +1756,6 @@ function updateModalPreviewTransform() {
         return;
     }
 
-    // ── 정적 이미지 모드 (Canvas) ──
     dom.modalPreviewAnimated.classList.add('hidden');
     dom.modalPreview.classList.remove('hidden');
 
@@ -1412,6 +1782,11 @@ function updateModalPreviewTransform() {
     ctx.drawImage(img, cx - rW / 2, cy - rH / 2, rW, rH);
 }
 
+/**
+ * 내부 카드 객체의 보정 데이터(줌, 오프셋, 배경색)를 반영하여 캔버스에 렌더링한 후 PNG Base64 문자열로 반환합니다.
+ * @param {object} card - 렌더링할 정보를 가진 카드 객체
+ * @returns {Promise<string>} 렌더링된 PNG의 Base64 문자열
+ */
 async function renderCardToPngBase64(card) {
     const mimeType = card.art_mime || (card.artType === 'gif' ? 'image/gif' : 'image/png');
     const dataUrl = `data:${mimeType};base64,${card.png_base64}`;
@@ -1450,6 +1825,10 @@ async function renderCardToPngBase64(card) {
     });
 }
 
+/**
+ * 현재 모달 에디터에서 변경된 모든 설정(이미지, 줌, 오프셋, 배경색 등)을 카드 객체에 반영하고 저장합니다.
+ * @returns {Promise<void>} 데이터 반영 및 DB 저장 완료 시점을 나타내는 Promise
+ */
 async function saveChanges() {
     const card = state.cards[state.editingCardIndex];
     if (!card) return;
@@ -1501,6 +1880,10 @@ async function saveChanges() {
     closeModal();
 }
 
+/**
+ * 현재 편집 중인 카드의 커스텀 이미지와 모든 보정 데이터를 초기화합니다.
+ * @returns {Promise<void>} 초기화 및 DB 저장 완료 시점을 나타내는 Promise
+ */
 function resetCurrentCard() {
     if (!confirm('이 카드의 커스텀 이미지를 제거하시겠습니까?')) return;
     const card = state.cards[state.editingCardIndex];
@@ -1513,7 +1896,7 @@ function resetCurrentCard() {
     card.adjust_offset_y = 0.0;
     card.background_color = 'transparent';
 
-    // 추가 상태 필드 초기화
+    // 상태 초기화
     card.artType = 'static';
     card.art_mime = 'image/png';
     card.gif_frames = null;
@@ -1529,6 +1912,10 @@ function resetCurrentCard() {
     closeModal();
 }
 
+/**
+ * 에디터 내의 슬라이더 값들(줌, 오프셋)을 기본값(100%, 0, 0)으로 초기화합니다.
+ * @returns {void}
+ */
 function resetAdjustValues() {
     dom.zoomSlider.value = 100;
     dom.offsetXSlider.value = 0;
@@ -1537,8 +1924,12 @@ function resetAdjustValues() {
 }
 
 // ================================================================
-// 선택 모드 리모콘
+// 선택 모드
 // ================================================================
+/**
+ * 카드 다중 선택 모드를 켜거나 끕니다. 모드 전환에 맞춰 UI 레이아웃을 조정합니다.
+ * @returns {void}
+ */
 function toggleSelectMode() {
     state.isSelectMode = !state.isSelectMode;
     document.body.classList.toggle('select-mode', state.isSelectMode);
@@ -1551,6 +1942,10 @@ function toggleSelectMode() {
     }
 }
 
+/**
+ * 카드 다중 선택 모드를 취소하고 선택된 카드 목록을 비웁니다.
+ * @returns {void}
+ */
 function cancelSelectMode() {
     state.isSelectMode = false;
     document.body.classList.remove('select-mode');
@@ -1559,6 +1954,12 @@ function cancelSelectMode() {
     updateSelectionUI();
 }
 
+/**
+ * 선택 모드에서 카드 위로 마우스 버튼을 눌렀을 때 드래그 선택을 시작합니다.
+ * @param {number} index - 마우스 이벤트가 발생한 카드의 인덱스
+ * @param {MouseEvent} e - 마우스 이벤트 객체
+ * @returns {void}
+ */
 function handleCardMouseDown(index, e) {
     if (!state.isSelectMode) return;
     if (e.button !== 0) return;
@@ -1579,11 +1980,20 @@ function handleCardMouseDown(index, e) {
     e.preventDefault();
 }
 
+/**
+ * 드래그 선택 중 마우스가 다른 카드 위로 진입했을 때 선택 범위를 확장/축소합니다.
+ * @param {number} index - 마우스가 진입한 카드의 인덱스
+ * @returns {void}
+ */
 function handleCardMouseEnter(index) {
     if (!state.isSelectMode || !state.isDraggingSelection) return;
     updateSelectionRange(state.dragStartIndex, index);
 }
 
+/**
+ * 마우스 버튼을 떼었을 때 드래그 선택 작업을 종료합니다.
+ * @returns {void}
+ */
 function stopDragSelection() {
     state.isDraggingSelection = false;
     state.dragStartIndex = -1;
@@ -1591,6 +2001,12 @@ function stopDragSelection() {
     state.dragAction = null;
 }
 
+/**
+ * 드래그의 시작점과 끝점 사이의 모든 가시적인 카드를 선택 상태로 업데이트합니다.
+ * @param {number} startIdx - 드래그 시작 카드의 인덱스
+ * @param {number} endIdx - 드래그 종료 카드의 인덱스
+ * @returns {void}
+ */
 function updateSelectionRange(startIdx, endIdx) {
     const visibleCardIndices = state.cards
         .map((card, i) => ({ card, i }))
@@ -1618,6 +2034,10 @@ function updateSelectionRange(startIdx, endIdx) {
     updateSelectionUI();
 }
 
+/**
+ * 현재 화면에 보이고 있는 모든(필터링된) 카드를 한꺼번에 선택하거나 해제합니다.
+ * @returns {void}
+ */
 function selectAllVisibleCards() {
     const visibleIndices = state.cards
         .map((card, i) => ({ card, i }))
@@ -1635,6 +2055,10 @@ function selectAllVisibleCards() {
     updateSelectionUI();
 }
 
+/**
+ * 현재 선택된 카드의 개수를 화면에 업데이트하고 카드 아이템의 선택 표시(시각적)를 갱신합니다.
+ * @returns {void}
+ */
 function updateSelectionUI() {
     const count = state.selectedCards.size;
     dom.selectedCount.textContent = count;
@@ -1675,6 +2099,11 @@ function updateSelectionUI() {
 // 내보내기
 // ================================================================
 
+/**
+ * 카드 객체의 GIF 정보를 바탕으로 개별 애니메이션 프레임을 추출하거나 재생성합니다.
+ * @param {object} card - 프레임을 추출할 카드 객체
+ * @returns {Promise<array>} 추출된 프레임(Base64 및 딜레이) 데이터 배열
+ */
 async function buildGifFrames(card) {
     if (card.gif_frames && card.gif_frames.length > 0 && !state.isDirty) {
         return card.gif_frames;
@@ -1819,6 +2248,11 @@ async function buildGifFrames(card) {
     }
 }
 
+/**
+ * 현재 수정된 카드들을 STS2 아트팩 형식의 JSON 파일로 생성하여 다운로드합니다.
+ * @param {boolean} [selectedOnly=false] - 선택된 카드만 내보낼지 여부
+ * @returns {Promise<void>} 파일 생성 및 다운로드 완료 시점을 나타내는 Promise
+ */
 async function exportJSON(selectedOnly = false) {
     let targetCards = state.cards;
 
@@ -1928,6 +2362,11 @@ async function exportJSON(selectedOnly = false) {
     }
 }
 
+/**
+ * 선택된 카드들을 5열 그리드 형태의 하나의 이미지(PNG)로 합쳐서 내보냅니다.
+ * html-to-image 라이브러리를 사용하여 렌더링합니다.
+ * @returns {Promise<void>} 이미지 생성 및 다운로드 완료 시점을 나타내는 Promise
+ */
 async function exportSelectedAsImage() {
     const selectedIndices = Array.from(state.selectedCards).sort((a, b) => {
         const noA = state.cards[a].no || 9999;
@@ -2036,8 +2475,12 @@ async function exportSelectedAsImage() {
 }
 
 // ================================================================
-// IndexedDB 영속화
+// IndexedDB
 // ================================================================
+/**
+ * IndexedDB를 열어 'STS2CardArtEditor' 데이터베이스와 'AppData' 저장소 인스턴스를 반환합니다.
+ * @returns {Promise<IDBDatabase>} 로드된 텍스트 IDBDatabase 객체
+ */
 function openDB() {
     return new Promise((resolve, reject) => {
         const req = indexedDB.open('STS2CardArtEditor', 1);
@@ -2051,6 +2494,11 @@ function openDB() {
     });
 }
 
+/**
+ * 현재 애플리케이션의 상태(원본 데이터 및 카드 목록)를 IndexedDB에 비동기로 저장합니다.
+ * @param {object} value - 저장할 상태 데이터 객체
+ * @returns {Promise<void>} 저장 완료 시점을 나타내는 Promise
+ */
 async function saveToDB(value) {
     try {
         const db = await openDB();
@@ -2064,6 +2512,10 @@ async function saveToDB(value) {
     } catch (e) { console.warn('IndexedDB 저장 실패:', e); }
 }
 
+/**
+ * IndexedDB에 저장된 가장 최근의 애플리케이션 상태 데이터를 로드합니다.
+ * @returns {Promise<object|null>} 로드된 상태 데이터 객체 또는 데이터가 없을 경우 null
+ */
 async function loadFromDB() {
     try {
         const db = await openDB();
@@ -2074,16 +2526,24 @@ async function loadFromDB() {
 }
 
 // ================================================================
-// 유틸
+// 유틸리티
 // ================================================================
-/** 로딩 레이어 표시 제어 */
+/**
+ * 애플리케이션 상단이나 모달 위에 로딩 스피너와 메시지를 표시하거나 숨깁니다.
+ * @param {boolean} show - 표시 여부 (true: 표시, false: 숨김)
+ * @param {string} [message='에셋 로딩 중...'] - 표시할 로딩 메시지
+ * @returns {void}
+ */
 function showLoading(show, message = '에셋 로딩 중...') {
     const textEl = document.getElementById('loadingText');
     if (textEl) textEl.textContent = message;
     dom.appLoading.classList.toggle('hidden', !show);
 }
 
-/** 스크롤바 드래그 종료 */
+/**
+ * 기본 콘텐츠 영역의 커스텀 스크롤바 드래그 작업을 종료합니다.
+ * @returns {void}
+ */
 function stopScrollbarDrag() {
     state.isDraggingScrollbar = false;
     document.body.classList.remove('dragging');
@@ -2093,100 +2553,110 @@ function stopScrollbarDrag() {
 }
 
 // ================================================================
-// 패치노트 시스템
+// 변경 내역
 // ================================================================
 
-/** 패치노트 초기화 및 자동 팝업 체크 */
-async function initPatchnotes() {
+/**
+ * 외부 changelog.json 파일을 로드하여 변경 내역 데이터를 초기화하고, 새 버전이 있을 경우 모달을 자동으로 엽니다.
+ * @returns {Promise<void>} 로딩 및 초기 설정 완료 시점을 나타내는 Promise
+ */
+async function initChangelog() {
     try {
-        const response = await fetch('patchnotes.json');
-        if (!response.ok) throw new Error('패치노트 로딩 실패');
-        const patchnotesData = await response.json();
-        // 데이터가 유효한 배열인지 확인
-        if (Array.isArray(patchnotesData) && patchnotesData.length > 0) {
-            state.patchnotes = patchnotesData;
-
-            const latestVersion = state.patchnotes[0].version;
-            const lastVersion = localStorage.getItem('sts2_last_patchnote_version');
+        const response = await fetch('changelog.json');
+        if (!response.ok) throw new Error('ChangeLog 로딩 실패');
+        const changelogData = await response.json();
+        if (Array.isArray(changelogData) && changelogData.length > 0) {
+            state.changelog = changelogData;
+            const latestVersion = state.changelog[0].version;
+            const lastVersion = localStorage.getItem('sts2_last_changelog_version');
             if (lastVersion !== latestVersion) {
-                openPatchnotesModal(true);
+                openChangelogModal(true);
             }
         }
     } catch (err) {
-        console.error('Patchnotes load failed:', err);
+        console.error('ChangeLog load failed:', err);
     }
 }
 
-/** 패치노트 모달 열기 */
-function openPatchnotesModal(isAuto = false) {
-    if (!state.patchnotes) return;
-
-    renderPatchnotesContent();
-    dom.patchnotesModal.classList.remove('hidden');
+/**
+ * 변경 내역(ChangeLog) 모달을 엽니다.
+ * @param {boolean} [isAuto=false] - 자동 팝업 여부 (true일 경우 로컬 스토리지에 확인 버전 기록)
+ * @returns {void}
+ */
+function openChangelogModal(isAuto = false) {
+    if (!state.changelog) return;
+    renderChangelogContent();
+    dom.changelogModal.classList.remove('hidden');
     lucide.createIcons({
         attrs: { class: 'lucide' },
         nameAttr: 'data-lucide',
         icons: undefined
-    }, dom.patchnotesModal);
-
-    // 열린 직후 스크롤바 상태 갱신
-    setTimeout(updateModalScrollbar, 50);
-
+    }, dom.changelogModal);
+    setTimeout(updateChangelogScrollbar, 50);
     if (isAuto) {
-        // 자동 팝업 시 최신 버전 저장 (한 번 닫으면 해당 버전은 안 뜸)
-        const latestVersion = state.patchnotes[0].version;
-        localStorage.setItem('sts2_last_patchnote_version', latestVersion);
+        const latestVersion = state.changelog[0].version;
+        localStorage.setItem('sts2_last_changelog_version', latestVersion);
     }
 }
 
-/** 패치노트 모달 닫기 */
-function closePatchnotesModal() {
-    dom.patchnotesModal.classList.add('hidden');
+/**
+ * 변경 내역 모달을 닫습니다.
+ * @returns {void}
+ */
+function closeChangelogModal() {
+    dom.changelogModal.classList.add('hidden');
     // 버튼 클릭으로 열었을 때도 닫으면 최신 버전을 확인한 것으로 간주
-    if (state.patchnotes && state.patchnotes.length > 0) {
-        const latestVersion = state.patchnotes[0].version;
-        localStorage.setItem('sts2_last_patchnote_version', latestVersion);
+    if (state.changelog && state.changelog.length > 0) {
+        const latestVersion = state.changelog[0].version;
+        localStorage.setItem('sts2_last_changelog_version', latestVersion);
     }
 }
 
-/** 패치노트 내용 렌더링 */
-function renderPatchnotesContent() {
-    if (!state.patchnotes || state.patchnotes.length === 0) return;
+/**
+ * state.changelog에 저장된 데이터를 바탕으로 모달 내부의 HTML 콘텐츠를 생성하여 렌더링합니다.
+ * @returns {void}
+ */
+function renderChangelogContent() {
+    if (!state.changelog || state.changelog.length === 0) return;
 
-    let html = state.patchnotes.map(group => {
+    let html = state.changelog.map(group => {
         const { version, date, notes } = group;
         return `
-            <div class="patchnote-group">
-                <div class="patchnote-header">
-                    <span class="patchnote-version">Ver ${version}</span>
-                    <span class="patchnote-date">${date}</span>
+            <div class="changelog-group">
+                <div class="changelog-header">
+                    <span class="changelog-version">Ver ${version}</span>
+                    <span class="changelog-date">${date}</span>
                 </div>
-                ${notes.map(note => `
-                    <div class="patchnote-section">
-                        <div class="patchnote-title">${note.title}</div>
-                        <ul class="patchnote-list">
-                            ${note.items.map(item => `<li class="patchnote-item">${item}</li>`).join('')}
-                        </ul>
+                ${(notes || []).map(note => `
+                    <div class="changelog-section">
+                        <div class="changelog-title">${note.title}</div>
+                        ${note.items && note.items.length > 0 ? `
+                        <ul class="changelog-list">
+                            ${note.items.map(item => `<li class="changelog-item">${item}</li>`).join('')}
+                        </ul>` : ''}
                     </div>
                 `).join('')}
             </div>
         `;
     }).join('');
 
-    dom.patchnotesContent.innerHTML = html;
+    dom.changelogContent.innerHTML = html;
 }
 
-/** 모달 전용 스크롤바 업데이트 */
-function updateModalScrollbar() {
-    const { patchnotesContent, modalScrollbarThumb, modalScrollbar } = dom;
-    if (!patchnotesContent || !modalScrollbarThumb || !modalScrollbar) {
+/**
+ * 변경 내역 모달 내의 커스텀 스크롤바 위치와 표시 여부를 콘텐츠 높이에 맞춰 업데이트합니다.
+ * @returns {void}
+ */
+function updateChangelogScrollbar() {
+    const { changelogContent, modalScrollbarThumb, modalScrollbar } = dom;
+    if (!changelogContent || !modalScrollbarThumb || !modalScrollbar) {
         state.isModalScrollUpdating = false;
         return;
     }
 
-    const scrollHeight = patchnotesContent.scrollHeight;
-    const clientHeight = patchnotesContent.clientHeight;
-    const scrollTop = patchnotesContent.scrollTop;
+    const scrollHeight = changelogContent.scrollHeight;
+    const clientHeight = changelogContent.clientHeight;
+    const scrollTop = changelogContent.scrollTop;
 
     if (scrollHeight <= clientHeight + 1) {
         modalScrollbar.style.display = 'none';
@@ -2207,48 +2677,63 @@ function updateModalScrollbar() {
     state.isModalScrollUpdating = false;
 }
 
-/** 모달 스크롤바 드래그 시작 */
-function startModalScrollbarDrag(e) {
+/**
+ * 변경 내역 모달의 스크롤바 썸(Thumb)을 마우스로 눌렀을 때 드래그 이동을 시작합니다.
+ * @param {MouseEvent} e - 마우스 이벤트 객체
+ * @returns {void}
+ */
+function startChangelogScrollbarDrag(e) {
     state.isDraggingModalScrollbar = true;
     state.modalStartY = e.clientY;
-    state.modalStartScrollTop = dom.patchnotesContent.scrollTop;
+    state.modalStartScrollTop = dom.changelogContent.scrollTop;
 
     document.body.classList.add('dragging');
 
-    window.addEventListener('mousemove', handleModalScrollbarDrag);
-    window.addEventListener('mouseup', stopModalScrollbarDrag);
+    window.addEventListener('mousemove', handleChangelogScrollbarDrag);
+    window.addEventListener('mouseup', stopChangelogScrollbarDrag);
 
     e.preventDefault();
 }
 
-/** 모달 스크롤바 드래그 진행 */
-function handleModalScrollbarDrag(e) {
+/**
+ * 변경 내역 모달 스크롤바 드래그 중 마우스 이동에 따라 콘텐츠의 스크롤 위치를 계산하여 적용합니다.
+ * @param {MouseEvent} e - 마우스 이벤트 객체
+ * @returns {void}
+ */
+function handleChangelogScrollbarDrag(e) {
     if (!state.isDraggingModalScrollbar) return;
 
     const deltaY = e.clientY - state.modalStartY;
-    const { patchnotesContent, modalScrollbar, modalScrollbarThumb } = dom;
+    const { changelogContent, modalScrollbar, modalScrollbarThumb } = dom;
 
     const trackHeight = modalScrollbar.clientHeight;
     const thumbHeight = modalScrollbarThumb.clientHeight;
     const maxThumbMove = trackHeight - thumbHeight;
-    const maxScroll = patchnotesContent.scrollHeight - patchnotesContent.clientHeight;
+    const maxScroll = changelogContent.scrollHeight - changelogContent.clientHeight;
 
     if (maxThumbMove <= 0 || maxScroll <= 0) return;
 
     const scrollDelta = (deltaY / maxThumbMove) * maxScroll;
-    patchnotesContent.scrollTop = state.modalStartScrollTop + scrollDelta;
+    changelogContent.scrollTop = state.modalStartScrollTop + scrollDelta;
 }
 
-/** 모달 스크롤바 드래그 종료 */
-function stopModalScrollbarDrag() {
+/**
+ * 변경 내역 모달의 스크롤바 드래그 작업을 종료합니다.
+ * @returns {void}
+ */
+function stopChangelogScrollbarDrag() {
     state.isDraggingModalScrollbar = false;
     document.body.classList.remove('dragging');
 
-    window.removeEventListener('mousemove', handleModalScrollbarDrag);
-    window.removeEventListener('mouseup', stopModalScrollbarDrag);
+    window.removeEventListener('mousemove', handleChangelogScrollbarDrag);
+    window.removeEventListener('mouseup', stopChangelogScrollbarDrag);
 }
 
-/** 이미지 URL로부터 Image 객체를 생성하여 Promise 반환 */
+/**
+ * 지정된 URL로부터 이미지를 로드하여 HTMLImageElement 객체를 반환하는 Promise 유틸리티입니다.
+ * @param {string} url - 로드할 이미지의 URL
+ * @returns {Promise<HTMLImageElement>} 로드된 이미지 객체를 담은 Promise
+ */
 function loadSourceImage(url) {
     return new Promise((resolve, reject) => {
         const img = new Image();
@@ -2258,7 +2743,10 @@ function loadSourceImage(url) {
     });
 }
 
-/** 커스텀 스크롤바 위치 업데이트 */
+/**
+ * 메인 카드 그리드 영역의 커스텀 스크롤바 위치와 표시 여부를 현재 스크롤 상태에 맞춰 업데이트합니다.
+ * @returns {void}
+ */
 function updateCustomScrollbar() {
     const { contentArea, scrollbarThumb, customScrollbar } = dom;
     if (!contentArea || !scrollbarThumb || !customScrollbar) {
@@ -2290,7 +2778,11 @@ function updateCustomScrollbar() {
     state.isScrollUpdating = false;
 }
 
-/** 스크롤바 드래그 시작 */
+/**
+ * 메인 그리드 영역의 커스텀 스크롤바 썸(Thumb)을 마우스로 눌렀을 때 드래그 이동을 시작합니다.
+ * @param {MouseEvent} e - 마우스 이벤트 객체
+ * @returns {void}
+ */
 function startScrollbarDrag(e) {
     state.isDraggingScrollbar = true;
     state.startY = e.clientY;
@@ -2304,7 +2796,11 @@ function startScrollbarDrag(e) {
     e.preventDefault();
 }
 
-/** 스크롤바 드래그 진행 */
+/**
+ * 메인 그리드 스크롤바 드래그 중 마우스 이동에 따라 콘텐츠의 스크롤 위치를 계산하여 적용합니다.
+ * @param {MouseEvent} e - 마우스 이벤트 객체
+ * @returns {void}
+ */
 function handleScrollbarDrag(e) {
     if (!state.isDraggingScrollbar) return;
 
@@ -2322,7 +2818,10 @@ function handleScrollbarDrag(e) {
     contentArea.scrollTop = state.startScrollTop + scrollDelta;
 }
 
-/** 스크롤바 드래그 종료 */
+/**
+ * 기본 콘텐츠 영역의 커스텀 스크롤바 드래그 작업을 종료합니다.
+ * @returns {void}
+ */
 function stopScrollbarDrag() {
     state.isDraggingScrollbar = false;
     document.body.classList.remove('dragging');

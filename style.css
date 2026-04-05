@@ -175,8 +175,8 @@ body {
     z-index: 1000;
 }
 
-/* 패치노트 버튼 */
-.patchnotes-btn {
+/* ChangeLog 버튼 */
+.changelog-btn {
     position: absolute;
     top: 30px;
     right: 50.5px;
@@ -192,19 +192,19 @@ body {
     padding: 0;
 }
 
-.patchnotes-btn img {
+.changelog-btn img {
     width: 100%;
     height: 100%;
     object-fit: contain;
     filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
 }
 
-.patchnotes-btn:hover {
+.changelog-btn:hover {
     transform: rotate(5deg);
     filter: brightness(1.2);
 }
 
-.patchnotes-btn:active {
+.changelog-btn:active {
     transform: scale(0.95);
 }
 
@@ -725,11 +725,9 @@ input:checked+.slider:before {
 }
 
 .modal-header {
-    padding: 0 0 16px 0;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    border-bottom: 1px solid var(--border);
 }
 
 .modal-header h3 {
@@ -772,6 +770,100 @@ input:checked+.slider:before {
     align-items: center;
     justify-content: center;
     overflow: visible;
+    position: relative;
+}
+
+/* 드롭 오버레이 */
+.drop-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.drop-overlay.active,
+.card-item.drag-over .drop-overlay {
+    opacity: 1;
+    visibility: visible;
+}
+
+.drop-overlay.active+.sts2-card,
+.card-item.drag-over .sts2-card {
+    filter: blur(5px) brightness(0.7);
+    transform: scale(1.05);
+}
+
+/* 그리드 카드 오버레이 전용 드래그 시 최상단 고정 */
+.card-item.drag-over {
+    z-index: 500 !important;
+}
+
+.drop-overlay-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    width: 273px;
+    aspect-ratio: 273 / 380;
+    border: 3px dashed var(--gold);
+    border-radius: 20px;
+    background: rgba(15, 17, 26, 0.4);
+    backdrop-filter: blur(4px);
+    color: white;
+    transform: scale(0.8);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+}
+
+.drop-overlay.active .drop-overlay-content,
+.card-item.drag-over .drop-overlay .drop-overlay-content {
+    transform: scale(1.15);
+}
+
+.drop-overlay-content i,
+.drop-overlay-content svg {
+    width: 64px;
+    height: 64px;
+    color: var(--gold);
+    filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.8));
+}
+
+/* 그리드 카드 내 오버레이 텍스트/아이콘 크기 조정 (원형 축소 버전) */
+.card-item .drop-overlay-content {
+    width: 120px;
+    height: 150px;
+    aspect-ratio: 1 / 1;
+    border-radius: 10%;
+    gap: 0;
+    background: rgba(15, 17, 26, 0.8);
+    border-width: 2px;
+}
+
+.card-item .drop-overlay-content i,
+.card-item .drop-overlay-content svg {
+    width: 32px;
+    height: 32px;
+}
+
+.card-item .drop-overlay-content span {
+    display: none;
+}
+
+.drop-overlay-content span {
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gold-light);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .card-large-preview .sts2-card {
@@ -833,8 +925,8 @@ input:checked+.slider:before {
     border-bottom: 1px solid var(--border);
 }
 
-/* 패치노트 모달 전용 */
-.patchnotes-modal-container {
+/* ChangeLog 모달 전용 */
+.changelog-modal-container {
     width: 600px;
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -843,25 +935,25 @@ input:checked+.slider:before {
     box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
 }
 
-.patchnotes-modal-body {
+.changelog-modal-body {
     padding: 20px 0;
     display: block;
 }
 
-.patchnotes-scroll-wrapper {
+.changelog-scroll-wrapper {
     position: relative;
     height: 450px;
     padding-right: 60px;
 }
 
-.patchnotes-content-area {
+.changelog-content-area {
     height: 100%;
     overflow-y: auto;
     scrollbar-width: none;
     /* Firefox */
 }
 
-.patchnotes-content-area::-webkit-scrollbar {
+.changelog-content-area::-webkit-scrollbar {
     display: none;
     /* Chrome, Safari, Edge */
 }
@@ -876,35 +968,30 @@ input:checked+.slider:before {
     background-size: 100% 100%;
 }
 
-.patchnote-group {
-    margin-bottom: 32px;
-}
-
-.patchnote-header {
+.changelog-header {
     display: flex;
     align-items: baseline;
     gap: 12px;
-    margin-bottom: 12px;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-    padding-bottom: 8px;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+    padding: 8px 0;
 }
 
-.patchnote-version {
+.changelog-version {
     font-size: 20px;
     font-weight: 700;
     color: var(--gold);
 }
 
-.patchnote-date {
+.changelog-date {
     font-size: 14px;
     color: var(--text-muted);
 }
 
-.patchnote-section {
+.changelog-section {
     margin-bottom: 20px;
 }
 
-.patchnote-title {
+.changelog-title {
     font-size: 16px;
     font-weight: 600;
     color: var(--gold-light);
@@ -914,12 +1001,12 @@ input:checked+.slider:before {
     gap: 8px;
 }
 
-.patchnote-list {
+.changelog-list {
     list-style: none;
     padding-left: 4px;
 }
 
-.patchnote-item {
+.changelog-item {
     font-size: 15px;
     color: var(--text-main);
     margin-bottom: 6px;
@@ -928,7 +1015,7 @@ input:checked+.slider:before {
     line-height: 1.5;
 }
 
-.patchnote-item::before {
+.changelog-item::before {
     content: "•";
     position: absolute;
     left: 0;
@@ -1078,8 +1165,6 @@ input:checked+.slider:before {
 }
 
 .modal-footer {
-    padding: 24px 0 0 0;
-    border-top: 1px solid var(--border);
     display: flex;
     flex-direction: row;
     gap: 12px;
@@ -1512,6 +1597,54 @@ body.select-mode .card-item {
     .card-grid {
         grid-template-columns: repeat(2, 250px);
     }
+}
+
+/* 토스트 알림 */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(26, 26, 36, 0.95);
+    color: var(--gold-light);
+    padding: 12px 24px;
+    border: 1px solid var(--gold);
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 10000;
+    pointer-events: auto;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
+    opacity: 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.toast-undo-btn {
+    border-radius: 6px;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold-light);
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: 15px;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+
+.toast-undo-btn:hover {
+    background: var(--gold);
+    color: #000;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
 
 @media (max-width: 780px) {

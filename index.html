@@ -148,9 +148,9 @@
                     </div>
                 </div>
 
-                <!-- 패치노트 버튼 -->
-                <button id="patchnotesBtn" class="patchnotes-btn" title="패치노트">
-                    <img src="source/img/static/patchnotes_icon.png" alt="Patch Notes">
+                <!-- ChangeLog 버튼 -->
+                <button id="changelogBtn" class="changelog-btn">
+                    <img src="source/img/static/changelog_icon.png" alt="ChangeLog">
                 </button>
 
                 <!-- 스크롤바 -->
@@ -169,6 +169,11 @@
         <div class="modal-container">
             <div class="modal-body">
                 <div class="card-large-preview" id="cardLargePreview">
+                    <div class="drop-overlay" id="dropOverlay">
+                        <div class="drop-overlay-content">
+                            <i data-lucide="image-plus"></i>
+                        </div>
+                    </div>
                     <div class="sts2-card">
                         <img id="modalLayerBg" class="layer layer-bg">
                         <img id="modalLayerFrame" class="layer layer-frame">
@@ -299,23 +304,23 @@
         </div>
     </div>
 
-    <!-- 패치노트 모달 -->
-    <div id="patchnotesModal" class="modal hidden">
+    <!-- ChangeLog 모달 -->
+    <div id="changelogModal" class="modal hidden">
         <div class="modal-overlay"></div>
-        <div class="modal-container patchnotes-modal-container">
+        <div class="modal-container changelog-modal-container">
             <div class="modal-header">
                 <div class="header-with-icon">
                     <i data-lucide="scroll" class="text-gold"></i>
-                    <h3>패치노트</h3>
+                    <h3>ChangeLog</h3>
                 </div>
-                <button class="btn-close" id="closePatchnotes"><i data-lucide="x"></i></button>
+                <button class="btn-close" id="closeChangelog"><i data-lucide="x"></i></button>
             </div>
-            <div class="modal-body patchnotes-modal-body">
-                <div class="patchnotes-scroll-wrapper">
-                    <div id="patchnotesContent" class="patchnotes-content-area">
-                        <!-- 패치노트 내용이 동적으로 생성됨 -->
+            <div class="modal-body changelog-modal-body">
+                <div class="changelog-scroll-wrapper">
+                    <div id="changelogContent" class="changelog-content-area">
+                        <!-- ChangeLog 내용이 동적으로 생성됨 -->
                     </div>
-                    
+
                     <!-- 모달 내부 스크롤바 -->
                     <div class="custom-scrollbar modal-scrollbar" id="modalScrollbar">
                         <div class="scrollbar-track"></div>
@@ -324,7 +329,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary btn-full" id="confirmPatchnotes">확인</button>
+                <button class="btn btn-primary btn-full" id="confirmChangelog">확인</button>
             </div>
         </div>
     </div>
@@ -355,6 +360,8 @@
             </div>
         </div>
     </div>
+
+    <div id="toast" class="toast"></div>
 
     <script src="script.js"></script>
     <script>lucide.createIcons();</script>
