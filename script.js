@@ -1309,8 +1309,9 @@ async function unloadArtPack() {
         initAllCards();
 
         const db = await openDB();
-        const tx = db.transaction('AppData', 'readwrite');
-        tx.objectStore('AppData').delete('currentState');
+        const tx = db.transaction(['AppData', 'CardOverrides'], 'readwrite');
+        tx.objectStore('AppData').delete('originalData');
+        tx.objectStore('CardOverrides').clear();
 
         await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
 
@@ -1594,8 +1595,8 @@ async function processSilentImageDrop(file, cardIndex) {
             card.source_height = img.naturalHeight;
             card.updated_at = new Date().toISOString().replace('T', ' ').slice(0, 19);
 
-            await saveToDB({ originalData: state.originalData, cards: state.cards });
-            updateCardBlobUrl(card); // Blob URL 갱신 추가
+            await saveToDB({ singleCard: card });
+            updateCardBlobUrl(card); 
             replaceCardDOM(card);
             updateStats();
             showToast(`${card.name_kr || card.name_en} 이미지가 변경되었습니다.`, true);
@@ -1874,7 +1875,8 @@ async function saveChanges() {
     state.isDirty = true;
 
     updateCardBlobUrl(card);
-    saveToDB({ originalData: state.originalData, cards: state.cards });
+    await saveToDB({ singleCard: card });
+    updateCardBlobUrl(card);
     replaceCardDOM(card);
     updateStats();
     closeModal();
@@ -1884,7 +1886,7 @@ async function saveChanges() {
  * 현재 편집 중인 카드의 커스텀 이미지와 모든 보정 데이터를 초기화합니다.
  * @returns {Promise<void>} 초기화 및 DB 저장 완료 시점을 나타내는 Promise
  */
-function resetCurrentCard() {
+async function resetCurrentCard() {
     if (!confirm('이 카드의 커스텀 이미지를 제거하시겠습니까?')) return;
     const card = state.cards[state.editingCardIndex];
     if (!card) return;
@@ -1904,9 +1906,7 @@ function resetCurrentCard() {
     delete card.source_height;
     delete card.updated_at;
 
-    updateCardBlobUrl(card);
-    state.isDirty = true;
-    saveToDB({ originalData: state.originalData, cards: state.cards });
+    await saveToDB({ singleCard: card });
     replaceCardDOM(card);
     updateStats();
     closeModal();
@@ -2483,10 +2483,14 @@ async function exportSelectedAsImage() {
  */
 function openDB() {
     return new Promise((resolve, reject) => {
-        const req = indexedDB.open('STS2CardArtEditor', 1);
+        const req = indexedDB.open('STS2CardArtEditor', 2);
         req.onupgradeneeded = e => {
-            if (!e.target.result.objectStoreNames.contains('AppData')) {
-                e.target.result.createObjectStore('AppData');
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('AppData')) {
+                db.createObjectStore('AppData');
+            }
+            if (!db.objectStoreNames.contains('CardOverrides')) {
+                db.createObjectStore('CardOverrides', { keyPath: 'source_path' });
             }
         };
         req.onsuccess = e => resolve(e.target.result);
@@ -2502,14 +2506,38 @@ function openDB() {
 async function saveToDB(value) {
     try {
         const db = await openDB();
-        const tx = db.transaction('AppData', 'readwrite');
-        const safeValue = {
-            ...value,
-            cards: (value.cards || []).map(({ domNode, ...rest }) => rest),
-        };
-        tx.objectStore('AppData').put(safeValue, 'currentState');
+
+        // 1. 단일 카드만 저장하는 경우 (성능 최적화의 핵심)
+        if (value.singleCard) {
+            const tx = db.transaction('CardOverrides', 'readwrite');
+            const { domNode, blobUrl, frameBlobUrls, ...saveData } = value.singleCard;
+            tx.objectStore('CardOverrides').put(saveData);
+            return new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
+        }
+
+        // 2. 전체 상태 저장 (가급적 지양, 벌크 작업용)
+        const tx = db.transaction(['AppData', 'CardOverrides'], 'readwrite');
+
+        // 메타 데이터 및 원본 데이터 저장
+        if (value.originalData !== undefined) {
+            tx.objectStore('AppData').put(value.originalData, 'originalData');
+        }
+
+        // 전체 카드 오버라이드 저장
+        if (value.cards) {
+            const store = tx.objectStore('CardOverrides');
+            value.cards.forEach(card => {
+                if (card.png_base64) {
+                    const { domNode, blobUrl, frameBlobUrls, ...saveData } = card;
+                    store.put(saveData);
+                }
+            });
+        }
+
         return new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
-    } catch (e) { console.warn('IndexedDB 저장 실패:', e); }
+    } catch (e) {
+        console.warn('IndexedDB 저장 실패:', e);
+    }
 }
 
 /**
@@ -2519,10 +2547,47 @@ async function saveToDB(value) {
 async function loadFromDB() {
     try {
         const db = await openDB();
-        const tx = db.transaction('AppData', 'readonly');
-        const req = tx.objectStore('AppData').get('currentState');
-        return new Promise((res, rej) => { req.onsuccess = () => res(req.result); req.onerror = rej; });
-    } catch (e) { console.warn('IndexedDB 로드 실패:', e); return null; }
+
+        // 1. 구버전 데이터 확인 및 마이그레이션
+        const oldTx = db.transaction('AppData', 'readwrite');
+        const oldReq = oldTx.objectStore('AppData').get('currentState');
+        const oldData = await new Promise(res => { oldReq.onsuccess = () => res(oldReq.result); });
+
+        if (oldData) {
+            console.log('구버전 데이터를 발견했습니다. 마이그레이션을 시작합니다...');
+            const migTx = db.transaction(['AppData', 'CardOverrides'], 'readwrite');
+            if (oldData.originalData) {
+                migTx.objectStore('AppData').put(oldData.originalData, 'originalData');
+            }
+            if (oldData.cards) {
+                const store = migTx.objectStore('CardOverrides');
+                oldData.cards.forEach(card => {
+                    if (card.png_base64) {
+                        const { domNode, blobUrl, frameBlobUrls, ...saveData } = card;
+                        store.put(saveData);
+                    }
+                });
+            }
+            migTx.objectStore('AppData').delete('currentState');
+            await new Promise(res => { migTx.oncomplete = res; });
+            console.log('마이그레이션 완료.');
+        }
+
+        // 2. 새로운 구조로 데이터 로드
+        const tx = db.transaction(['AppData', 'CardOverrides'], 'readonly');
+        const origReq = tx.objectStore('AppData').get('originalData');
+        const overReq = tx.objectStore('CardOverrides').getAll();
+
+        const [originalData, overrides] = await Promise.all([
+            new Promise(res => { origReq.onsuccess = () => res(origReq.result); }),
+            new Promise(res => { overReq.onsuccess = () => res(overReq.result); })
+        ]);
+
+        return { originalData, cards: overrides };
+    } catch (e) {
+        console.warn('IndexedDB 로드 실패:', e);
+        return null;
+    }
 }
 
 // ================================================================
