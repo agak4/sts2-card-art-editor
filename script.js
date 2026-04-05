@@ -1486,12 +1486,22 @@ function resetCurrentCard() {
     if (!confirm('이 카드의 커스텀 이미지를 제거하시겠습니까?')) return;
     const card = state.cards[state.editingCardIndex];
     if (!card) return;
+
     card.png_base64 = '';
     card.source_png_base64 = '';
     card.adjust_zoom = 1.0;
     card.adjust_offset_x = 0.0;
     card.adjust_offset_y = 0.0;
     card.background_color = 'transparent';
+
+    // 추가 상태 필드 초기화
+    card.artType = 'static';
+    card.art_mime = 'image/png';
+    card.gif_frames = null;
+    delete card.source_width;
+    delete card.source_height;
+    delete card.updated_at;
+
     updateCardBlobUrl(card);
     state.isDirty = true;
     saveToDB({ originalData: state.originalData, cards: state.cards });
@@ -1733,7 +1743,7 @@ async function buildGifFrames(card) {
 
                 outCtx.drawImage(rawCanvas, drawX, drawY, rW, rH);
 
-                const pngBase64 = outCanvas.toDataURL('image/png').split(',')[1];
+                const pngBase64 = outCanvas.toDataURL('image/webp', 0.8).split(',')[1];
                 const delaySec = Math.max(0.01, (frame.delay || 100) / 1000);
 
                 resultFrames.push({ png_base64: pngBase64, delay: delaySec });
@@ -1769,7 +1779,7 @@ async function buildGifFrames(card) {
                 outCtx.drawImage(img, cx - rW / 2, cy - rH / 2, rW, rH);
 
                 resultFrames.push({
-                    png_base64: compressCanvasToPngBase64(outCanvas),
+                    png_base64: outCanvas.toDataURL('image/webp', 0.8).split(',')[1],
                     delay: f.delay
                 });
             }
@@ -2106,7 +2116,7 @@ function renderPatchnotesContent() {
             </div>
         `;
     }).join('');
-    
+
     dom.patchnotesContent.innerHTML = html;
 }
 
