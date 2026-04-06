@@ -63,14 +63,36 @@ function toKey(str) {
 }
 
 /**
- * cards.json 파일로부터 전체 카드 데이터베이스를 비동기로 로드하고 인덱싱합니다.
+ * 문자열에서 특수문자를 제거하고 파일명으로 적합한 형식으로 변환합니다.
+ * 영문자와 숫자만 남기고 공백은 언더바(_)로 변환하며, 정규표현식을 사용하지 않습니다.
+ * @param {string} str - 변환할 원본 문자열
+ * @returns {string} 변환된 파일명 호환 문자열
+ */
+function toFileName(str) {
+    if (!str) return '';
+    let result = '';
+    const lower = str.toLowerCase();
+    for (let i = 0; i < lower.length; i++) {
+        const c = lower[i];
+        if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')) {
+            result += c;
+        } else if (c === ' ') {
+            result += '_';
+        }
+    }
+    return result;
+}
+
+/**
+ * cards.csv 파일로부터 전체 카드 데이터베이스를 비동기로 로드하고 인덱싱합니다.
  * @returns {Promise<void>} 로드 완료 시점을 나타내는 Promise
  */
 async function fetchCardDatabase() {
     try {
-        const response = await fetch('cards.json');
+        const response = await fetch('cards.csv');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        CARDS_DB = await response.json();
+        const text = await response.text();
+        CARDS_DB = parseCSV(text);
         CARDS_DB.forEach(card => {
             const nk = toKey(card.name_en);
             if (!nk) return;
@@ -81,6 +103,63 @@ async function fetchCardDatabase() {
     } catch (err) {
         console.error('Database load failed:', err);
     }
+}
+
+/**
+ * CSV 텍스트를 파싱하여 카드 객체 배열로 변환합니다.
+ * 쌍따옴표로 감싼 필드(쉼표 포함 가능)를 올바르게 처리합니다.
+ * @param {string} text - CSV 원본 텍스트
+ * @returns {object[]} 파싱된 카드 객체 배열
+ */
+function parseCSV(text) {
+    const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+    if (lines.length < 2) return [];
+
+    const headers = splitCSVLine(lines[0]);
+    const result = [];
+
+    for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        const values = splitCSVLine(line);
+        const obj = {};
+        headers.forEach((header, index) => {
+            const raw = values[index] ?? '';
+            obj[header] = header === 'no' ? parseInt(raw, 10) : raw;
+        });
+        result.push(obj);
+    }
+    return result;
+}
+
+/**
+ * CSV 한 줄을 필드 배열로 분리합니다. 쌍따옴표 내부의 쉼표는 구분자로 처리하지 않습니다.
+ * @param {string} line - CSV 한 줄 문자열
+ * @returns {string[]} 파싱된 필드 값 배열
+ */
+function splitCSVLine(line) {
+    const fields = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+            if (inQuotes && line[i + 1] === '"') {
+                current += '"';
+                i++;
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (ch === ',' && !inQuotes) {
+            fields.push(current);
+            current = '';
+        } else {
+            current += ch;
+        }
+    }
+    fields.push(current);
+    return fields;
 }
 
 /**
@@ -303,7 +382,7 @@ function getCardArtSrc(card) {
         if (card.blobUrl) return card.blobUrl;
     }
     const character = (card?.character || 'colorless').toLowerCase();
-    const nameEn = (card?.name_en || '').toLowerCase().replace(/ /g, '_');
+    const nameEn = toFileName(card?.name_en || '');
     if (character === 'ancient' && nameEn === 'apparition') {
         return 'source/img/card_images/silent_apparition.webp';
     }
@@ -429,8 +508,13 @@ function buildCardTextHTML(card) {
  * @returns {string} 추론된 리소스 경로 문자열
  */
 function getBaseSourcePath(card) {
-    const charDir = Object.keys(DIR_TO_CHARACTER).find(k => DIR_TO_CHARACTER[k] === card.character) || 'colorless';
-    return `res://images/packed/card_portraits/${charDir}/${(card.name_en || '').toLowerCase().replace(/ /g, '_')}.png`;
+    let charDir = Object.keys(DIR_TO_CHARACTER).find(k => DIR_TO_CHARACTER[k] === card.itemSource) || 'colorless';
+    const fileName = toFileName(card.name_en || '');
+
+    if (card.isBeta === 'true') {
+        return `res://images/atlases/card_atlas.sprites/${charDir}/${fileName}.tres`;
+    }
+    return `res://images/packed/card_portraits/${charDir}/${fileName}.png`;
 }
 
 /**
@@ -448,6 +532,8 @@ function initAllCards() {
             name_kr: card.name_kr,
             name_en: card.name_en,
             character: card.character,
+            itemSource: card.itemSource,
+            isBeta: card.isBeta,
             cardType: card.cardType,
             rarity: card.rarity,
             width: isAncient ? 606 : 1000,
@@ -1359,7 +1445,7 @@ function openEditor(cardIndex) {
 
     const fallbackSrc = 'source/img/card_frame/273px-StS2_AncientCardHighlight.png';
     const charPrefix = (card.character || '').toLowerCase();
-    const defaultArtSrc = `source/img/card_images/${charPrefix}_${(card.name_en || '').toLowerCase().replace(/ /g, '_')}.webp`;
+    const defaultArtSrc = `source/img/card_images/${charPrefix}_${toFileName(card.name_en || '')}.webp`;
 
     const isFrameBased = card.artType === 'gif' && card.frameBlobUrls && card.frameBlobUrls.length > 0 && (!card.png_base64 || !card.png_base64.startsWith('R0lGOD'));
     const sourceBase64 = card.source_png_base64 || card.png_base64;
@@ -1596,7 +1682,7 @@ async function processSilentImageDrop(file, cardIndex) {
             card.updated_at = new Date().toISOString().replace('T', ' ').slice(0, 19);
 
             await saveToDB({ singleCard: card });
-            updateCardBlobUrl(card); 
+            updateCardBlobUrl(card);
             replaceCardDOM(card);
             updateStats();
             showToast(`${card.name_kr || card.name_en} 이미지가 변경되었습니다.`, true);
@@ -2273,16 +2359,10 @@ async function exportJSON(selectedOnly = false) {
     const jsonParts = [];
 
     const baseData = { ...(state.originalData || { format: 'card_art_bundle', version: 1 }) };
-    delete baseData.overrides;
+    const versionVal = baseData.version || 1;
+    const exportedAt = new Date().toISOString().slice(0, 19);
 
-    const headerObj = {
-        ...baseData,
-        format: 'card_art_bundle',
-        version: baseData.version || 1,
-        exported_at: new Date().toISOString().slice(0, 19),
-        count: modifiedCards.length,
-    };
-    jsonParts.push(`${JSON.stringify(headerObj).slice(0, -1)},"overrides":[`);
+    jsonParts.push(`{\n  "count": ${modifiedCards.length},\n  "exported_at": "${exportedAt}",\n  "format": "card_art_bundle",\n  "overrides": [\n`);
 
     try {
         for (let i = 0; i < modifiedCards.length; i++) {
@@ -2297,15 +2377,8 @@ async function exportJSON(selectedOnly = false) {
                 source_path: c.source_path,
                 type: c.artType === 'gif' ? 'animated_gif' : (c.artType || 'static'),
                 updated_at: (c.updated_at || new Date().toISOString().slice(0, 19)).replace(' ', 'T'),
-                width: c.width || 1000,
-                adjust_zoom: parseFloat(c.adjust_zoom ?? 1.0),
-                adjust_offset_x: parseFloat(c.adjust_offset_x ?? 0.0),
-                adjust_offset_y: parseFloat(c.adjust_offset_y ?? 0.0),
+                width: c.width || 1000
             };
-
-            if (c.source_png_base64 && c.source_png_base64 !== c.png_base64) {
-                obj.source_png_base64 = c.source_png_base64;
-            }
 
             if (c.artType === 'gif') {
                 let frames = c.gif_frames;
@@ -2323,15 +2396,22 @@ async function exportJSON(selectedOnly = false) {
                 obj.png_base64 = c.png_base64;
             }
 
-            jsonParts.push(JSON.stringify(obj));
+            const objStr = JSON.stringify(obj, null, 2);
+            const lines = objStr.split('\n');
+            let indentedObj = '';
+            for (let j = 0; j < lines.length; j++) {
+                indentedObj += '    ' + lines[j] + (j < lines.length - 1 ? '\n' : '');
+            }
+            jsonParts.push(indentedObj);
+
             if (i < modifiedCards.length - 1) {
-                jsonParts.push(',');
+                jsonParts.push(',\n');
             }
 
             obj.frames = null;
         }
 
-        jsonParts.push(']}');
+        jsonParts.push(`\n  ],\n  "version": ${versionVal}\n}`);
 
         const now = new Date();
         const dateStr = now.getFullYear().toString() +

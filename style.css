@@ -1013,6 +1013,7 @@ input:checked+.slider:before {
     position: relative;
     padding-left: 18px;
     line-height: 1.5;
+    word-break: auto-phrase;
 }
 
 .changelog-item::before {
