@@ -2007,7 +2007,6 @@ async function resetCurrentCard() {
     card.adjust_offset_y = 0.0;
     card.background_color = 'transparent';
 
-    // 상태 초기화
     card.artType = 'static';
     card.art_mime = 'image/png';
     card.gif_frames = null;
@@ -2015,6 +2014,7 @@ async function resetCurrentCard() {
     delete card.source_height;
     delete card.updated_at;
 
+    updateCardBlobUrl(card);
     await saveToDB({ singleCard: card });
     replaceCardDOM(card);
     updateStats();
