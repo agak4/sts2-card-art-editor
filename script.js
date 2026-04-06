@@ -63,12 +63,35 @@ function toKey(str) {
 }
 
 /**
- * 문자열에서 특수문자를 제거하고 파일명으로 적합한 형식으로 변환합니다.
- * 영문자와 숫자만 남기고 공백은 언더바(_)로 변환하며, 정규표현식을 사용하지 않습니다.
+ * 문자열을 파일명으로 적합한 형식으로 변환합니다.
+ * 공백은 언더바(_)로 변환하며, 영문 소문자로 처리합니다.
+ * 원본 파일(Assets) 로딩을 위해 특수문자를 제거하지 않습니다.
  * @param {string} str - 변환할 원본 문자열
  * @returns {string} 변환된 파일명 호환 문자열
  */
 function toFileName(str) {
+    if (!str) return '';
+    let result = '';
+    const lower = str.toLowerCase();
+    for (let i = 0; i < lower.length; i++) {
+        const c = lower[i];
+        if (c === ' ') {
+            result += '_';
+        } else {
+            result += c;
+        }
+    }
+    return result;
+}
+
+/**
+ * 문자열에서 특수문자를 제거하고 파일명으로 적합한 형식으로 변환합니다.
+ * 영문자와 숫자만 남기고 공백은 언더바(_)로 변환하며, 정규표현식을 사용하지 않습니다.
+ * 내보내기용(Mod, Web Export) 경로 생성을 위해 사용됩니다.
+ * @param {string} str - 변환할 원본 문자열
+ * @returns {string} 변환된 파일명 호환 문자열
+ */
+function toSanitizedFileName(str) {
     if (!str) return '';
     let result = '';
     const lower = str.toLowerCase();
@@ -509,7 +532,7 @@ function buildCardTextHTML(card) {
  */
 function getBaseSourcePath(card) {
     let charDir = Object.keys(DIR_TO_CHARACTER).find(k => DIR_TO_CHARACTER[k] === card.itemSource) || 'colorless';
-    const fileName = toFileName(card.name_en || '');
+    const fileName = toSanitizedFileName(card.name_en || '');
 
     if (card.isBeta === 'true') {
         return `res://images/atlases/card_atlas.sprites/${charDir}/${fileName}.tres`;
