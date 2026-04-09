@@ -2218,109 +2218,79 @@ async function buildGifFrames(card) {
         return card.gif_frames;
     }
 
+    const targetW = card.width || 1000;
+    const targetH = card.height || 760;
+    const zoom = card.adjust_zoom || 1.0;
+    const offsetX = card.adjust_offset_x || 0.0;
+    const offsetY = card.adjust_offset_y || 0.0;
+
     try {
-        const isNativeGif = card.png_base64 && card.png_base64.startsWith('R0lGOD');
-        const targetW = card.width || 1000;
-        const targetH = card.height || 760;
-        const zoom = card.adjust_zoom || 1.0;
-        const offsetX = card.adjust_offset_x || 0.0;
-        const offsetY = card.adjust_offset_y || 0.0;
-
-        if (isNativeGif) {
-            const safeParseGIF = window.parseGIF || window.gifuct?.parseGIF;
-            const safeDecompressFrames = window.decompressFrames || window.gifuct?.decompressFrames;
-            if (!safeParseGIF || !safeDecompressFrames) throw new Error("gifuct-js 라이브러리가 로드되지 않았습니다.");
-
+        if ('ImageDecoder' in window && card.png_base64) {
+            const artMime = card.art_mime || (card.png_base64.startsWith('R0lGOD') ? 'image/gif' : 'image/webp');
             const binary = atob(card.png_base64);
             const array = new Uint8Array(binary.length);
             for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
 
-            const gif = safeParseGIF(array.buffer);
-            const frames = safeDecompressFrames(gif, true);
+            const decoder = new ImageDecoder({ data: array.buffer, type: artMime });
+            await decoder.tracks.ready;
+            const track = decoder.tracks.selectedTrack;
 
-            if (!frames || frames.length === 0) throw new Error("추출된 프레임이 없습니다.");
+            if (track.animated) {
+                const outCanvas = document.createElement('canvas');
+                outCanvas.width = targetW;
+                outCanvas.height = targetH;
+                const outCtx = outCanvas.getContext('2d', { alpha: true });
 
-            const gifW = frames[0].dims.width;
-            const gifH = frames[0].dims.height;
+                const resultFrames = [];
+                for (let i = 0; i < track.frameCount; i++) {
+                    const result = await decoder.decode({ frameIndex: i });
+                    const image = result.image;
 
-            const rawCanvas = document.createElement('canvas');
-            rawCanvas.width = gifW;
-            rawCanvas.height = gifH;
-            const rawCtx = rawCanvas.getContext('2d', { willReadFrequently: true });
+                    const coverScale = Math.max(targetW / image.displayWidth, targetH / image.displayHeight);
+                    const totalScale = coverScale * zoom;
+                    const rW = image.displayWidth * totalScale;
+                    const rH = image.displayHeight * totalScale;
+                    const cx = targetW / 2 + offsetX * (targetW / 2);
+                    const cy = targetH / 2 + offsetY * (targetH / 2);
 
-            const outCanvas = document.createElement('canvas');
-            outCanvas.width = targetW;
-            outCanvas.height = targetH;
-            const outCtx = outCanvas.getContext('2d', { alpha: true });
+                    outCtx.clearRect(0, 0, targetW, targetH);
+                    if (card.background_color && card.background_color !== 'transparent') {
+                        outCtx.fillStyle = card.background_color;
+                        outCtx.fillRect(0, 0, targetW, targetH);
+                    }
+                    outCtx.drawImage(image, cx - rW / 2, cy - rH / 2, rW, rH);
 
-            const coverScale = Math.max(targetW / gifW, targetH / gifH);
-            const totalScale = coverScale * zoom;
-            const rW = gifW * totalScale;
-            const rH = gifH * totalScale;
-            const cx = targetW / 2 + offsetX * (targetW / 2);
-            const cy = targetH / 2 + offsetY * (targetH / 2);
-            const drawX = cx - rW / 2;
-            const drawY = cy - rH / 2;
+                    const pngBase64 = compressCanvasToPngBase64(outCanvas);
+                    const delaySec = image.duration ? image.duration / 1000000 : 0.1;
 
-            const resultFrames = [];
-            let previousImageData = null;
-
-            for (let i = 0; i < frames.length; i++) {
-                const frame = frames[i];
-
-                if (i > 0 && frames[i - 1].disposalType === 2) {
-                    rawCtx.clearRect(
-                        frames[i - 1].dims.left, frames[i - 1].dims.top,
-                        frames[i - 1].dims.width, frames[i - 1].dims.height
-                    );
-                }
-                if (i > 0 && frames[i - 1].disposalType === 3 && previousImageData) {
-                    rawCtx.putImageData(previousImageData, 0, 0);
-                } else {
-                    previousImageData = rawCtx.getImageData(0, 0, gifW, gifH);
-                }
-
-                const patchImageData = new ImageData(
-                    new Uint8ClampedArray(frame.patch),
-                    frame.dims.width,
-                    frame.dims.height
-                );
-                const patchCanvas = document.createElement('canvas');
-                patchCanvas.width = frame.dims.width;
-                patchCanvas.height = frame.dims.height;
-                patchCanvas.getContext('2d').putImageData(patchImageData, 0, 0);
-
-                rawCtx.drawImage(patchCanvas, frame.dims.left, frame.dims.top);
-
-                outCtx.clearRect(0, 0, targetW, targetH);
-                if (card.background_color && card.background_color !== 'transparent') {
-                    outCtx.fillStyle = card.background_color;
-                    outCtx.fillRect(0, 0, targetW, targetH);
+                    const lastFrame = resultFrames[resultFrames.length - 1];
+                    if (lastFrame && lastFrame.png_base64 === pngBase64) {
+                        lastFrame.delay += delaySec;
+                    } else {
+                        resultFrames.push({
+                            png_base64: pngBase64,
+                            delay: delaySec
+                        });
+                    }
+                    image.close();
                 }
 
-                outCtx.drawImage(rawCanvas, drawX, drawY, rW, rH);
-
-                const pngBase64 = compressCanvasToPngBase64(outCanvas);
-                const delaySec = Math.max(0.01, (frame.delay || 100) / 1000);
-
-                resultFrames.push({ png_base64: pngBase64, delay: delaySec });
+                if (resultFrames.length > 0) {
+                    card.gif_frames = resultFrames;
+                    return resultFrames;
+                }
             }
+        }
 
-            card.gif_frames = resultFrames;
-            return resultFrames;
-
-        } else if (card.gif_frames && card.gif_frames.length > 0) {
+        if (card.gif_frames && card.gif_frames.length > 0) {
             const outCanvas = document.createElement('canvas');
             outCanvas.width = targetW;
             outCanvas.height = targetH;
             const outCtx = outCanvas.getContext('2d', { alpha: true });
-
             const resultFrames = [];
 
-            for (let i = 0; i < card.gif_frames.length; i++) {
-                const f = card.gif_frames[i];
+            for (const f of card.gif_frames) {
                 const img = await loadSourceImage(`data:image/png;base64,${f.png_base64}`);
-
                 const coverScale = Math.max(targetW / img.naturalWidth, targetH / img.naturalHeight);
                 const totalScale = coverScale * zoom;
                 const rW = img.naturalWidth * totalScale;
@@ -2335,19 +2305,26 @@ async function buildGifFrames(card) {
                 }
                 outCtx.drawImage(img, cx - rW / 2, cy - rH / 2, rW, rH);
 
-                resultFrames.push({
-                    png_base64: compressCanvasToPngBase64(outCanvas),
-                    delay: f.delay
-                });
-            }
+                const pngBase64 = compressCanvasToPngBase64(outCanvas);
 
+                const lastFrame = resultFrames[resultFrames.length - 1];
+                if (lastFrame && lastFrame.png_base64 === pngBase64) {
+                    lastFrame.delay += f.delay;
+                } else {
+                    resultFrames.push({
+                        png_base64: pngBase64,
+                        delay: f.delay
+                    });
+                }
+            }
             card.gif_frames = resultFrames;
             return resultFrames;
-        } else {
-            throw new Error("No GIF data or frames available.");
         }
 
+        throw new Error("처리 가능한 애니메이션 데이터가 없습니다.");
+
     } catch (e) {
+        console.warn('애니메이션 프레임 추출 실패, 정적 렌더링으로 폴백:', e);
         try {
             const pngBase64 = await renderCardToPngBase64(card);
             return pngBase64 ? [{ png_base64: pngBase64, delay: 0.1 }] : [];
