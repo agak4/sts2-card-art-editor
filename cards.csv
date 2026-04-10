@@ -502,7 +502,7 @@ no,name_kr,name_en,character,cardType,rarity,itemSource,isBeta
 501,염원,Wish,Ancient,Skill,Ancient,Event,
 502,찬란한 불꽃,Brightest Flame,Ancient,Skill,Ancient,Event,
 503,사중 시전,Quadcast,Defect,Skill,Ancient,Defect,
-504,영체화,Apparition,Ancient,Skill,Ancient,Event,
+504,영체화,Apparition,Ancient,Skill,Ancient,Event,true
 505,신성,Apotheosis,Ancient,Skill,Ancient,Event,
 506,안식,Relax,Ancient,Skill,Ancient,Event,
 507,봉인된 왕좌,The Sealed Throne,Regent,Power,Ancient,Regent,

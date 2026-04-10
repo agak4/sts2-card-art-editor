@@ -406,9 +406,6 @@ function getCardArtSrc(card) {
     }
     const character = (card?.character || 'colorless').toLowerCase();
     const nameEn = toFileName(card?.name_en || '');
-    if (character === 'ancient' && nameEn === 'apparition') {
-        return 'source/img/card_images/silent_apparition.webp';
-    }
     return `source/img/card_images/${character}_${nameEn}.webp`;
 }
 
