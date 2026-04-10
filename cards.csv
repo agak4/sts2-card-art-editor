@@ -139,7 +139,7 @@ no,name_kr,name_en,character,cardType,rarity,itemSource,isBeta
 138,괜찮은 전략,Well Laid Plans,Silent,Power,Uncommon,Silent,
 139,무한의 검날,Infinite Blades,Silent,Power,Uncommon,Silent,
 140,발놀림,Footwork,Silent,Power,Uncommon,Silent,
-141,발병,Outbreak,Silent,Power,Uncommon,Silent,true
+141,발병,Outbreak,Silent,Power,Uncommon,Silent,
 142,유독 가스,Noxious Fumes,Silent,Power,Uncommon,Silent,
 143,정밀,Accuracy,Silent,Power,Uncommon,Silent,
 144,환영검,Phantom Blades,Silent,Power,Uncommon,Silent,
@@ -389,10 +389,10 @@ no,name_kr,name_en,character,cardType,rarity,itemSource,isBeta
 388,유리 공예,Glasswork,Defect,Skill,Uncommon,Defect,
 389,포집,Scavenge,Defect,Skill,Uncommon,Defect,
 390,혼돈,Chaos,Defect,Skill,Uncommon,Defect,
-391,그림자 방패,Shadow Shield,Defect,Skill,Uncommon,Defect,true
+391,그림자 방패,Shadow Shield,Defect,Skill,Uncommon,Defect,
 392,빙하,Glacier,Defect,Skill,Uncommon,Defect,
 393,융합,Fusion,Defect,Skill,Uncommon,Defect,
-394,굴뚝,Smokestack,Defect,Power,Uncommon,Defect,true
+394,굴뚝,Smokestack,Defect,Power,Uncommon,Defect,
 395,반복,Loop,Defect,Power,Uncommon,Defect,
 396,벼락,Thunder,Defect,Power,Uncommon,Defect,
 397,서브루틴,Subroutine,Defect,Power,Uncommon,Defect,
@@ -405,7 +405,7 @@ no,name_kr,name_en,character,cardType,rarity,itemSource,isBeta
 404,나선 관통,Helix Drill,Defect,Attack,Rare,Defect,
 405,산산조각,Shatter,Defect,Attack,Rare,Defect,
 406,대공포,Flak Cannon,Defect,Attack,Rare,Defect,
-407,적응형 타격,Adaptive Strike,Defect,Attack,Rare,Defect,true
+407,적응형 타격,Adaptive Strike,Defect,Attack,Rare,Defect,
 408,파괴광선,Hyperbeam,Defect,Attack,Rare,Defect,
 409,하나를 위한 모두,All for One,Defect,Attack,Rare,Defect,
 410,얼음 창,Ice Lance,Defect,Attack,Rare,Defect,
@@ -502,7 +502,7 @@ no,name_kr,name_en,character,cardType,rarity,itemSource,isBeta
 501,염원,Wish,Ancient,Skill,Ancient,Event,
 502,찬란한 불꽃,Brightest Flame,Ancient,Skill,Ancient,Event,
 503,사중 시전,Quadcast,Defect,Skill,Ancient,Defect,
-504,영체화,Apparition,Ancient,Skill,Ancient,Event,
+504,영체화,Apparition,Ancient,Skill,Ancient,Silent,
 505,신성,Apotheosis,Ancient,Skill,Ancient,Event,
 506,안식,Relax,Ancient,Skill,Ancient,Event,
 507,봉인된 왕좌,The Sealed Throne,Regent,Power,Ancient,Regent,
@@ -530,7 +530,7 @@ no,name_kr,name_en,character,cardType,rarity,itemSource,isBeta
 529,몸부림,Writhe,Curse,Curse,Curse,Curse,
 530,방울의 저주,Curse of the Bell,Curse,Curse,Curse,Curse,
 531,부패,Decay,Curse,Curse,Curse,Curse,
-532,불운,Bad Luck,Curse,Curse,Curse,Curse,true
+532,불운,Bad Luck,Curse,Curse,Curse,Curse,
 533,빚,Debt,Curse,Curse,Curse,Curse,
 534,상처,Injury,Curse,Curse,Curse,Curse,
 535,서투름,Clumsy,Curse,Curse,Curse,Curse,
