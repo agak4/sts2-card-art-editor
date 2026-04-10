@@ -118,7 +118,7 @@
 
             // DB 저장 (script.js 함수)
             if (typeof saveToDB === 'function') {
-                await saveToDB();
+                await saveToDB({ originalData: state.originalData, cards: state.cards });
             }
 
             // 알림 표시 (script.js 함수)

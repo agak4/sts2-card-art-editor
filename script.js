@@ -909,11 +909,15 @@ function bindEvents() {
  * @returns {Promise<void>} 파일 처리 완료 시점을 나타내는 Promise
  */
 async function handleFileUpload(file) {
+    if (!file) return;
+
+    console.log(`[파일 업로드 시작] 이름: ${file.name}, 크기: ${file.size} bytes, 타입: ${file.type}`);
     showLoading(true, '아트팩 데이터를 처리 중입니다...');
 
     let text;
     try {
         text = await readFileAsText(file);
+        console.log(`[파일 읽기 완료] 텍스트 길이: ${text ? text.length : 0} 자`);
     } catch (err) {
         console.error('파일 읽기 오류:', err);
         alert(`파일을 읽지 못했습니다: ${err.message}`);
@@ -923,10 +927,21 @@ async function handleFileUpload(file) {
 
     let data;
     try {
+        if (!text || text.trim().length === 0) {
+            throw new SyntaxError('파일 내용이 비어 있습니다.');
+        }
         data = JSON.parse(text);
     } catch (err) {
-        console.error('JSON 파싱 오류:', err);
-        alert(`올바른 JSON 형식이 아닙니다: ${err.message}`);
+        console.group('JSON 파싱 오류 상세 정보');
+        console.error('오류 메시지:', err.message);
+        console.error('읽어온 텍스트 길이:', text ? text.length : 0);
+        if (text) {
+            console.error('텍스트 미리보기 (앞 200자):', text.substring(0, 200));
+            console.error('텍스트 미리보기 (뒤 200자):', text.length > 200 ? text.substring(text.length - 200) : 'N/A');
+        }
+        console.groupEnd();
+
+        alert(`올바른 JSON 형식이 아닙니다: ${err.message}\n(자세한 내용은 콘솔 로그를 확인해주세요)`);
         showLoading(false);
         return;
     }
@@ -1111,8 +1126,19 @@ function inferTypeFromPath(sourcePath) {
 function readFileAsText(file) {
     return new Promise((resolve, reject) => {
         const r = new FileReader();
-        r.onload = e => resolve(e.target.result);
-        r.onerror = reject;
+        r.onload = e => {
+            if (e.target.result === null) {
+                reject(new Error('파일 내용을 읽어오지 못했습니다 (result is null)'));
+            } else {
+                resolve(e.target.result);
+            }
+        };
+        r.onerror = () => {
+            reject(new Error(`FileReader 오류 발생: ${r.error ? r.error.message : '알 수 없는 오류'}`));
+        };
+        r.onabort = () => {
+            reject(new Error('파일 읽기가 중단되었습니다.'));
+        };
         r.readAsText(file);
     });
 }
