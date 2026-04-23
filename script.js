@@ -227,6 +227,7 @@ const state = {
     filters: { character: 'Ironclad', type: 'all', rarity: 'all' },
     showModifiedBadge: true,
     showOnlyModified: false,
+    showOnlyUnmodified: false,
     adjustState: { zoom: 1.0, offsetX: 0.0, offsetY: 0.0, sourceDataUrl: null, sourceImage: null, isAnimated: false, backgroundColor: 'transparent' },
     pendingImportData: null,
     isDraggingScrollbar: false,
@@ -309,6 +310,7 @@ function initDom() {
         downloadImageBtn: $('downloadImageBtn'),
         badgeToggle: $('badgeToggle'),
         onlyModifiedToggle: $('onlyModifiedToggle'),
+        onlyUnmodifiedToggle: $('onlyUnmodifiedToggle'),
         changelogBtn: $('changelogBtn'),
         changelogModal: $('changelogModal'),
         changelogContent: $('changelogContent'),
@@ -693,6 +695,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         state.showOnlyModified = savedOnlyModified === 'true';
         dom.onlyModifiedToggle.checked = state.showOnlyModified;
     }
+    const savedOnlyUnmodified = localStorage.getItem('sts2_only_unmodified');
+    if (savedOnlyUnmodified !== null) {
+        state.showOnlyUnmodified = savedOnlyUnmodified === 'true';
+        dom.onlyUnmodifiedToggle.checked = state.showOnlyUnmodified;
+    }
 
     renderUI();
     startGlobalAnimationLoop();
@@ -809,7 +816,23 @@ function bindEvents() {
     // 수정된 카드만 보기 토글
     dom.onlyModifiedToggle.addEventListener('change', (e) => {
         state.showOnlyModified = e.target.checked;
+        if (state.showOnlyModified) {
+            state.showOnlyUnmodified = false;
+            dom.onlyUnmodifiedToggle.checked = false;
+        }
         filterCards();
+        localStorage.setItem('sts2_only_modified', state.showOnlyModified);
+        localStorage.setItem('sts2_only_unmodified', state.showOnlyUnmodified);
+    });
+    // 미수정 카드만 보기 토글
+    dom.onlyUnmodifiedToggle.addEventListener('change', (e) => {
+        state.showOnlyUnmodified = e.target.checked;
+        if (state.showOnlyUnmodified) {
+            state.showOnlyModified = false;
+            dom.onlyModifiedToggle.checked = false;
+        }
+        filterCards();
+        localStorage.setItem('sts2_only_unmodified', state.showOnlyUnmodified);
         localStorage.setItem('sts2_only_modified', state.showOnlyModified);
     });
 
@@ -1398,9 +1421,10 @@ function filterCards() {
             || (card.source_path || '').toLowerCase().includes(query);
 
         const matchModified = !state.showOnlyModified || !!card.png_base64;
+        const matchUnmodified = !state.showOnlyUnmodified || !card.png_base64;
 
         if (card.domNode) {
-            card.domNode.style.display = (matchChar && matchType && matchRarity && matchSearch && matchModified) ? '' : 'none';
+            card.domNode.style.display = (matchChar && matchType && matchRarity && matchSearch && matchModified && matchUnmodified) ? '' : 'none';
         }
     });
 
