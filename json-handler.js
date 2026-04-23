@@ -29,7 +29,6 @@ async function handleFileUpload(files) {
     let totalProcessed = 0;
     const totalSize = fileArray.reduce((acc, file) => acc + file.size, 0);
     let previousFilesLoadedBytes = 0;
-    let lastRenderTime = 0;
 
     let globalTotalCards = 0;
     let globalProcessedCards = 0;
@@ -39,16 +38,19 @@ async function handleFileUpload(files) {
         const filePrefix = fileArray.length > 1 ? `[${i + 1}/${fileArray.length}] ` : '';
         console.log(`[파일 업로드 시작] ${file.name}`);
 
+        let lastReportedPct = -1;
+
         const count = await streamImportWithWorker(file, {
             onProgress: (currentFileLoadedBytes) => {
-                const now = performance.now();
-                if (now - lastRenderTime > 50) {
-                    const currentTotalLoaded = previousFilesLoadedBytes + currentFileLoadedBytes;
-                    const overallPct = totalSize > 0 ? (currentTotalLoaded / totalSize) * 100 : 0;
+                const currentTotalLoaded = previousFilesLoadedBytes + currentFileLoadedBytes;
+                const overallPct = totalSize > 0 ? (currentTotalLoaded / totalSize) * 100 : 0;
+                const steppedPct = Math.floor(overallPct / 5) * 5;
+                
+                if (steppedPct !== lastReportedPct) {
                     const countStr = globalTotalCards > 0 ? `\n[${globalProcessedCards} / ${globalTotalCards}]` : `\n[${globalProcessedCards}개 처리]`;
+                    showLoading(true, `전체 진행 중... ${filePrefix}(${steppedPct}%)${countStr}`, steppedPct);
                     
-                    showLoading(true, `전체 진행 중... ${filePrefix}(${Math.round(overallPct)}%)${countStr}`, overallPct);
-                    lastRenderTime = now;
+                    lastReportedPct = steppedPct;
                 }
             },
             onFileCount: (c) => globalTotalCards += c,
@@ -60,11 +62,16 @@ async function handleFileUpload(files) {
         
         // 파일 단위 작업 완료 시 강제 동기화
         const overallPct = totalSize > 0 ? (previousFilesLoadedBytes / totalSize) * 100 : 0;
+        const steppedPct = i === fileArray.length - 1 ? 100 : Math.floor(overallPct / 5) * 5;
         const countStr = globalTotalCards > 0 ? `\n[${globalProcessedCards} / ${globalTotalCards}]` : `\n[${globalProcessedCards}개 처리]`;
-        showLoading(true, `전체 진행 중... ${filePrefix}(${Math.round(overallPct)}%)${countStr}`, overallPct);
+        showLoading(true, `전체 진행 중... ${filePrefix}(${steppedPct}%)${countStr}`, steppedPct);
     }
 
     renderUI();
+    
+    // 100% 진행률과 애니메이션이 화면에 표시되도록 잠시 대기
+    await new Promise(resolve => setTimeout(resolve, 150));
+    
     showLoading(false);
 }
 
@@ -76,9 +83,10 @@ function askImportChoice() {
     return new Promise((resolve) => {
         showImportChoiceModal();
 
-        const mergeBtn = document.getElementById('importMergeBtn');
-        const resetBtn = document.getElementById('importResetBtn');
-        const cancelBtn = document.getElementById('cancelImportBtn');
+        const mergeBtn = dom.importMergeBtn;
+        const resetBtn = dom.importResetBtn;
+        const cancelBtn = dom.cancelImportBtn;
+        const overlay = dom.importChoiceModal.querySelector('.modal-overlay');
 
         const onMerge = () => { cleanup(); resolve('merge'); };
         const onReset = () => { cleanup(); resolve('reset'); };
@@ -89,11 +97,13 @@ function askImportChoice() {
             mergeBtn.removeEventListener('click', onMerge);
             resetBtn.removeEventListener('click', onReset);
             cancelBtn.removeEventListener('click', onCancel);
+            overlay.removeEventListener('click', onCancel);
         }
 
         mergeBtn.addEventListener('click', onMerge, { once: true });
         resetBtn.addEventListener('click', onReset, { once: true });
         cancelBtn.addEventListener('click', onCancel, { once: true });
+        overlay.addEventListener('click', onCancel, { once: true });
     });
 }
 
