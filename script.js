@@ -926,27 +926,6 @@ function bindEvents() {
 // ================================================================
 // 파일 처리
 // ================================================================
-
-/**
- * 파일 크기를 적절한 단위(B, KB, MB, GB)로 변환하여 문자열로 반환합니다.
- * @param {number} bytes - 변환할 바이트 수
- * @returns {string} 포맷팅된 파일 크기 문자열
- */
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 B';
-    const unitSizes = [
-        { unit: 'GB', size: Math.pow(1024, 3) },
-        { unit: 'MB', size: Math.pow(1024, 2) },
-        { unit: 'KB', size: 1024 }
-    ];
-    for (const { unit, size } of unitSizes) {
-        if (bytes >= size) {
-            return `${(bytes / size).toFixed(2)} ${unit}`;
-        }
-    }
-    return `${bytes} B`;
-}
-
 /**
  * 사용자가 업로드한 JSON 파일을 읽고 파싱하여 아트팩 형식(card_art_bundle)인지 검증합니다.
  * @param {File} file - 업로드된 JSON 파일 객체
@@ -971,35 +950,21 @@ async function handleFileUpload(file) {
 
     let data;
     try {
-        if (typeof text !== 'string') {
-            throw new Error(`파일 텍스트를 정상적으로 읽지 못했습니다. (타입: ${typeof text})`);
-        }
-        if (text.length === 0) {
-            if (file.size > 0) {
-                throw new Error(`파일 크기는 ${formatFileSize(file.size)} 이지만 읽어온 텍스트는 0자입니다. 브라우저 메모리 한계(대용량 파일)를 초과했거나 읽기 오류가 발생했을 수 있습니다.`);
-            } else {
-                throw new Error('파일의 크기가 0 B 이며 내용이 비어 있습니다.');
-            }
-        }
-        if (text.trim().length === 0) {
-            throw new SyntaxError('파일 내용이 공백으로만 이루어져 있습니다.');
+        if (!text || text.trim().length === 0) {
+            throw new SyntaxError('파일 내용이 비어 있습니다.');
         }
         data = JSON.parse(text);
     } catch (err) {
         console.group('JSON 파싱 오류 상세 정보');
         console.error('오류 메시지:', err.message);
-        console.error('파일 원본 정보:', { name: file.name, size: formatFileSize(file.size), type: file.type });
-        console.error('읽어온 텍스트 상태:', { type: typeof text, length: text ? text.length : 0 });
+        console.error('읽어온 텍스트 길이:', text ? text.length : 0);
         if (text) {
             console.error('텍스트 미리보기 (앞 200자):', text.substring(0, 200));
             console.error('텍스트 미리보기 (뒤 200자):', text.length > 200 ? text.substring(text.length - 200) : 'N/A');
         }
-        if (file.size > 0 && (!text || text.length === 0)) {
-            console.warn('💡 참고: 수백 MB 단위의 대용량 파일은 브라우저의 메모리 제한으로 인해 FileReader에서 빈 문자열을 반환할 수 있습니다.');
-        }
         console.groupEnd();
 
-        alert(`오류 발생: ${err.message}`);
+        alert(`올바른 JSON 형식이 아닙니다: ${err.message}`);
         showLoading(false);
         return;
     }
@@ -2755,6 +2720,22 @@ async function loadFromDB() {
 // ================================================================
 // 유틸리티
 // ================================================================
+/**
+ * 파일 크기(bytes)를 사람이 읽기 쉬운 단위(KB, MB, GB)로 변환합니다.
+ * @param {number} bytes - 변환할 파일 크기 (bytes)
+ * @returns {string} 단위가 포함된 파일 크기 문자열
+ */
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 bytes';
+
+    const k = 1024;
+    const sizes = ['bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    const unitIndex = Math.min(i, sizes.length - 1);
+
+    const val = bytes / Math.pow(k, unitIndex);
+    return `${parseFloat(val.toFixed(2))} ${sizes[unitIndex]}`;
+}
 /**
  * 애플리케이션 상단이나 모달 위에 로딩 스피너와 메시지를 표시하거나 숨깁니다.
  * @param {boolean} show - 표시 여부 (true: 표시, false: 숨김)
