@@ -570,6 +570,18 @@ function initAllCards() {
             blobUrl: null,
         };
     });
+    buildCardIndex();
+}
+
+let CARD_INDEX = new Map();
+
+function buildCardIndex() {
+    CARD_INDEX.clear();
+
+    state.cards.forEach(c => {
+        if (c.source_path) CARD_INDEX.set(c.source_path, c);
+        if (c.name_en) CARD_INDEX.set(c.name_en, c);
+    });
 }
 
 const animationState = {
@@ -736,8 +748,12 @@ async function preloadAllAssets() {
  * @returns {void}
  */
 function bindEvents() {
-    dom.fileInput.addEventListener('change', e => {
-        if (e.target.files[0]) handleFileUpload(e.target.files[0]);
+    dom.fileInput.addEventListener('change', async e => {
+        if (e.target.files.length > 0) {
+            await handleFileUpload(e.target.files);
+            // 업로드 후 초기화 (같은 파일 다시 선택 가능하도록)
+            e.target.value = '';
+        }
     });
 
     dom.importBtn.onclick = () => dom.fileInput.click();
@@ -748,18 +764,7 @@ function bindEvents() {
     dom.selectAllBtn.onclick = selectAllVisibleCards;
     dom.exportSelectedBtn.onclick = () => exportJSON(true);
     dom.exportImageBtn.onclick = exportSelectedAsImage;
-    dom.importMergeBtn.onclick = () => {
-        if (state.pendingImportData) processImport(state.pendingImportData, true);
-        hideImportChoiceModal();
-    };
-    dom.importResetBtn.onclick = async () => {
-        if (state.pendingImportData) {
-            await resetToCleanState();
-            processImport(state.pendingImportData, false);
-        }
-        hideImportChoiceModal();
-    };
-    dom.cancelImportBtn.onclick = hideImportChoiceModal;
+    // 임포트 선택 버튼 핸들러는 json-handler.js의 askImportChoice()가 일회성(once) 리스너로 관리합니다.
 
     dom.searchInput.addEventListener('input', filterCards);
 
@@ -923,248 +928,11 @@ function bindEvents() {
     dom.dropOverlay.addEventListener('dragenter', e => e.preventDefault());
 }
 
+
 // ================================================================
-// 파일 처리
+// 파일 처리 / 임포트 / 익스포트 → json-handler.js 참조
 // ================================================================
-/**
- * 사용자가 업로드한 JSON 파일을 읽고 파싱하여 아트팩 형식(card_art_bundle)인지 검증합니다.
- * @param {File} file - 업로드된 JSON 파일 객체
- * @returns {Promise<void>} 파일 처리 완료 시점을 나타내는 Promise
- */
-async function handleFileUpload(file) {
-    if (!file) return;
 
-    console.log(`[파일 업로드 시작] 이름: ${file.name}, 크기: ${formatFileSize(file.size)}, 타입: ${file.type}`);
-    showLoading(true, '아트팩 데이터를 처리 중입니다...');
-
-    let text;
-    try {
-        text = await readFileAsText(file);
-        console.log(`[파일 읽기 완료] 텍스트 길이: ${text ? text.length : 0} 자`);
-    } catch (err) {
-        console.error('파일 읽기 오류:', err);
-        alert(`파일을 읽지 못했습니다: ${err.message}`);
-        showLoading(false);
-        return;
-    }
-
-    let data;
-    try {
-        if (!text || text.trim().length === 0) {
-            throw new SyntaxError('파일 내용이 비어 있습니다.');
-        }
-        data = JSON.parse(text);
-    } catch (err) {
-        console.group('JSON 파싱 오류 상세 정보');
-        console.error('오류 메시지:', err.message);
-        console.error('읽어온 텍스트 길이:', text ? text.length : 0);
-        if (text) {
-            console.error('텍스트 미리보기 (앞 200자):', text.substring(0, 200));
-            console.error('텍스트 미리보기 (뒤 200자):', text.length > 200 ? text.substring(text.length - 200) : 'N/A');
-        }
-        console.groupEnd();
-
-        alert(`올바른 JSON 형식이 아닙니다: ${err.message}`);
-        showLoading(false);
-        return;
-    }
-
-    try {
-        if (data.format !== 'card_art_bundle') {
-            alert('올바른 STS2 아트팩 형식이 아닙니다. (format: card_art_bundle 필요)');
-            return;
-        }
-
-        const hasModified = state.cards.some(c => c.png_base64);
-        if (hasModified) {
-            state.pendingImportData = data;
-            showImportChoiceModal();
-        } else {
-            processImport(data);
-        }
-    } catch (err) {
-        console.error('데이터 처리 오류:', err);
-        alert(`데이터를 처리하는 중 오류가 발생했습니다: ${err.message}`);
-    } finally {
-        showLoading(false);
-    }
-}
-
-/**
- * 파싱된 아트팩 데이터를 현재 상태에 적용합니다. 병합(Merge) 또는 초기화 후 적용을 선택할 수 있습니다.
- * @param {object} data - 적용할 아트팩 데이터 객체
- * @param {boolean} [isMerge=true] - 기존 수정사항 유지 여부 (true: 병합, false: 덮어쓰기)
- * @returns {Promise<void>} 데이터 적용 및 UI 갱신 완료 시점을 나타내는 Promise
- */
-async function processImport(data, isMerge = true) {
-    showLoading(true, '데이터를 적용 중입니다...');
-    try {
-        state.originalData = data;
-        (data.overrides || []).forEach(ov => {
-            const fileCard = enrichCard(ov);
-            let target = state.cards.find(c => c.source_path === fileCard.source_path);
-            if (!target && fileCard.name_en) {
-                target = state.cards.find(c => c.name_en === fileCard.name_en);
-            }
-            if (target) {
-                if (isMerge || !target.png_base64) {
-                    target.png_base64 = fileCard.png_base64;
-                    target.source_png_base64 = fileCard.source_png_base64 || fileCard.png_base64;
-                    target.adjust_zoom = fileCard.adjust_zoom ?? 1.0;
-                    target.adjust_offset_x = fileCard.adjust_offset_x ?? 0.0;
-                    target.adjust_offset_y = fileCard.adjust_offset_y ?? 0.0;
-                    target.display_mode = fileCard.display_mode || 'default';
-                    target.updated_at = fileCard.updated_at;
-                    target.artType = fileCard.artType;
-                    target.art_mime = fileCard.art_mime || (fileCard.artType === 'gif' ? 'image/gif' : 'image/png');
-                    target.gif_frames = fileCard.gif_frames || null;
-                    updateCardBlobUrl(target);
-                }
-            }
-        });
-
-        state.isDirty = false;
-        await saveToDB({ originalData: state.originalData, cards: state.cards });
-        dom.cardGrid.innerHTML = '';
-        renderUI();
-    } catch (err) {
-        console.error('불러오기 처리 중 오류:', err);
-    } finally {
-        showLoading(false);
-        state.pendingImportData = null;
-    }
-}
-
-/**
- * 아트팩 불러오기 시 기존 데이터와의 충돌을 해결하기 위한 선택 모달을 표시합니다.
- * @returns {void}
- */
-function showImportChoiceModal() {
-    dom.importChoiceModal.classList.remove('hidden');
-    lucide.createIcons();
-}
-
-/**
- * 불러오기 선택 모달을 숨기고 대기 중인 데이터를 초기화합니다.
- * @returns {void}
- */
-function hideImportChoiceModal() {
-    dom.importChoiceModal.classList.add('hidden');
-    state.pendingImportData = null;
-}
-
-/**
- * 모든 카드 객체의 상태를 초기화하고 IndexedDB 및 Blob URL을 포함한 모든 데이터를 삭제합니다.
- * @returns {Promise<void>} 초기화 완료 시점을 나타내는 Promise
- */
-async function resetToCleanState() {
-    state.cards.forEach(c => {
-        if (c.blobUrl) URL.revokeObjectURL(c.blobUrl);
-        c.blobUrl = null;
-    });
-    initAllCards();
-    const db = await openDB();
-    const tx = db.transaction('AppData', 'readwrite');
-    tx.objectStore('AppData').delete('currentState');
-    await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
-}
-
-/**
- * 외부에서 가져온 로우(raw) 카드 데이터에 로컬 DB의 메타데이터를 결합하여 완전한 카드 객체를 생성합니다.
- * @param {object} raw - 외부 아트팩에서 추출한 개별 카드 데이터
- * @returns {object} 메타데이터가 보완된 카드 객체
- */
-function enrichCard(raw) {
-    const meta = findCardMeta(raw.source_path || '');
-    const isAncient = meta?.rarity === 'Ancient';
-
-    const hasGifFrames = raw.frames && raw.frames.length > 0;
-    const detectedArtType = raw.type === 'gif' || hasGifFrames ? 'gif' : 'static';
-
-    let restoredBase64 = raw.png_base64;
-    if (!restoredBase64 && hasGifFrames) {
-        restoredBase64 = raw.frames[0].png_base64;
-    }
-
-    return {
-        ...raw,
-        artType: detectedArtType,
-        art_mime: 'image/png',
-        gif_frames: hasGifFrames ? raw.frames : null,
-        no: meta?.no ?? 9999,
-        name_kr: meta?.name_kr ?? extractFallbackName(raw.source_path),
-        name_en: meta?.name_en ?? '',
-        character: meta?.character ?? inferCharacterFromPath(raw.source_path),
-        cardType: meta?.cardType ?? inferTypeFromPath(raw.source_path),
-        rarity: meta?.rarity ?? 'Common',
-        width: raw.width ?? (isAncient ? 606 : 1000),
-        height: raw.height ?? (isAncient ? 852 : 760),
-        source_png_base64: raw.source_png_base64 || restoredBase64 || '',
-        png_base64: restoredBase64 || '',
-        adjust_zoom: raw.adjust_zoom ?? 1.0,
-        adjust_offset_x: raw.adjust_offset_x ?? 0.0,
-        adjust_offset_y: raw.adjust_offset_y ?? 0.0,
-        display_mode: raw.display_mode || 'default',
-    };
-}
-
-/**
- * 소스 경로에서 파일명을 추출하여 가독성 있는 기본 카드 이름으로 변환합니다. (폴백용)
- * @param {string} sourcePath - 리소스 경로
- * @returns {string} 변환된 이름 문자열
- */
-function extractFallbackName(sourcePath) {
-    if (!sourcePath) return 'Unknown';
-    const file = sourcePath.split('/').pop()?.replace(/\.[^.]+$/, '') || 'unknown';
-    return file.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-}
-
-/**
- * 소스 경로의 디렉토리 정보를 바탕으로 카드의 캐릭터를 추론합니다.
- * @param {string} sourcePath - 리소스 경로
- * @returns {string} 추론된 캐릭터 명칭
- */
-function inferCharacterFromPath(sourcePath) {
-    const dir = (sourcePath || '').split('/').slice(-2, -1)[0]?.toLowerCase() || '';
-    return DIR_TO_CHARACTER[dir] || 'Colorless';
-}
-
-/**
- * 소스 경로에 포함된 키워드를 바탕으로 카드 타입을 추론합니다.
- * @param {string} sourcePath - 리소스 경로
- * @returns {string} 추론된 카드 타입 (Attack, Power, Skill 중 하나)
- */
-function inferTypeFromPath(sourcePath) {
-    const path = (sourcePath || '').toLowerCase();
-    if (path.includes('attack')) return 'Attack';
-    if (path.includes('power')) return 'Power';
-    return 'Skill';
-}
-
-/**
- * File 객체를 읽어 문자열 텍스트로 반환하는 Promise 기반의 유틸리티 함수입니다.
- * @param {File} file - 읽을 파일 객체
- * @returns {Promise<string>} 파일 내용 문자열을 담은 Promise
- */
-function readFileAsText(file) {
-    return new Promise((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = e => {
-            if (e.target.result === null) {
-                reject(new Error('파일 내용을 읽어오지 못했습니다 (result is null)'));
-            } else {
-                resolve(e.target.result);
-            }
-        };
-        r.onerror = () => {
-            reject(new Error(`FileReader 오류 발생: ${r.error ? r.error.message : '알 수 없는 오류'}`));
-        };
-        r.onabort = () => {
-            reject(new Error('파일 읽기가 중단되었습니다.'));
-        };
-        r.readAsText(file);
-    });
-}
 
 // ================================================================
 // UI 렌더링
@@ -2251,243 +2019,6 @@ function updateSelectionUI() {
     });
 }
 
-// ================================================================
-// 내보내기
-// ================================================================
-
-/**
- * 카드 객체의 GIF 정보를 바탕으로 개별 애니메이션 프레임을 추출하거나 재생성합니다.
- * @param {object} card - 프레임을 추출할 카드 객체
- * @returns {Promise<array>} 추출된 프레임(Base64 및 딜레이) 데이터 배열
- */
-async function buildGifFrames(card) {
-    if (card.gif_frames && card.gif_frames.length > 0 && !state.isDirty) {
-        return card.gif_frames;
-    }
-
-    const targetW = card.width || 1000;
-    const targetH = card.height || 760;
-    const zoom = card.adjust_zoom || 1.0;
-    const offsetX = card.adjust_offset_x || 0.0;
-    const offsetY = card.adjust_offset_y || 0.0;
-
-    try {
-        if ('ImageDecoder' in window && card.png_base64) {
-            const artMime = card.art_mime || (card.png_base64.startsWith('R0lGOD') ? 'image/gif' : 'image/webp');
-            const binary = atob(card.png_base64);
-            const array = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
-
-            const decoder = new ImageDecoder({ data: array.buffer, type: artMime });
-            await decoder.tracks.ready;
-            const track = decoder.tracks.selectedTrack;
-
-            if (track.animated) {
-                const outCanvas = document.createElement('canvas');
-                outCanvas.width = targetW;
-                outCanvas.height = targetH;
-                const outCtx = outCanvas.getContext('2d', { alpha: true });
-
-                const resultFrames = [];
-                for (let i = 0; i < track.frameCount; i++) {
-                    const result = await decoder.decode({ frameIndex: i });
-                    const image = result.image;
-
-                    const coverScale = Math.max(targetW / image.displayWidth, targetH / image.displayHeight);
-                    const totalScale = coverScale * zoom;
-                    const rW = image.displayWidth * totalScale;
-                    const rH = image.displayHeight * totalScale;
-                    const cx = targetW / 2 + offsetX * (targetW / 2);
-                    const cy = targetH / 2 + offsetY * (targetH / 2);
-
-                    outCtx.clearRect(0, 0, targetW, targetH);
-                    if (card.background_color && card.background_color !== 'transparent') {
-                        outCtx.fillStyle = card.background_color;
-                        outCtx.fillRect(0, 0, targetW, targetH);
-                    }
-                    outCtx.drawImage(image, cx - rW / 2, cy - rH / 2, rW, rH);
-
-                    const pngBase64 = compressCanvasToPngBase64(outCanvas);
-                    const delaySec = image.duration ? image.duration / 1000000 : 0.1;
-
-                    const lastFrame = resultFrames[resultFrames.length - 1];
-                    if (lastFrame && lastFrame.png_base64 === pngBase64) {
-                        lastFrame.delay += delaySec;
-                    } else {
-                        resultFrames.push({
-                            png_base64: pngBase64,
-                            delay: delaySec
-                        });
-                    }
-                    image.close();
-                }
-
-                if (resultFrames.length > 0) {
-                    card.gif_frames = resultFrames;
-                    return resultFrames;
-                }
-            }
-        }
-
-        if (card.gif_frames && card.gif_frames.length > 0) {
-            const outCanvas = document.createElement('canvas');
-            outCanvas.width = targetW;
-            outCanvas.height = targetH;
-            const outCtx = outCanvas.getContext('2d', { alpha: true });
-            const resultFrames = [];
-
-            for (const f of card.gif_frames) {
-                const img = await loadSourceImage(`data:image/png;base64,${f.png_base64}`);
-                const coverScale = Math.max(targetW / img.naturalWidth, targetH / img.naturalHeight);
-                const totalScale = coverScale * zoom;
-                const rW = img.naturalWidth * totalScale;
-                const rH = img.naturalHeight * totalScale;
-                const cx = targetW / 2 + offsetX * (targetW / 2);
-                const cy = targetH / 2 + offsetY * (targetH / 2);
-
-                outCtx.clearRect(0, 0, targetW, targetH);
-                if (card.background_color && card.background_color !== 'transparent') {
-                    outCtx.fillStyle = card.background_color;
-                    outCtx.fillRect(0, 0, targetW, targetH);
-                }
-                outCtx.drawImage(img, cx - rW / 2, cy - rH / 2, rW, rH);
-
-                const pngBase64 = compressCanvasToPngBase64(outCanvas);
-
-                const lastFrame = resultFrames[resultFrames.length - 1];
-                if (lastFrame && lastFrame.png_base64 === pngBase64) {
-                    lastFrame.delay += f.delay;
-                } else {
-                    resultFrames.push({
-                        png_base64: pngBase64,
-                        delay: f.delay
-                    });
-                }
-            }
-            card.gif_frames = resultFrames;
-            return resultFrames;
-        }
-
-        throw new Error("처리 가능한 애니메이션 데이터가 없습니다.");
-
-    } catch (e) {
-        console.warn('애니메이션 프레임 추출 실패, 정적 렌더링으로 폴백:', e);
-        try {
-            const pngBase64 = await renderCardToPngBase64(card);
-            return pngBase64 ? [{ png_base64: pngBase64, delay: 0.1 }] : [];
-        } catch (errFallback) {
-            return [];
-        }
-    }
-}
-
-/**
- * 현재 수정된 카드들을 STS2 아트팩 형식의 JSON 파일로 생성하여 다운로드합니다.
- * @param {boolean} [selectedOnly=false] - 선택된 카드만 내보낼지 여부
- * @returns {Promise<void>} 파일 생성 및 다운로드 완료 시점을 나타내는 Promise
- */
-async function exportJSON(selectedOnly = false) {
-    let targetCards = state.cards;
-
-    if (selectedOnly) {
-        targetCards = state.cards.filter((_, index) => state.selectedCards.has(index));
-    }
-
-    const modifiedCards = targetCards.filter(c => c.png_base64?.length > 0);
-
-    if (modifiedCards.length === 0) {
-        alert(selectedOnly ? '선택하신 카드 중 수정된 카드가 없습니다.' : '수정된 카드가 없습니다.');
-        return;
-    }
-
-    showLoading(true, `아트팩을 생성하는 중입니다... (0/${modifiedCards.length})`);
-    await new Promise(resolve => setTimeout(resolve, 50));
-
-    const jsonParts = [];
-
-    const baseData = { ...(state.originalData || { format: 'card_art_bundle', version: 1 }) };
-    const versionVal = baseData.version || 1;
-    const exportedAt = new Date().toISOString().slice(0, 19);
-
-    jsonParts.push(`{\n  "count": ${modifiedCards.length},\n  "exported_at": "${exportedAt}",\n  "format": "card_art_bundle",\n  "overrides": [\n`);
-
-    try {
-        for (let i = 0; i < modifiedCards.length; i++) {
-            const c = modifiedCards[i];
-            showLoading(true, `아트팩을 생성하는 중입니다... (${i + 1}/${modifiedCards.length})`);
-
-            if (i % 5 === 0) await new Promise(resolve => setTimeout(resolve, 10));
-
-            const obj = {
-                display_mode: c.display_mode || 'default',
-                height: c.height || 760,
-                source_path: c.source_path,
-                type: c.artType === 'gif' ? 'animated_gif' : (c.artType || 'static'),
-                updated_at: (c.updated_at || new Date().toISOString().slice(0, 19)).replace(' ', 'T'),
-                width: c.width || 1000
-            };
-
-            if (c.artType === 'gif') {
-                let frames = c.gif_frames;
-                if (!frames || c.png_base64.startsWith('R0lGOD') || state.isDirty) {
-                    frames = await buildGifFrames(c);
-                }
-
-                if (frames && frames.length > 0) {
-                    obj.frames = frames;
-                } else {
-                    obj.png_base64 = c.png_base64;
-                    obj.type = 'static';
-                }
-            } else {
-                obj.png_base64 = c.png_base64;
-            }
-
-            const objStr = JSON.stringify(obj, null, 2);
-            const lines = objStr.split('\n');
-            let indentedObj = '';
-            for (let j = 0; j < lines.length; j++) {
-                indentedObj += '    ' + lines[j] + (j < lines.length - 1 ? '\n' : '');
-            }
-            jsonParts.push(indentedObj);
-
-            if (i < modifiedCards.length - 1) {
-                jsonParts.push(',\n');
-            }
-
-            obj.frames = null;
-        }
-
-        jsonParts.push(`\n  ],\n  "version": ${versionVal}\n}`);
-
-        const now = new Date();
-        const dateStr = now.getFullYear().toString() +
-            (now.getMonth() + 1).toString().padStart(2, '0') +
-            now.getDate().toString().padStart(2, '0') +
-            now.getHours().toString().padStart(2, '0') +
-            now.getMinutes().toString().padStart(2, '0') +
-            now.getSeconds().toString().padStart(2, '0');
-
-        const blob = new Blob(jsonParts, { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `artpack_${modifiedCards.length}_${dateStr}.cardartpack.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-    } catch (e) {
-        console.error('파일 저장 오류:', e);
-        alert(`파일 다운로드 시도가 실패했습니다: ${e.message}`);
-    } finally {
-        showLoading(false);
-        state.isDirty = false;
-        saveToDB({ originalData: state.originalData, cards: state.cards });
-        jsonParts.length = 0;
-    }
-}
 
 /**
  * 선택된 카드들을 5열 그리드 형태의 하나의 이미지(PNG)로 합쳐서 내보냅니다.
@@ -2742,9 +2273,27 @@ function formatFileSize(bytes) {
  * @param {string} [message='에셋 로딩 중...'] - 표시할 로딩 메시지
  * @returns {void}
  */
-function showLoading(show, message = '에셋 로딩 중...') {
+/**
+ * 전체 로딩 화면을 표시하거나 숨기고 메시지를 갱신합니다.
+ * @param {boolean} show - 표시 여부
+ * @param {string} [message] - 표시할 메시지
+ * @param {number|null} [progress=null] - 진행률 (0-100), null이면 프로그레스 바 숨김
+ */
+function showLoading(show, message = '에셋 로딩 중...', progress = null) {
     const textEl = document.getElementById('loadingText');
+    const container = document.getElementById('progressContainer');
+    const bar = document.getElementById('progressBar');
+
     if (textEl) textEl.textContent = message;
+
+    if (show && progress !== null) {
+        if (container) container.classList.remove('hidden');
+        if (bar) bar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+    } else {
+        if (container) container.classList.add('hidden');
+        if (bar) bar.style.width = '0%';
+    }
+
     dom.appLoading.classList.toggle('hidden', !show);
 }
 

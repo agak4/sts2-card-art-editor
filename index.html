@@ -30,7 +30,7 @@
 <body class="theme-dark">
 
     <main class="app-main">
-        <input type="file" id="fileInput" accept=".cardartpack.json" hidden>
+        <input type="file" id="fileInput" accept=".cardartpack.json" multiple hidden>
 
         <!-- 에디터 섹션 -->
         <section id="editorSection" class="editor-section">
@@ -147,6 +147,9 @@
                         <div class="loader-content">
                             <div class="skeleton-loader"></div>
                             <p id="loadingText">에셋 로딩 중...</p>
+                            <div id="progressContainer" class="progress-container hidden">
+                                <div id="progressBar" class="progress-bar"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -370,6 +373,7 @@
 
     <div id="toast" class="toast"></div>
 
+    <script src="json-handler.js"></script>
     <script src="script.js"></script>
     <!-- <script src="dev-tools.js"></script> -->
     <script>lucide.createIcons();</script>
