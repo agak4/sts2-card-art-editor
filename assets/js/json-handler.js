@@ -202,51 +202,6 @@ function applyOverrideStreaming(ov) {
 }
 
 /**
- * 파싱된 아트팩 데이터를 현재 상태에 적용합니다. 병합(Merge) 또는 초기화 후 적용을 선택할 수 있습니다.
- * @param {object} data - 적용할 아트팩 데이터 객체
- * @param {boolean} [isMerge=true] - 기존 수정사항 유지 여부 (true: 병합, false: 덮어쓰기)
- * @returns {Promise<void>} 데이터 적용 및 UI 갱신 완료 시점을 나타내는 Promise
- */
-async function processImport(data, isMerge = true) {
-    showLoading(true, '데이터를 적용 중입니다...');
-    try {
-        state.originalData = data;
-        (data.overrides || []).forEach(ov => {
-            const fileCard = enrichCard(ov);
-            let target = state.cards.find(c => c.source_path === fileCard.source_path);
-            if (!target && fileCard.name_en) {
-                target = state.cards.find(c => c.name_en === fileCard.name_en);
-            }
-            if (target) {
-                if (isMerge || !target.png_base64) {
-                    target.png_base64 = fileCard.png_base64;
-                    target.source_png_base64 = fileCard.source_png_base64 || fileCard.png_base64;
-                    target.adjust_zoom = fileCard.adjust_zoom ?? 1.0;
-                    target.adjust_offset_x = fileCard.adjust_offset_x ?? 0.0;
-                    target.adjust_offset_y = fileCard.adjust_offset_y ?? 0.0;
-                    target.display_mode = fileCard.display_mode || 'default';
-                    target.updated_at = fileCard.updated_at;
-                    target.artType = fileCard.artType;
-                    target.art_mime = fileCard.art_mime || (fileCard.artType === 'gif' ? 'image/gif' : 'image/png');
-                    target.gif_frames = fileCard.gif_frames || null;
-                    updateCardBlobUrl(target);
-                }
-            }
-        });
-
-        state.isDirty = false;
-        await saveToDB({ originalData: state.originalData, cards: state.cards });
-        dom.cardGrid.innerHTML = '';
-        renderUI();
-    } catch (err) {
-        console.error('불러오기 처리 중 오류:', err);
-    } finally {
-        showLoading(false);
-        state.pendingImportData = null;
-    }
-}
-
-/**
  * 아트팩 불러오기 시 기존 데이터와의 충돌을 해결하기 위한 선택 모달을 표시합니다.
  * @returns {void}
  */
@@ -354,31 +309,6 @@ function inferTypeFromPath(sourcePath) {
     if (path.includes('attack')) return 'Attack';
     if (path.includes('power')) return 'Power';
     return 'Skill';
-}
-
-/**
- * File 객체를 읽어 문자열 텍스트로 반환하는 Promise 기반의 유틸리티 함수입니다.
- * @param {File} file - 읽을 파일 객체
- * @returns {Promise<string>} 파일 내용 문자열을 담은 Promise
- */
-function readFileAsText(file) {
-    return new Promise((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = e => {
-            if (e.target.result === null) {
-                reject(new Error('파일 내용을 읽어오지 못했습니다 (result is null)'));
-            } else {
-                resolve(e.target.result);
-            }
-        };
-        r.onerror = () => {
-            reject(new Error(`FileReader 오류 발생: ${r.error ? r.error.message : '알 수 없는 오류'}`));
-        };
-        r.onabort = () => {
-            reject(new Error('파일 읽기가 중단되었습니다.'));
-        };
-        r.readAsText(file);
-    });
 }
 
 // ================================================================

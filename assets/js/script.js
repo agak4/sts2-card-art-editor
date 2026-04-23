@@ -2252,31 +2252,9 @@ async function loadFromDB() {
 // 유틸리티
 // ================================================================
 /**
- * 파일 크기(bytes)를 사람이 읽기 쉬운 단위(KB, MB, GB)로 변환합니다.
- * @param {number} bytes - 변환할 파일 크기 (bytes)
- * @returns {string} 단위가 포함된 파일 크기 문자열
- */
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 bytes';
-
-    const k = 1024;
-    const sizes = ['bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const unitIndex = Math.min(i, sizes.length - 1);
-
-    const val = bytes / Math.pow(k, unitIndex);
-    return `${parseFloat(val.toFixed(2))} ${sizes[unitIndex]}`;
-}
-/**
- * 애플리케이션 상단이나 모달 위에 로딩 스피너와 메시지를 표시하거나 숨깁니다.
- * @param {boolean} show - 표시 여부 (true: 표시, false: 숨김)
- * @param {string} [message='에셋 로딩 중...'] - 표시할 로딩 메시지
- * @returns {void}
- */
-/**
  * 전체 로딩 화면을 표시하거나 숨기고 메시지를 갱신합니다.
  * @param {boolean} show - 표시 여부
- * @param {string} [message] - 표시할 메시지
+ * @param {string} [message='에셋 로딩 중...'] - 표시할 메시지
  * @param {number|null} [progress=null] - 진행률 (0-100), null이면 프로그레스 바 숨김
  */
 function showLoading(show, message = '에셋 로딩 중...', progress = null) {
@@ -2295,18 +2273,6 @@ function showLoading(show, message = '에셋 로딩 중...', progress = null) {
     }
 
     dom.appLoading.classList.toggle('hidden', !show);
-}
-
-/**
- * 기본 콘텐츠 영역의 커스텀 스크롤바 드래그 작업을 종료합니다.
- * @returns {void}
- */
-function stopScrollbarDrag() {
-    state.isDraggingScrollbar = false;
-    document.body.classList.remove('dragging');
-
-    window.removeEventListener('mousemove', handleScrollbarDrag);
-    window.removeEventListener('mouseup', stopScrollbarDrag);
 }
 
 // ================================================================

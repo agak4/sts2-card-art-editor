@@ -41,7 +41,7 @@ img {
 
 body {
     font-family: 'GyeonggiMillenniumBackground', 'Outfit', sans-serif;
-    background: url('source/img/static/background.jpg') no-repeat center center fixed;
+    background: url('../../source/img/static/background.jpg') no-repeat center center fixed;
     background-size: cover;
     color: var(--text-main);
     line-height: 1.6;
@@ -211,7 +211,7 @@ body {
 .scrollbar-track {
     width: 40px;
     height: 100%;
-    background: url('source/img/static/scroll_bar.webp') center/100% 100% no-repeat;
+    background: url('../../source/img/static/scroll_bar.webp') center/100% 100% no-repeat;
     position: relative;
 }
 
@@ -222,7 +222,7 @@ body {
     transform: translate3d(-50%, 0, 0);
     width: 42px;
     height: 64px;
-    background: url('source/img/static/scroll_handle.webp') center/100% 100% no-repeat;
+    background: url('../../source/img/static/scroll_handle.webp') center/100% 100% no-repeat;
     pointer-events: auto;
     cursor: grab;
     z-index: 1001;
@@ -1228,7 +1228,7 @@ body.select-mode .card-item {
     content: '';
     position: absolute;
     inset: 0;
-    background: url('source/img/static/select_icon.webp') center/100% 100% no-repeat;
+    background: url('../../source/img/static/select_icon.webp') center/100% 100% no-repeat;
     z-index: 20;
     pointer-events: none;
     border-radius: inherit;
