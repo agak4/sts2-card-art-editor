@@ -320,6 +320,8 @@ function initDom() {
         modalScrollbarThumb: $('modalScrollbarThumb'),
         dropOverlay: $('dropOverlay'),
         toast: $('toast'),
+        emptyState: $('emptyState'),
+        emptyStateText: $('emptyStateText'),
     };
 }
 
@@ -599,7 +601,8 @@ function startGlobalAnimationLoop() {
     animationState.lastTime = performance.now();
 
     function loop(time) {
-        const delta = (time - animationState.lastTime) / 1000;
+        let delta = (time - animationState.lastTime) / 1000;
+        if (delta > 0.1) delta = 0.1;
         animationState.lastTime = time;
 
         state.cards.forEach((card, index) => {
@@ -1169,6 +1172,7 @@ function filterCards() {
     const query = dom.searchInput.value.toLowerCase();
     const { character, type, rarity } = state.filters;
     const rarityDisabled = RARITY_DISABLED_CHARS.has(character);
+    let visibleCount = 0;
 
     state.cards.forEach(card => {
         const matchChar = character === 'Ancient' ? card.rarity === 'Ancient'
@@ -1192,9 +1196,24 @@ function filterCards() {
         const matchUnmodified = !state.showOnlyUnmodified || !card.png_base64;
 
         if (card.domNode) {
-            card.domNode.style.display = (matchChar && matchType && matchRarity && matchSearch && matchModified && matchUnmodified) ? '' : 'none';
+            const isVisible = (matchChar && matchType && matchRarity && matchSearch && matchModified && matchUnmodified);
+            card.domNode.style.display = isVisible ? '' : 'none';
+            if (isVisible) visibleCount++;
         }
     });
+
+    if (visibleCount === 0) {
+        dom.emptyState.classList.remove('hidden');
+        if (state.showOnlyModified) {
+            dom.emptyStateText.textContent = '수정된 카드가 없습니다.';
+        } else if (state.showOnlyUnmodified) {
+            dom.emptyStateText.textContent = '미수정 카드가 없습니다.';
+        } else {
+            dom.emptyStateText.textContent = '검색 결과가 없습니다.';
+        }
+    } else {
+        dom.emptyState.classList.add('hidden');
+    }
 
     if (state.isSelectMode) updateSelectionUI();
 }
@@ -1566,30 +1585,106 @@ function processImageFile(file) {
 }
 
 /**
- * 사용자가 새로 업로드한 커스텀 이미지의 원본 파일을 브라우저를 통해 다운로드합니다.
- * @returns {void}
+ * gif_frames를 기반으로 UPNG.js를 사용해 APNG(Animated PNG)를 생성하고 Base64로 반환합니다.
+ * @param {object} card 
+ * @returns {Promise<string>}
  */
-function downloadCustomImage() {
+async function buildAnimatedPngBase64(card) {
+    if (!card.gif_frames || card.gif_frames.length === 0) return '';
+    if (typeof UPNG === 'undefined') {
+        console.warn('UPNG 라이브러리가 로드되지 않았습니다.');
+        return '';
+    }
+
+    const targetW = card.width || 1000;
+    const targetH = card.height || 760;
+
+    const frames = [];
+    const delays = [];
+
+    const canvas = document.createElement('canvas');
+    canvas.width = targetW;
+    canvas.height = targetH;
+    const ctx = canvas.getContext('2d', { alpha: true });
+
+    for (const f of card.gif_frames) {
+        const img = await loadSourceImage(`data:image/png;base64,${f.png_base64}`);
+        ctx.clearRect(0, 0, targetW, targetH);
+        ctx.drawImage(img, 0, 0, targetW, targetH);
+
+        const imgData = ctx.getImageData(0, 0, targetW, targetH);
+        frames.push(imgData.data.buffer);
+        delays.push(Math.round((f.delay || 0.1) * 1000));
+    }
+
+    const apngBuffer = UPNG.encode(frames, targetW, targetH, 0, delays);
+
+    let binary = '';
+    const bytes = new Uint8Array(apngBuffer);
+    const len = bytes.byteLength;
+    const chunkSize = 8192;
+    for (let i = 0; i < len; i += chunkSize) {
+        const chunk = bytes.subarray(i, Math.min(i + chunkSize, len));
+        binary += String.fromCharCode.apply(null, chunk);
+    }
+    return btoa(binary);
+}
+
+/**
+ * 사용자가 편집 중인 커스텀 이미지를 브라우저를 통해 다운로드합니다.
+ * @returns {Promise<void>}
+ */
+async function downloadCustomImage() {
     const card = state.cards[state.editingCardIndex];
     if (!card) return;
 
-    const dataUrl = state.adjustState.sourceDataUrl;
-    if (!dataUrl) {
+    let downloadDataUrl;
+    const isAnimated = state.adjustState.isAnimated;
+
+    if (isAnimated) {
+        let sourceUrl = state.adjustState.sourceDataUrl;
+
+        if (state.adjustState.isFrameBased) {
+            const sourceBase64 = card.source_png_base64 || card.png_base64;
+            const isOriginalGif = sourceBase64 && sourceBase64.startsWith('R0lGOD');
+
+            if (isOriginalGif) {
+                sourceUrl = `data:image/webp;base64,${sourceBase64}`;
+            } else if (card.gif_frames && card.gif_frames.length > 1) {
+                showLoading(true, '이미지 다운로드 중입니다...');
+                try {
+                    const apngBase64 = await buildAnimatedPngBase64(card);
+                    if (apngBase64) {
+                        sourceUrl = `data:image/webp;base64,${apngBase64}`;
+                    }
+                } catch (e) {
+                    console.error('APNG 생성 실패:', e);
+                }
+                showLoading(false);
+            } else if (sourceBase64) {
+                sourceUrl = `data:image/webp;base64,${sourceBase64}`;
+            }
+        }
+
+        if (sourceUrl && sourceUrl.startsWith('data:')) {
+            downloadDataUrl = sourceUrl.replace(/^data:image\/[^;]+;/, 'data:image/webp;');
+        } else {
+            downloadDataUrl = sourceUrl;
+        }
+    } else {
+        downloadDataUrl = dom.modalPreview.toDataURL('image/webp', 1.0);
+    }
+
+    if (!downloadDataUrl) {
         alert('다운로드할 이미지 데이터가 없습니다.');
         return;
     }
 
-    let ext = 'webp';
-    if (dataUrl.includes('image/gif')) ext = 'gif';
-    else if (dataUrl.includes('image/png')) ext = 'png';
-    else if (dataUrl.includes('image/jpeg')) ext = 'jpg';
-    else if (dataUrl.includes('image/webp')) ext = 'webp';
-
     const name = card.name_en || 'card';
-    const filename = `${name.toLowerCase().replace(/ /g, '_')}_art.${ext}`;
+    const filename = `${name.toLowerCase().replace(/ /g, '_')}_art.webp`;
 
     const a = document.createElement('a');
-    a.href = dataUrl;
+    a.href = downloadDataUrl;
     a.download = filename;
     document.body.appendChild(a);
     a.click();

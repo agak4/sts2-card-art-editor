@@ -1664,3 +1664,45 @@ body.select-mode .card-item {
         grid-template-columns: repeat(1, 250px);
     }
 }
+
+/* 검색 및 필터 결과 없음 상태 */
+.empty-state {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 600px;
+    color: var(--text-muted);
+    text-align: center;
+    gap: 20px;
+    animation: fadeIn 0.4s ease-out;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.empty-state.hidden {
+    display: none;
+}
+
+.empty-state i, .empty-state svg {
+    width: 64px;
+    height: 64px;
+    color: var(--border);
+    opacity: 0.5;
+}
+
+.empty-state p {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
