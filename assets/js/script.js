@@ -13,8 +13,14 @@ const CARD_TYPE_KO = {
     Curse: '저주',
 };
 
-// 카드 프레임 경로
-const FRAME_PREFIX = 'source/img/card_frame/273px-StS2_';
+// 이미지 경로 상수
+const ASSET_PATH = 'public/img/';
+const CARD_FRAME_PATH = ASSET_PATH + 'card_frame/';
+const CARD_IMAGE_PATH = ASSET_PATH + 'card_images/';
+const STATIC_PATH = ASSET_PATH + 'static/';
+
+// 카드 프레임 경로 접두사
+const FRAME_PREFIX = CARD_FRAME_PATH + '273px-StS2_';
 
 // 특수 캐릭터 그룹
 const SPECIAL_CHARACTERS = new Set(['Status', 'Curse', 'Event', 'Quest', 'Token']);
@@ -112,7 +118,7 @@ function toSanitizedFileName(str) {
  */
 async function fetchCardDatabase() {
     try {
-        const response = await fetch('cards.csv');
+        const response = await fetch('data/cards.csv');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const text = await response.text();
         CARDS_DB = parseCSV(text);
@@ -410,7 +416,7 @@ function getCardArtSrc(card) {
     }
     const character = (card?.character || 'colorless').toLowerCase();
     const nameEn = toFileName(card?.name_en || '');
-    return `source/img/card_images/${character}_${nameEn}.webp`;
+    return `${CARD_IMAGE_PATH}${character}_${nameEn}.webp`;
 }
 
 /**
@@ -493,7 +499,7 @@ function updateCardBlobUrl(card) {
  * @returns {string} 구성된 HTML 문자열
  */
 function buildCardFrameHTML(assets, artContent) {
-    const fallback = 'source/img/card_frame/273px-StS2_AncientCardHighlight.png';
+    const fallback = `${CARD_FRAME_PATH}273px-StS2_AncientCardHighlight.png`;
     return `
         <img src="${assets.bg}"     class="layer layer-bg"     onerror="this.onerror=null;this.src='${fallback}'">
         <img src="${assets.frame}"  class="layer layer-frame"  onerror="this.onerror=null;this.src='${fallback}'">
@@ -1054,7 +1060,7 @@ function createCardElement(card) {
 
     const assets = getCardAssets(card.character, card.cardType, card.rarity);
     const artSrc = getCardArtSrc(card);
-    const fallback = 'source/img/card_frame/273px-StS2_AncientCardHighlight.png';
+    const fallback = `${CARD_FRAME_PATH}273px-StS2_AncientCardHighlight.png`;
 
     const bgColor = card.background_color && card.background_color !== 'transparent' ? card.background_color : '';
     const zoom = card.adjust_zoom || 1.0;
@@ -1300,9 +1306,9 @@ function openEditor(cardIndex) {
     if (!card) return;
     state.editingCardIndex = cardIndex;
 
-    const fallbackSrc = 'source/img/card_frame/273px-StS2_AncientCardHighlight.png';
+    const fallbackSrc = `${CARD_FRAME_PATH}273px-StS2_AncientCardHighlight.png`;
     const charPrefix = (card.character || '').toLowerCase();
-    const defaultArtSrc = `source/img/card_images/${charPrefix}_${toFileName(card.name_en || '')}.webp`;
+    const defaultArtSrc = `${CARD_IMAGE_PATH}${charPrefix}_${toFileName(card.name_en || '')}.webp`;
 
     const isFrameBased = card.artType === 'gif' && card.frameBlobUrls && card.frameBlobUrls.length > 0 && (!card.png_base64 || !card.png_base64.startsWith('R0lGOD'));
     const sourceBase64 = card.source_png_base64 || card.png_base64;
@@ -2380,7 +2386,7 @@ function showLoading(show, message = '에셋 로딩 중...', progress = null) {
  */
 async function initChangelog() {
     try {
-        const response = await fetch('changelog.json');
+        const response = await fetch('data/changelog.json');
         if (!response.ok) throw new Error('ChangeLog 로딩 실패');
         const changelogData = await response.json();
         if (Array.isArray(changelogData) && changelogData.length > 0) {

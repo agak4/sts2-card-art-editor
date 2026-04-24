@@ -116,7 +116,7 @@ function askImportChoice() {
  */
 async function streamImportWithWorker(file, callbacks = {}) {
     return new Promise((resolve) => {
-        const worker = new Worker('worker.js');
+        const worker = new Worker('assets/js/worker.js');
         const reader = file.stream().getReader();
         const decoder = new TextDecoder();
 

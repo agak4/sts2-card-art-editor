@@ -19,6 +19,13 @@
     --border: rgba(255, 255, 255, 0.1);
     --radius: 8px;
     --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* 이미지 경로 변수 */
+    --url-background: url('../../public/img/static/background.jpg');
+    --url-scroll-bar: url('../../public/img/static/scroll_bar.webp');
+    --url-scroll-handle: url('../../public/img/static/scroll_handle.webp');
+    --url-select-icon: url('../../public/img/static/select_icon.webp');
+    --url-changelog-icon: url('../../public/img/static/changelog_icon.png');
 }
 
 * {
@@ -41,7 +48,7 @@ img {
 
 body {
     font-family: 'GyeonggiMillenniumBackground', 'Outfit', sans-serif;
-    background: url('../../source/img/static/background.jpg') no-repeat center center fixed;
+    background: var(--url-background) no-repeat center center fixed;
     background-size: cover;
     color: var(--text-main);
     line-height: 1.6;
@@ -182,7 +189,7 @@ body {
     right: 50.5px;
     width: 49px;
     height: 49px;
-    background: transparent;
+    background: var(--url-changelog-icon) center/contain no-repeat;
     border: none;
     cursor: pointer;
     z-index: 1002;
@@ -190,12 +197,6 @@ body {
     align-items: center;
     justify-content: center;
     padding: 0;
-}
-
-.changelog-btn img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
     filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
 }
 
@@ -211,7 +212,7 @@ body {
 .scrollbar-track {
     width: 40px;
     height: 100%;
-    background: url('../../source/img/static/scroll_bar.webp') center/100% 100% no-repeat;
+    background: var(--url-scroll-bar) center/100% 100% no-repeat;
     position: relative;
 }
 
@@ -222,7 +223,7 @@ body {
     transform: translate3d(-50%, 0, 0);
     width: 42px;
     height: 64px;
-    background: url('../../source/img/static/scroll_handle.webp') center/100% 100% no-repeat;
+    background: var(--url-scroll-handle) center/100% 100% no-repeat;
     pointer-events: auto;
     cursor: grab;
     z-index: 1001;
@@ -1228,7 +1229,7 @@ body.select-mode .card-item {
     content: '';
     position: absolute;
     inset: 0;
-    background: url('../../source/img/static/select_icon.webp') center/100% 100% no-repeat;
+    background: var(--url-select-icon) center/100% 100% no-repeat;
     z-index: 20;
     pointer-events: none;
     border-radius: inherit;
