@@ -23,7 +23,7 @@ no,name_kr,name_en,character,cardType,rarity,itemSource,isBeta
 22,흘려보내기,Shrug It Off,Ironclad,Skill,Common,Ironclad,
 23,피의 벽,Blood Wall,Ironclad,Skill,Common,Ironclad,
 24,소용돌이,Whirlwind,Ironclad,Attack,Uncommon,Ironclad,
-25,악의,Spite,Ironclad,Attack,Uncommon,Ironclad,true
+25,악의,Spite,Ironclad,Attack,Uncommon,Ironclad,
 26,협박,Bully,Ironclad,Attack,Uncommon,Ironclad,
 27,갈취,Pillage,Ironclad,Attack,Uncommon,Ironclad,
 28,광란,Rampage,Ironclad,Attack,Uncommon,Ironclad,
@@ -72,7 +72,7 @@ no,name_kr,name_en,character,cardType,rarity,itemSource,isBeta
 71,원투 펀치,One Two Punch,Ironclad,Skill,Rare,Ironclad,
 72,화력 증폭,Stoke,Ironclad,Skill,Rare,Ironclad,
 73,무적,Impervious,Ironclad,Skill,Rare,Ironclad,
-74,불굴,Not Yet,Ironclad,Skill,Rare,Ironclad,true
+74,불굴,Not Yet,Ironclad,Skill,Rare,Ironclad,
 75,공격성,Aggression,Ironclad,Power,Rare,Ironclad,
 76,악랄함,Cruelty,Ironclad,Power,Rare,Ironclad,
 77,탱커,Tank,Ironclad,Power,Rare,Ironclad,
@@ -169,7 +169,7 @@ no,name_kr,name_en,character,cardType,rarity,itemSource,isBeta
 168,추적,Tracking,Silent,Power,Rare,Silent,
 169,칼날 부채,Fan of Knives,Silent,Power,Rare,Silent,
 170,구렁이의 형상,Serpent Form,Silent,Power,Rare,Silent,
-171,연마,Abrasive,Silent,Power,Rare,Silent,true
+171,연마,Abrasive,Silent,Power,Rare,Silent,
 172,별똥별,Falling Star,Regent,Attack,Starter,Regent,
 173,타격,Strike Regent,Regent,Attack,Starter,Regent,
 174,수비,Defend Regent,Regent,Skill,Starter,Regent,
@@ -378,9 +378,9 @@ no,name_kr,name_en,character,cardType,rarity,itemSource,isBeta
 377,부팅 과정,Boot Sequence,Defect,Skill,Uncommon,Defect,
 378,오버클럭,Overclock,Defect,Skill,Uncommon,Defect,
 379,오한,Chill,Defect,Skill,Uncommon,Defect,
-380,강행 돌파,Fight Through,Defect,Skill,Uncommon,Defect,true
+380,강행 돌파,Fight Through,Defect,Skill,Uncommon,Defect,
 381,걷어내기,Skim,Defect,Skill,Uncommon,Defect,
-382,동기화,Synchronize,Defect,Skill,Uncommon,Defect,true
+382,동기화,Synchronize,Defect,Skill,Uncommon,Defect,
 383,백색 소음,White Noise,Defect,Skill,Uncommon,Defect,
 384,압축,Compact,Defect,Skill,Uncommon,Defect,
 385,어둠,Darkness,Defect,Skill,Uncommon,Defect,
@@ -392,15 +392,15 @@ no,name_kr,name_en,character,cardType,rarity,itemSource,isBeta
 391,그림자 방패,Shadow Shield,Defect,Skill,Uncommon,Defect,
 392,빙하,Glacier,Defect,Skill,Uncommon,Defect,
 393,융합,Fusion,Defect,Skill,Uncommon,Defect,
-394,배기 장치,Smokestack,Defect,Power,Uncommon,Defect,true
+394,배기 장치,Smokestack,Defect,Power,Uncommon,Defect,
 395,반복,Loop,Defect,Power,Uncommon,Defect,
 396,벼락,Thunder,Defect,Power,Uncommon,Defect,
 397,서브루틴,Subroutine,Defect,Power,Uncommon,Defect,
-398,순회,Iteration,Defect,Power,Uncommon,Defect,true
-399,우박 폭풍,Hailstorm,Defect,Power,Uncommon,Defect,true
+398,순회,Iteration,Defect,Power,Uncommon,Defect,
+399,우박 폭풍,Hailstorm,Defect,Power,Uncommon,Defect,
 400,축전기,Capacitor,Defect,Power,Uncommon,Defect,
 401,폭풍,Storm,Defect,Power,Uncommon,Defect,
-402,야성,Feral,Defect,Power,Uncommon,Defect,true
+402,야성,Feral,Defect,Power,Uncommon,Defect,
 403,증강,Bulk Up,Defect,Power,Uncommon,Defect,
 404,나선 관통,Helix Drill,Defect,Attack,Rare,Defect,
 405,산산조각,Shatter,Defect,Attack,Rare,Defect,
@@ -418,7 +418,7 @@ no,name_kr,name_en,character,cardType,rarity,itemSource,isBeta
 417,유전 알고리즘,Genetic Algorithm,Defect,Skill,Rare,Defect,
 418,점화,Ignition,Defect,Skill,Rare,Defect,
 419,무지개,Rainbow,Defect,Skill,Rare,Defect,
-420,동전기,Voltaic,Defect,Skill,Rare,Defect,true
+420,동전기,Voltaic,Defect,Skill,Rare,Defect,
 421,고철을 보물로,Trash to Treasure,Defect,Power,Rare,Defect,
 422,기계학습,Machine Learning,Defect,Power,Rare,Defect,
 423,냉각재,Coolant,Defect,Power,Rare,Defect,
@@ -502,7 +502,7 @@ no,name_kr,name_en,character,cardType,rarity,itemSource,isBeta
 501,염원,Wish,Ancient,Skill,Ancient,Event,
 502,찬란한 불꽃,Brightest Flame,Ancient,Skill,Ancient,Event,
 503,사중 시전,Quadcast,Defect,Skill,Ancient,Defect,
-504,영체화,Apparition,Ancient,Skill,Ancient,Event,true
+504,영체화,Apparition,Ancient,Skill,Ancient,Event,
 505,신성,Apotheosis,Ancient,Skill,Ancient,Event,
 506,안식,Relax,Ancient,Skill,Ancient,Event,
 507,봉인된 왕좌,The Sealed Throne,Regent,Power,Ancient,Regent,

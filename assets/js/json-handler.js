@@ -45,21 +45,21 @@ async function handleFileUpload(files) {
                 const currentTotalLoaded = previousFilesLoadedBytes + currentFileLoadedBytes;
                 const overallPct = totalSize > 0 ? (currentTotalLoaded / totalSize) * 100 : 0;
                 const steppedPct = Math.floor(overallPct / 5) * 5;
-                
+
                 if (steppedPct !== lastReportedPct) {
                     const countStr = globalTotalCards > 0 ? `\n[${globalProcessedCards} / ${globalTotalCards}]` : `\n[${globalProcessedCards}개 처리]`;
                     showLoading(true, `전체 진행 중... ${filePrefix}(${steppedPct}%)${countStr}`, steppedPct);
-                    
+
                     lastReportedPct = steppedPct;
                 }
             },
             onFileCount: (c) => globalTotalCards += c,
             onItemParsed: () => globalProcessedCards++
         });
-        
+
         totalProcessed += count;
         previousFilesLoadedBytes += file.size;
-        
+
         // 파일 단위 작업 완료 시 강제 동기화
         const overallPct = totalSize > 0 ? (previousFilesLoadedBytes / totalSize) * 100 : 0;
         const steppedPct = i === fileArray.length - 1 ? 100 : Math.floor(overallPct / 5) * 5;
@@ -68,10 +68,10 @@ async function handleFileUpload(files) {
     }
 
     renderUI();
-    
+
     // 100% 진행률과 애니메이션이 화면에 표시되도록 잠시 대기
     await new Promise(resolve => setTimeout(resolve, 150));
-    
+
     showLoading(false);
 }
 
