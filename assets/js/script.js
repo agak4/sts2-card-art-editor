@@ -52,6 +52,9 @@ let CARDS_DB = [];
 const CHAR_NAME_MAP = new Map();
 const NAME_MAP = new Map();
 
+let CARDS_BETA_DB = [];
+const BETA_NAME_MAP = new Map();
+
 /**
  * 문자열에서 특수문자를 제거하고 소문자로 변환하여 조회용 키를 생성합니다.
  * @param {string} str - 변환할 원본 문자열
@@ -118,9 +121,18 @@ function toSanitizedFileName(str) {
  */
 async function fetchCardDatabase() {
     try {
-        const response = await fetch('data/cards.csv');
+        const [response, betaResponse] = await Promise.all([
+            fetch('data/cards.csv'),
+            fetch('data/cardsBeta.csv')
+        ]);
+
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const text = await response.text();
+
+        const [text, betaText] = await Promise.all([
+            response.text(),
+            betaResponse.ok ? betaResponse.text() : Promise.resolve(null)
+        ]);
+
         CARDS_DB = parseCSV(text);
         CARDS_DB.forEach(card => {
             const nk = toKey(card.name_en);
@@ -129,6 +141,15 @@ async function fetchCardDatabase() {
             if (!CHAR_NAME_MAP.has(ck)) CHAR_NAME_MAP.set(ck, card);
             if (!NAME_MAP.has(nk)) NAME_MAP.set(nk, card);
         });
+
+        if (betaText) {
+            CARDS_BETA_DB = parseCSV(betaText);
+            CARDS_BETA_DB.forEach(card => {
+                const nk = toKey(card.name_en);
+                if (!nk) return;
+                BETA_NAME_MAP.set(nk, card);
+            });
+        }
     } catch (err) {
         console.error('Database load failed:', err);
     }
@@ -288,6 +309,7 @@ function initDom() {
         resetAdjustBtn: $('resetAdjustBtn'),
         imageInput: $('imageInput'),
         toggleOriginalBtn: $('toggleOriginalBtn'),
+        toggleFullArtBtn: $('toggleFullArtBtn'),
         modalLayerBg: $('modalLayerBg'),
         modalLayerFrame: $('modalLayerFrame'),
         modalLayerBanner: $('modalLayerBanner'),
@@ -313,6 +335,10 @@ function initDom() {
         importMergeBtn: $('importMergeBtn'),
         importResetBtn: $('importResetBtn'),
         cancelImportBtn: $('cancelImportBtn'),
+        exportChoiceModal: $('exportChoiceModal'),
+        exportNormalBtn: $('exportNormalBtn'),
+        exportBetaBtn: $('exportBetaBtn'),
+        cancelExportChoiceBtn: $('cancelExportChoiceBtn'),
         downloadImageBtn: $('downloadImageBtn'),
         badgeToggle: $('badgeToggle'),
         onlyModifiedToggle: $('onlyModifiedToggle'),
@@ -452,6 +478,30 @@ function base64ToBlob(base64, type = 'image/webp') {
     const array = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
     return new Blob([array], { type });
+}
+
+/**
+ * data URL로 인코딩된 이미지의 실제 프레임 수를 반환합니다.
+ * ImageDecoder API가 없거나 감지 실패 시 1을 반환합니다.
+ * @param {string} dataUrl - data URL 형식의 이미지
+ * @param {string} mimeType - 이미지 MIME 타입
+ * @returns {Promise<number>} 프레임 수
+ */
+async function detectWebpFrameCount(dataUrl, mimeType) {
+    if (!('ImageDecoder' in window)) return 1;
+    try {
+        const base64 = dataUrl.split(',')[1];
+        const binary = atob(base64);
+        const array = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
+        const decoder = new ImageDecoder({ data: array.buffer, type: mimeType });
+        await decoder.tracks.ready;
+        const frameCount = decoder.tracks.selectedTrack?.frameCount ?? 1;
+        decoder.close();
+        return frameCount;
+    } catch {
+        return 1;
+    }
 }
 
 /**
@@ -767,11 +817,21 @@ function bindEvents() {
 
     dom.importBtn.onclick = () => dom.fileInput.click();
     dom.unloadBtn.onclick = unloadArtPack;
-    dom.exportBtn.onclick = () => exportJSON(false);
+    dom.exportBtn.onclick = async () => {
+        const choice = await askExportVersionChoice();
+        if (choice !== 'cancel') {
+            await exportJSON(false, choice);
+        }
+    };
     dom.selectModeBtn.onclick = toggleSelectMode;
     dom.cancelSelectBtn.onclick = cancelSelectMode;
     dom.selectAllBtn.onclick = selectAllVisibleCards;
-    dom.exportSelectedBtn.onclick = () => exportJSON(true);
+    dom.exportSelectedBtn.onclick = async () => {
+        const choice = await askExportVersionChoice();
+        if (choice !== 'cancel') {
+            await exportJSON(true, choice);
+        }
+    };
     dom.exportImageBtn.onclick = exportSelectedAsImage;
     // 임포트 선택 버튼 핸들러는 json-handler.js의 askImportChoice()가 일회성(once) 리스너로 관리합니다.
 
@@ -798,6 +858,7 @@ function bindEvents() {
     $('uploadImageBtn').onclick = () => dom.imageInput.click();
     dom.imageInput.addEventListener('change', handleImageUpload);
     dom.toggleOriginalBtn.onclick = toggleOriginalView;
+    dom.toggleFullArtBtn.onclick = toggleFullArtMode;
     dom.downloadImageBtn.onclick = downloadCustomImage;
     dom.resetAdjustBtn.onclick = resetAdjustValues;
 
@@ -1058,7 +1119,8 @@ function createCardElement(card) {
         }
     });
 
-    const assets = getCardAssets(card.character, card.cardType, card.rarity);
+    const isFullArt = card.display_mode === 'full_art';
+    const assets = getCardAssets(card.character, card.cardType, isFullArt ? 'Ancient' : card.rarity);
     const artSrc = getCardArtSrc(card);
     const fallback = `${CARD_FRAME_PATH}273px-StS2_AncientCardHighlight.png`;
 
@@ -1116,7 +1178,7 @@ function createCardElement(card) {
     const rarityClass = card.rarity ? `rarity-${card.rarity.toLowerCase()}` : '';
 
     const cardEl = document.createElement('div');
-    cardEl.className = `sts2-card ${rarityClass}`;
+    cardEl.className = `sts2-card ${rarityClass}${isFullArt ? ' display-full-art' : ''}`;
     cardEl.innerHTML = buildCardFrameHTML(assets, artContent) + buildCardTextHTML(card);
 
     if (card.png_base64) {
@@ -1278,6 +1340,37 @@ async function unloadArtPack() {
 // ================================================================
 
 /**
+ * 모달의 카드 레이어(배경, 프레임, 배너, 타입, 오브) 이미지를 업데이트합니다.
+ * @param {object} card - 카드 객체
+ * @param {boolean} isFullArt - 풀아트 모드 여부
+ */
+function updateModalLayers(card, isFullArt) {
+    const fallbackSrc = `${CARD_FRAME_PATH}273px-StS2_AncientCardHighlight.png`;
+    const assets = getCardAssets(card.character, card.cardType, isFullArt ? 'Ancient' : card.rarity);
+
+    const updateSrc = (img, src) => {
+        if (!src) { img.src = ''; return; }
+        const absSrc = new URL(src, window.location.href).href;
+        if (img.src !== absSrc) {
+            img.src = src;
+            img.onerror = () => { img.src = fallbackSrc; img.onerror = null; };
+        }
+    };
+
+    updateSrc(dom.modalLayerBg, assets.bg);
+    updateSrc(dom.modalLayerFrame, assets.frame);
+    updateSrc(dom.modalLayerBanner, assets.banner);
+    updateSrc(dom.modalLayerType, assets.type);
+
+    if (assets.orb) {
+        dom.modalLayerOrb.classList.remove('hidden');
+        updateSrc(dom.modalLayerOrb, assets.orb);
+    } else {
+        dom.modalLayerOrb.classList.add('hidden');
+    }
+}
+
+/**
  * 모달 내의 캔버스 및 애니메이션 프리뷰 영역을 초기화하고 숨깁니다.
  * @returns {void}
  */
@@ -1326,7 +1419,8 @@ function openEditor(cardIndex) {
         sourceDataUrl: sourceSrc,
         backgroundColor: card.background_color || 'transparent',
         isAnimated: card.artType === 'gif',
-        isFrameBased: isFrameBased
+        isFrameBased: isFrameBased,
+        displayMode: card.display_mode || 'default'
     };
 
     updateBackgroundColor(state.adjustState.backgroundColor, false);
@@ -1336,9 +1430,10 @@ function openEditor(cardIndex) {
         c.classList.toggle('active', c.dataset.color === bgColor);
     });
 
-    const assets = getCardAssets(card.character, card.cardType, card.rarity);
+    const isFullArt = state.adjustState.displayMode === 'full_art';
+    updateModalLayers(card, isFullArt);
 
-    const updateSrc = (img, src) => {
+    const setSrc = (img, src) => {
         if (!src) { img.src = ''; return; }
         const absSrc = new URL(src, window.location.href).href;
         if (img.src !== absSrc) {
@@ -1346,20 +1441,7 @@ function openEditor(cardIndex) {
             img.onerror = () => { img.src = fallbackSrc; img.onerror = null; };
         }
     };
-
-    updateSrc(dom.modalLayerBg, assets.bg);
-    updateSrc(dom.modalLayerFrame, assets.frame);
-    updateSrc(dom.modalLayerBanner, assets.banner);
-    updateSrc(dom.modalLayerType, assets.type);
-
-    if (assets.orb) {
-        dom.modalLayerOrb.classList.remove('hidden');
-        updateSrc(dom.modalLayerOrb, assets.orb);
-    } else {
-        dom.modalLayerOrb.classList.add('hidden');
-    }
-
-    updateSrc(dom.modalPreviewOriginal, defaultArtSrc);
+    setSrc(dom.modalPreviewOriginal, defaultArtSrc);
 
     const name = card.name_kr || card.name_en;
     dom.modalTextName.innerText = name;
@@ -1378,7 +1460,18 @@ function openEditor(cardIndex) {
         opt.classList.toggle('active', opt.classList.contains('left'));
     });
 
-    dom.cardLargePreview.querySelector('.sts2-card').className = `sts2-card ${card.rarity ? `rarity-${card.rarity.toLowerCase()}` : ''}`;
+    dom.toggleFullArtBtn.classList.toggle('is-full-art', isFullArt);
+    dom.toggleFullArtBtn.querySelectorAll('.toggle-option').forEach(opt => {
+        opt.classList.toggle('active', opt.dataset.type === (isFullArt ? 'full_art' : 'default'));
+    });
+
+    const sts2Card = dom.cardLargePreview.querySelector('.sts2-card');
+    sts2Card.className = `sts2-card ${card.rarity ? `rarity-${card.rarity.toLowerCase()}` : ''}`;
+    if (isFullArt) sts2Card.classList.add('display-full-art');
+
+    const w = isFullArt || card.rarity === 'Ancient' ? 606 : 1000;
+    const h = isFullArt || card.rarity === 'Ancient' ? 852 : 760;
+    dom.modalSize.textContent = `${w} × ${h}`;
 
     clearModalPreviews();
 
@@ -1427,6 +1520,40 @@ function toggleOriginalView() {
     dom.toggleOriginalBtn.querySelectorAll('.toggle-option').forEach(opt => {
         opt.classList.toggle('active');
     });
+}
+
+/**
+ * 상세 에디터에서 기본 디스플레이 모드와 풀아트 디스플레이 모드를 토글합니다.
+ * @returns {void}
+ */
+function toggleFullArtMode() {
+    const isCurrentlyFullArt = state.adjustState.displayMode === 'full_art';
+    const newMode = isCurrentlyFullArt ? 'default' : 'full_art';
+    state.adjustState.displayMode = newMode;
+    
+    dom.toggleFullArtBtn.classList.toggle('is-full-art', !isCurrentlyFullArt);
+    dom.toggleFullArtBtn.querySelectorAll('.toggle-option').forEach(opt => {
+        opt.classList.toggle('active', opt.dataset.type === newMode);
+    });
+
+    const card = state.cards[state.editingCardIndex];
+    const sts2Card = dom.cardLargePreview.querySelector('.sts2-card');
+    const isFullArt = newMode === 'full_art';
+    
+    if (isFullArt) {
+        sts2Card.classList.add('display-full-art');
+    } else {
+        sts2Card.classList.remove('display-full-art');
+    }
+
+    const w = (isFullArt || card.rarity === 'Ancient') ? 606 : 1000;
+    const h = (isFullArt || card.rarity === 'Ancient') ? 852 : 760;
+    dom.modalSize.textContent = `${w} × ${h}`;
+    
+    updateModalLayers(card, isFullArt);
+    
+    state.isDirty = true;
+    updateModalPreviewTransform();
 }
 
 /**
@@ -1509,7 +1636,12 @@ async function processSilentImageDrop(file, cardIndex) {
     const reader = new FileReader();
     reader.onload = async ev => {
         const dataUrl = ev.target.result;
-        const isAnimated = file.type === 'image/gif' || file.type === 'image/webp' || file.name.toLowerCase().endsWith('.gif');
+        const mightBeAnimated = file.type === 'image/gif' || file.type === 'image/webp' || file.name.toLowerCase().endsWith('.gif');
+        let isAnimated = mightBeAnimated;
+        if (file.type === 'image/webp' && mightBeAnimated) {
+            const frameCount = await detectWebpFrameCount(dataUrl, file.type);
+            isAnimated = frameCount > 1;
+        }
 
         try {
             const img = await loadSourceImage(dataUrl);
@@ -1570,7 +1702,12 @@ function processImageFile(file) {
     const reader = new FileReader();
     reader.onload = async ev => {
         const dataUrl = ev.target.result;
-        const isAnimated = file.type === 'image/gif' || file.type === 'image/webp' || file.name.toLowerCase().endsWith('.gif');
+        const mightBeAnimated = file.type === 'image/gif' || file.type === 'image/webp' || file.name.toLowerCase().endsWith('.gif');
+        let isAnimated = mightBeAnimated;
+        if (file.type === 'image/webp' && mightBeAnimated) {
+            const frameCount = await detectWebpFrameCount(dataUrl, file.type);
+            isAnimated = frameCount > 1;
+        }
 
         state.adjustState.sourceDataUrl = dataUrl;
         state.adjustState.isAnimated = isAnimated;
@@ -1749,8 +1886,12 @@ function updateModalPreviewTransform() {
     if (!img) return;
 
     const card = state.cards[state.editingCardIndex];
-    const targetW = card?.width || 1000;
-    const targetH = card?.height || 760;
+    let targetW = 1000;
+    let targetH = 760;
+    if (state.adjustState.displayMode === 'full_art' || card?.rarity === 'Ancient') {
+        targetW = 606;
+        targetH = 852;
+    }
 
     if (state.adjustState.isAnimated) {
         dom.modalPreview.classList.add('hidden');
@@ -1896,6 +2037,21 @@ async function saveChanges() {
         card.source_height = state.adjustState.sourceImage.naturalHeight;
     }
 
+    if (state.adjustState.displayMode === 'full_art') {
+        card.display_mode = 'full_art';
+        card.width = 606;
+        card.height = 852;
+    } else {
+        delete card.display_mode;
+        if (card.rarity === 'Ancient') {
+            card.width = 606;
+            card.height = 852;
+        } else {
+            card.width = 1000;
+            card.height = 760;
+        }
+    }
+
     card.updated_at = new Date().toISOString().slice(0, 19).replace('T', ' ');
     state.isDirty = true;
 
@@ -1929,6 +2085,14 @@ async function resetCurrentCard() {
     delete card.source_width;
     delete card.source_height;
     delete card.updated_at;
+    delete card.display_mode;
+    if (card.rarity === 'Ancient') {
+        card.width = 606;
+        card.height = 852;
+    } else {
+        card.width = 1000;
+        card.height = 760;
+    }
 
     updateCardBlobUrl(card);
     await saveToDB({ singleCard: card });

@@ -19,7 +19,7 @@
     --border: rgba(255, 255, 255, 0.1);
     --radius: 8px;
     --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    
+
     /* 이미지 경로 변수 */
     --url-background: url('../../public/img/static/background.jpg');
     --url-scroll-bar: url('../../public/img/static/scroll_bar.webp');
@@ -570,8 +570,9 @@ input:checked+.slider:before {
     overflow: hidden;
 }
 
-/* 고대(Ancient) 카드 전용 레이아웃 (세로형 일러스트) */
-.sts2-card.rarity-ancient .layer-art {
+/* 고대(Ancient) 카드 및 풀아트(Full Art) 전용 레이아웃 (세로형 일러스트) */
+.sts2-card.rarity-ancient .layer-art,
+.sts2-card.display-full-art .layer-art {
     top: 10%;
     left: 10.5%;
     width: 79%;
@@ -583,7 +584,8 @@ input:checked+.slider:before {
     overflow: hidden;
 }
 
-.sts2-card.rarity-ancient .layer-art::after {
+.sts2-card.rarity-ancient .layer-art::after,
+.sts2-card.display-full-art .layer-art::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -593,14 +595,16 @@ input:checked+.slider:before {
     z-index: 2;
 }
 
-/* 고대(Ancient) 카드 확대 상태 (모달) 전용 스타일 */
-#editModal .sts2-card.rarity-ancient .layer-art {
+/* 고대(Ancient) 카드 및 풀아트(Full Art) 확대 상태 (모달) 전용 스타일 */
+#editModal .sts2-card.rarity-ancient .layer-art,
+#editModal .sts2-card.display-full-art .layer-art {
     border-width: 3px;
     border-radius: 30px;
     box-shadow: 0 0 15px rgba(255, 255, 255, 1);
 }
 
-#editModal .sts2-card.rarity-ancient .layer-art::after {
+#editModal .sts2-card.rarity-ancient .layer-art::after,
+#editModal .sts2-card.display-full-art .layer-art::after {
     box-shadow: inset 0 0 10px 1px rgba(255, 255, 255, 1);
 }
 
@@ -613,8 +617,9 @@ input:checked+.slider:before {
     left: 0;
 }
 
-/* 고대(Ancient) 카드 전용 배경 투명도 */
-.sts2-card.rarity-ancient .layer-bg {
+/* 고대(Ancient) 카드 및 풀아트(Full Art) 전용 배경 투명도 */
+.sts2-card.rarity-ancient .layer-bg,
+.sts2-card.display-full-art .layer-bg {
     opacity: 0.3;
 }
 
@@ -1097,7 +1102,8 @@ input:checked+.slider:before {
     z-index: 1;
 }
 
-.image-toggle.is-original .toggle-slider {
+.image-toggle.is-original .toggle-slider,
+.image-toggle.is-full-art .toggle-slider {
     transform: translateX(100%);
 }
 
@@ -1144,16 +1150,11 @@ input:checked+.slider:before {
     border-top: none;
 }
 
-.slider-row {
-    margin-bottom: 12px;
-}
-
 .slider-row span {
     display: flex;
     justify-content: space-between;
     font-size: 14px;
     color: var(--text-muted);
-    margin-bottom: 8px;
 }
 
 .slider-row span::after {
@@ -1414,8 +1415,17 @@ body.select-mode .card-item {
 }
 
 @keyframes pulse {
-    0%, 100% { transform: scale(0.8); opacity: 0.5; }
-    50% { transform: scale(1.1); opacity: 1; }
+
+    0%,
+    100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
 }
 
 .progress-container {
@@ -1565,13 +1575,39 @@ body.select-mode .card-item {
     background-color: white;
 }
 
-.color-picker-input {
+.color-picker-wrapper {
+    position: relative;
     width: 32px;
     height: 32px;
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
+.color-picker-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    color: white;
+    width: 16px;
+    height: 16px;
+    filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.8));
+    z-index: 2;
+}
+
+.color-picker-input {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    width: 200%;
+    height: 200%;
     border: none;
     background: none;
     cursor: pointer;
     padding: 0;
+    z-index: 1;
 }
 
 .color-picker-input::-webkit-color-swatch-wrapper {
@@ -1690,7 +1726,8 @@ body.select-mode .card-item {
     display: none;
 }
 
-.empty-state i, .empty-state svg {
+.empty-state i,
+.empty-state svg {
     width: 64px;
     height: 64px;
     color: var(--border);
@@ -1704,6 +1741,13 @@ body.select-mode .card-item {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

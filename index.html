@@ -229,6 +229,11 @@
                             <div class="toggle-option left active" data-type="custom">커스텀</div>
                             <div class="toggle-option right" data-type="original">원본</div>
                         </div>
+                        <div class="image-toggle" id="toggleFullArtBtn" title="기본/풀아트 디스플레이 모드 전환" style="margin-top: 8px;">
+                            <div class="toggle-slider"></div>
+                            <div class="toggle-option left active" data-type="default">기본</div>
+                            <div class="toggle-option right" data-type="full_art">풀아트</div>
+                        </div>
                     </div>
 
                     <div class="action-group">
@@ -282,8 +287,10 @@
                                     title="어두운 회색"></button>
                                 <button class="color-chip" data-color="#4a4a4a" style="background:#4a4a4a;"
                                     title="회색"></button>
-                                <input type="color" id="bgColorPicker" class="color-picker-input" value="#000000"
-                                    title="색상 직접 선택">
+                                <div class="color-picker-wrapper" title="색상 직접 선택">
+                                    <input type="color" id="bgColorPicker" class="color-picker-input" value="#000000">
+                                    <i data-lucide="pipette" class="color-picker-icon"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -375,11 +382,38 @@
         </div>
     </div>
 
+    <!-- 내보내기 버전 선택 모달 -->
+    <div id="exportChoiceModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-container mini-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="header-with-icon">
+                        <i data-lucide="download" class="text-gold"></i>
+                        <h3>내보내기 버전 선택</h3>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <p>어느 버전 기준으로 내보낼까요?</p>
+                </div>
+                <div class="modal-footer vertical-stack">
+                    <button id="exportNormalBtn" class="btn btn-primary btn-full">
+                        일반 버전으로 내보내기
+                    </button>
+                    <button id="exportBetaBtn" class="btn btn-secondary btn-full">
+                        베타 버전으로 내보내기
+                    </button>
+                    <button id="cancelExportChoiceBtn" class="btn btn-secondary btn-full">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="toast" class="toast"></div>
 
     <script src="assets/js/json-handler.js"></script>
     <script src="assets/js/script.js"></script>
-    <!-- <script src="assets/js/dev-tools.js"></script> -->
+    <script src="assets/js/dev-tools.js"></script>
     <script>lucide.createIcons();</script>
 </body>
 

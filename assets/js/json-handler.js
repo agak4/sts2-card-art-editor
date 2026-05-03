@@ -107,6 +107,39 @@ function askImportChoice() {
     });
 }
 
+/**
+ * 내보내기 버전 선택 모달을 열고 사용자의 선택('normal', 'beta', 'cancel')을 Promise로 반환합니다.
+ * @returns {Promise<'normal'|'beta'|'cancel'>}
+ */
+function askExportVersionChoice() {
+    return new Promise((resolve) => {
+        dom.exportChoiceModal.classList.remove('hidden');
+        lucide.createIcons();
+
+        const normalBtn = dom.exportNormalBtn;
+        const betaBtn = dom.exportBetaBtn;
+        const cancelBtn = dom.cancelExportChoiceBtn;
+        const overlay = dom.exportChoiceModal.querySelector('.modal-overlay');
+
+        const onNormal = () => { cleanup(); resolve('normal'); };
+        const onBeta = () => { cleanup(); resolve('beta'); };
+        const onCancel = () => { cleanup(); resolve('cancel'); };
+
+        function cleanup() {
+            dom.exportChoiceModal.classList.add('hidden');
+            normalBtn.removeEventListener('click', onNormal);
+            betaBtn.removeEventListener('click', onBeta);
+            cancelBtn.removeEventListener('click', onCancel);
+            overlay.removeEventListener('click', onCancel);
+        }
+
+        normalBtn.addEventListener('click', onNormal, { once: true });
+        betaBtn.addEventListener('click', onBeta, { once: true });
+        cancelBtn.addEventListener('click', onCancel, { once: true });
+        overlay.addEventListener('click', onCancel, { once: true });
+    });
+}
+
 
 /**
  * 단일 파일을 ReadableStream으로 읽어 Worker에 청크 단위로 전달하고, 처리된 카드 개수를 반환합니다.
@@ -342,6 +375,13 @@ async function buildGifFrames(card) {
             await decoder.tracks.ready;
             const track = decoder.tracks.selectedTrack;
 
+            if (!track.animated || track.frameCount <= 1) {
+                // 단일 프레임 → static으로 처리 (delay 없음)
+                const pngBase64 = await renderCardToPngBase64(card);
+                decoder.close();
+                return pngBase64 ? [{ png_base64: pngBase64 }] : [];
+            }
+
             if (track.animated) {
                 const outCanvas = document.createElement('canvas');
                 outCanvas.width = targetW;
@@ -444,9 +484,10 @@ async function buildGifFrames(card) {
 /**
  * 현재 수정된 카드들을 STS2 아트팩 형식의 JSON 파일로 생성하여 다운로드합니다.
  * @param {boolean} [selectedOnly=false] - 선택된 카드만 내보낼지 여부
+ * @param {string} [version='normal'] - 내보낼 버전 ('normal' 또는 'beta')
  * @returns {Promise<void>} 파일 생성 및 다운로드 완료 시점을 나타내는 Promise
  */
-async function exportJSON(selectedOnly = false) {
+async function exportJSON(selectedOnly = false, version = 'normal') {
     let targetCards = state.cards;
 
     if (selectedOnly) {
@@ -478,11 +519,28 @@ async function exportJSON(selectedOnly = false) {
 
             if (i % 5 === 0) await new Promise(resolve => setTimeout(resolve, 10));
 
+            let exportIsBeta = 'false';
+            if (version === 'beta') {
+                const nk = toKey(c.name_en);
+                const betaCard = BETA_NAME_MAP.get(nk);
+                if (betaCard) {
+                    exportIsBeta = betaCard.isBeta;
+                }
+            } else {
+                exportIsBeta = c.isBeta;
+            }
+
+            const exportCard = {
+                ...c,
+                isBeta: exportIsBeta
+            };
+            const computedSourcePath = getBaseSourcePath(exportCard);
+
             const obj = {
                 display_mode: c.display_mode || 'default',
                 height: c.height || 760,
-                source_path: c.source_path,
-                type: c.artType === 'gif' ? 'animated_gif' : (c.artType || 'static'),
+                source_path: computedSourcePath,
+                type: 'static',
                 updated_at: (c.updated_at || new Date().toISOString().slice(0, 19)).replace(' ', 'T'),
                 width: c.width || 1000
             };
@@ -493,8 +551,13 @@ async function exportJSON(selectedOnly = false) {
                     frames = await buildGifFrames(c);
                 }
 
-                if (frames && frames.length > 0) {
+                const isActuallyAnimated = frames && frames.length > 1 && frames.some(f => f.delay != null);
+                if (isActuallyAnimated) {
                     obj.frames = frames;
+                    obj.type = 'animated_gif';
+                } else if (frames && frames.length > 0) {
+                    obj.png_base64 = frames[0].png_base64 || c.png_base64;
+                    obj.type = 'static';
                 } else {
                     obj.png_base64 = c.png_base64;
                     obj.type = 'static';
