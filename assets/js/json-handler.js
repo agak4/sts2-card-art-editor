@@ -224,11 +224,53 @@ function applyOverrideStreaming(ov) {
     target.adjust_zoom = fileCard.adjust_zoom ?? 1.0;
     target.adjust_offset_x = fileCard.adjust_offset_x ?? 0.0;
     target.adjust_offset_y = fileCard.adjust_offset_y ?? 0.0;
+    target.background_color = fileCard.background_color || 'transparent';
     target.display_mode = fileCard.display_mode || 'default';
     target.updated_at = fileCard.updated_at;
     target.artType = fileCard.artType;
     target.art_mime = fileCard.art_mime || (fileCard.artType === 'gif' ? 'image/gif' : 'image/png');
     target.gif_frames = fileCard.gif_frames || null;
+
+    // full_art static 카드: source_png_base64를 600×847 기준으로 재렌더링
+    // 모달에서 저장할 때와 동일한 방식으로 그리드 표시 이미지를 생성
+    if (target.display_mode === 'full_art' && target.artType !== 'gif' && target.source_png_base64) {
+        const srcBase64 = target.source_png_base64;
+        const srcMime = target.art_mime || 'image/png';
+        const zoom = target.adjust_zoom;
+        const offsetX = target.adjust_offset_x;
+        const offsetY = target.adjust_offset_y;
+        const bgColor = target.background_color;
+        const targetW = 600;
+        const targetH = 847;
+
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = targetW;
+            canvas.height = targetH;
+            const ctx = canvas.getContext('2d', { alpha: true });
+
+            ctx.clearRect(0, 0, targetW, targetH);
+            if (bgColor && bgColor !== 'transparent') {
+                ctx.fillStyle = bgColor;
+                ctx.fillRect(0, 0, targetW, targetH);
+            }
+
+            const coverScale = Math.max(targetW / img.naturalWidth, targetH / img.naturalHeight);
+            const totalScale = coverScale * zoom;
+            const rW = img.naturalWidth * totalScale;
+            const rH = img.naturalHeight * totalScale;
+            const cx = targetW / 2 + offsetX * (targetW / 2);
+            const cy = targetH / 2 + offsetY * (targetH / 2);
+
+            ctx.drawImage(img, cx - rW / 2, cy - rH / 2, rW, rH);
+            target.png_base64 = compressCanvasToPngBase64(canvas);
+            updateCardBlobUrl(target);
+            replaceCardDOM(target);
+        };
+        img.src = `data:${srcMime};base64,${srcBase64}`;
+        return; // 비동기 렌더링 완료 후 위에서 처리
+    }
 
     updateCardBlobUrl(target);
     replaceCardDOM(target);
@@ -302,11 +344,12 @@ function enrichCard(raw) {
         rarity: meta?.rarity ?? 'Common',
         width: raw.width ?? (isAncient ? 606 : 1000),
         height: raw.height ?? (isAncient ? 852 : 760),
-        source_png_base64: raw.source_png_base64 || restoredBase64 || '',
+        source_png_base64: raw.edit_source_png_base64 || raw.source_png_base64 || restoredBase64 || '',
         png_base64: restoredBase64 || '',
         adjust_zoom: raw.adjust_zoom ?? 1.0,
         adjust_offset_x: raw.adjust_offset_x ?? 0.0,
         adjust_offset_y: raw.adjust_offset_y ?? 0.0,
+        background_color: raw.background_color || 'transparent',
         display_mode: raw.display_mode || 'default',
     };
 }
@@ -542,7 +585,12 @@ async function exportJSON(selectedOnly = false, version = 'normal') {
                 source_path: computedSourcePath,
                 type: 'static',
                 updated_at: (c.updated_at || new Date().toISOString().slice(0, 19)).replace(' ', 'T'),
-                width: c.width || 1000
+                width: c.width || 1000,
+                adjust_zoom: c.adjust_zoom ?? 1.0,
+                adjust_offset_x: c.adjust_offset_x ?? 0.0,
+                adjust_offset_y: c.adjust_offset_y ?? 0.0,
+                background_color: c.background_color || 'transparent',
+                edit_source_png_base64: c.source_png_base64 || ''
             };
 
             if (c.artType === 'gif') {

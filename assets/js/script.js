@@ -1464,14 +1464,19 @@ function openEditor(cardIndex) {
     dom.toggleFullArtBtn.querySelectorAll('.toggle-option').forEach(opt => {
         opt.classList.toggle('active', opt.dataset.type === (isFullArt ? 'full_art' : 'default'));
     });
+    // 풀아트 토글은 가로형 카드에서만 가능 (Ancient 제외)
+    const isLandscape = card.rarity !== 'Ancient';
+    dom.toggleFullArtBtn.style.opacity = isLandscape ? '' : '0.4';
+    dom.toggleFullArtBtn.style.pointerEvents = isLandscape ? '' : 'none';
+    dom.toggleFullArtBtn.title = isLandscape
+        ? '기본/풀아트 디스플레이 모드 전환'
+        : '풀아트는 일반 가로형 카드에서만 사용할 수 있습니다';
 
     const sts2Card = dom.cardLargePreview.querySelector('.sts2-card');
     sts2Card.className = `sts2-card ${card.rarity ? `rarity-${card.rarity.toLowerCase()}` : ''}`;
     if (isFullArt) sts2Card.classList.add('display-full-art');
 
-    const w = isFullArt || card.rarity === 'Ancient' ? 606 : 1000;
-    const h = isFullArt || card.rarity === 'Ancient' ? 852 : 760;
-    dom.modalSize.textContent = `${w} × ${h}`;
+    dom.modalSize.textContent = `${card.width || (card.rarity === 'Ancient' ? 606 : 1000)} × ${card.height || (card.rarity === 'Ancient' ? 852 : 760)}`;
 
     clearModalPreviews();
 
@@ -1527,6 +1532,10 @@ function toggleOriginalView() {
  * @returns {void}
  */
 function toggleFullArtMode() {
+    const card = state.cards[state.editingCardIndex];
+    // 가로형 카드에서만 풀아트 전환 가능 (Ancient 제외)
+    if (card.rarity === 'Ancient') return;
+
     const isCurrentlyFullArt = state.adjustState.displayMode === 'full_art';
     const newMode = isCurrentlyFullArt ? 'default' : 'full_art';
     state.adjustState.displayMode = newMode;
@@ -1536,7 +1545,6 @@ function toggleFullArtMode() {
         opt.classList.toggle('active', opt.dataset.type === newMode);
     });
 
-    const card = state.cards[state.editingCardIndex];
     const sts2Card = dom.cardLargePreview.querySelector('.sts2-card');
     const isFullArt = newMode === 'full_art';
     
@@ -1546,9 +1554,12 @@ function toggleFullArtMode() {
         sts2Card.classList.remove('display-full-art');
     }
 
-    const w = (isFullArt || card.rarity === 'Ancient') ? 606 : 1000;
-    const h = (isFullArt || card.rarity === 'Ancient') ? 852 : 760;
-    dom.modalSize.textContent = `${w} × ${h}`;
+    // 표시용: 풀아트일 때 FULL_ART_TARGET_SIZE(600x847) 표시
+    // 저장 width/height는 원본과 동일하게 유지
+    dom.modalSize.textContent = `${card.width || 1000} × ${card.height || 760}`;
+    if (isFullArt) {
+        dom.modalSize.textContent += ' (풀아트 효과 적용)';
+    }
     
     updateModalLayers(card, isFullArt);
     
@@ -1886,11 +1897,17 @@ function updateModalPreviewTransform() {
     if (!img) return;
 
     const card = state.cards[state.editingCardIndex];
-    let targetW = 1000;
-    let targetH = 760;
-    if (state.adjustState.displayMode === 'full_art' || card?.rarity === 'Ancient') {
-        targetW = 606;
-        targetH = 852;
+    // 풀아트 모드일 때 FULL_ART_TARGET_SIZE(600x847)로 렌더링, 안그래는 원본 카드 기본값 사용
+    let targetW, targetH;
+    if (state.adjustState.displayMode === 'full_art') {
+        targetW = 600;
+        targetH = 847;
+    } else if (card?.rarity === 'Ancient') {
+        targetW = card?.width || 606;
+        targetH = card?.height || 852;
+    } else {
+        targetW = card?.width || 1000;
+        targetH = card?.height || 760;
     }
 
     if (state.adjustState.isAnimated) {
@@ -1960,8 +1977,14 @@ async function renderCardToPngBase64(card) {
     return new Promise((resolve) => {
         const img = new Image();
         img.onload = () => {
-            const targetW = card.width || 1000;
-            const targetH = card.height || 760;
+            let targetW, targetH;
+            if (card.display_mode === 'full_art') {
+                targetW = 600;
+                targetH = 847;
+            } else {
+                targetW = card.width || 1000;
+                targetH = card.height || 760;
+            }
             const canvas = document.createElement('canvas');
             canvas.width = targetW;
             canvas.height = targetH;
@@ -2038,18 +2061,12 @@ async function saveChanges() {
     }
 
     if (state.adjustState.displayMode === 'full_art') {
+        // 풀아트: display_mode만 설정, width/height는 원본 유지 (게임 모드와 동일한 방식)
         card.display_mode = 'full_art';
-        card.width = 606;
-        card.height = 852;
+        // width/height 변경 안함 - CSV 원본값 유지
     } else {
         delete card.display_mode;
-        if (card.rarity === 'Ancient') {
-            card.width = 606;
-            card.height = 852;
-        } else {
-            card.width = 1000;
-            card.height = 760;
-        }
+        // width/height는 이미 CSV에서 불러온 값이 컴면 유지
     }
 
     card.updated_at = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -2086,13 +2103,7 @@ async function resetCurrentCard() {
     delete card.source_height;
     delete card.updated_at;
     delete card.display_mode;
-    if (card.rarity === 'Ancient') {
-        card.width = 606;
-        card.height = 852;
-    } else {
-        card.width = 1000;
-        card.height = 760;
-    }
+    // width/height는 CSV 원본값 유지 (게임 모드와 동일)
 
     updateCardBlobUrl(card);
     await saveToDB({ singleCard: card });
