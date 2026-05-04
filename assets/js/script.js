@@ -19,6 +19,9 @@ const CARD_FRAME_PATH = ASSET_PATH + 'card_frame/';
 const CARD_IMAGE_PATH = ASSET_PATH + 'card_images/';
 const STATIC_PATH = ASSET_PATH + 'static/';
 
+// 풀아트 인게임 확대율 (표시 전용 - 내보내기 데이터에는 적용 안 함)
+const FULL_ART_GAME_SCALE = 1.13;
+
 // 카드 프레임 경로 접두사
 const FRAME_PREFIX = CARD_FRAME_PATH + '273px-StS2_';
 
@@ -1130,7 +1133,9 @@ function createCardElement(card) {
     const offY = card.adjust_offset_y || 0.0;
 
     const isGif = card.artType === 'gif';
-    let artStyle = `position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover;`;
+    // full_art static: 인게임 확대율을 CSS transform으로만 반영 (데이터 불변)
+    const fullArtScale = (isFullArt && !isGif) ? ` transform: scale(${FULL_ART_GAME_SCALE}); transform-origin: center;` : '';
+    let artStyle = `position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover;${fullArtScale}`;
 
     if (isGif && card.source_width && card.source_height) {
         const targetW = card.width || 1000;
@@ -1964,6 +1969,15 @@ function updateModalPreviewTransform() {
     const cy = targetH / 2 + offsetY * (targetH / 2);
 
     ctx.drawImage(img, cx - rW / 2, cy - rH / 2, rW, rH);
+
+    // 풀아트 인게임 확대율을 CSS transform으로만 반영 (canvas 픽셀 데이터·내보내기 불변)
+    if (state.adjustState.displayMode === 'full_art') {
+        dom.modalPreview.style.transform = `scale(${FULL_ART_GAME_SCALE})`;
+        dom.modalPreview.style.transformOrigin = 'center';
+    } else {
+        dom.modalPreview.style.transform = '';
+        dom.modalPreview.style.transformOrigin = '';
+    }
 }
 
 /**
