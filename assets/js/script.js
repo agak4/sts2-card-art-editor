@@ -19,8 +19,9 @@ const CARD_FRAME_PATH = ASSET_PATH + 'card_frame/';
 const CARD_IMAGE_PATH = ASSET_PATH + 'card_images/';
 const STATIC_PATH = ASSET_PATH + 'static/';
 
-// 풀아트 인게임 확대율 (표시 전용 - 내보내기 데이터에는 적용 안 함)
-const FULL_ART_GAME_SCALE = 1.13;
+// 풀아트 인게임 보정값 (내보내기 및 프리뷰 공통 적용)
+const FULL_ART_STATIC_ZOOM_BOOST = 1.12;
+const FULL_ART_ANIMATED_ZOOM_BOOST = 1.22;
 
 // 카드 프레임 경로 접두사
 const FRAME_PREFIX = CARD_FRAME_PATH + '273px-StS2_';
@@ -1133,22 +1134,34 @@ function createCardElement(card) {
     const offY = card.adjust_offset_y || 0.0;
 
     const isGif = card.artType === 'gif';
-    // full_art static: 인게임 확대율을 CSS transform으로만 반영 (데이터 불변)
-    const fullArtScale = (isFullArt && !isGif) ? ` transform: scale(${FULL_ART_GAME_SCALE}); transform-origin: center;` : '';
-    let artStyle = `position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover;${fullArtScale}`;
+    let artStyle = `position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover;`;
 
     if (isGif && card.source_width && card.source_height) {
-        const targetW = card.width || 1000;
-        const targetH = card.height || 760;
+        let boost = isFullArt ? FULL_ART_ANIMATED_ZOOM_BOOST : 1.0;
+        let targetW, targetH;
+        if (isFullArt) {
+            targetW = 600;
+            targetH = 847;
+        } else if (card.rarity === 'Ancient') {
+            targetW = card.width || 606;
+            targetH = card.height || 852;
+        } else {
+            targetW = card.width || 1000;
+            targetH = card.height || 760;
+        }
         const coverScale = Math.max(targetW / card.source_width, targetH / card.source_height);
-        const totalScale = coverScale * zoom;
+        const totalScale = coverScale * zoom * boost;
         const rW = card.source_width * totalScale;
         const rH = card.source_height * totalScale;
-        const cx = targetW / 2 + offX * (targetW / 2);
-        const cy = targetH / 2 + offY * (targetH / 2);
 
-        const leftPct = ((cx - rW / 2) / targetW) * 100;
-        const topPct = ((cy - rH / 2) / targetH) * 100;
+        const extraW = Math.max(0, rW - targetW);
+        const extraH = Math.max(0, rH - targetH);
+
+        const cropX = (extraW / 2) - (offX * (extraW / 2));
+        const cropY = (extraH / 2) - (offY * (extraH / 2));
+
+        const leftPct = (-cropX / targetW) * 100;
+        const topPct = (-cropY / targetH) * 100;
         const widthPct = (rW / targetW) * 100;
         const heightPct = (rH / targetH) * 100;
 
@@ -1161,6 +1174,7 @@ function createCardElement(card) {
             object-fit: fill;
         `;
     } else if (isGif) {
+        const boost = isFullArt ? FULL_ART_ANIMATED_ZOOM_BOOST : 1.0;
         artStyle = `
             position: absolute;
             left: 50%;
@@ -1168,13 +1182,16 @@ function createCardElement(card) {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transform: translate(calc(-50% + ${offX * 50 / Math.max(0.1, zoom)}%), calc(-50% + ${offY * 50 / Math.max(0.1, zoom)}%)) scale(${zoom});
+            transform: translate(calc(-50% - ${offX * 50 / Math.max(0.1, zoom * boost)}%), calc(-50% - ${offY * 50 / Math.max(0.1, zoom * boost)}%)) scale(${zoom * boost});
         `;
+    } else {
+        const fullArtScale = (isFullArt) ? ` transform: scale(${FULL_ART_STATIC_ZOOM_BOOST}); transform-origin: center;` : '';
+        artStyle = `position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover;${fullArtScale}`;
     }
 
     const artImgId = `art-img-${index}`;
     const artContent = `
-        <div class="layer-art-container" style="width:100%;height:100%;position:relative;background-color:${bgColor};overflow:hidden;">
+        <div class="layer-art-container" style="width:98%; height:98%; background-color:${bgColor}; overflow:hidden;">
             <img id="${artImgId}" src="${artSrc}" alt="${card.name_en || card.name_kr}" 
                  style="${artStyle}"
                  onerror="this.onerror=null;this.src='${fallback}'">
@@ -1456,7 +1473,7 @@ function openEditor(cardIndex) {
     dom.modalSize.textContent = `${card.width || 1000} × ${card.height || 760}`;
     dom.modalNameKr.textContent = card.name_kr ? `${card.name_kr} (${card.name_en || ''})` : (card.name_en || '');
 
-    dom.zoomSlider.value = Math.round((card.adjust_zoom ?? 1.0) * 100);
+    dom.zoomSlider.value = Math.max(100, Math.round((card.adjust_zoom ?? 1.0) * 100));
     dom.offsetXSlider.value = Math.round((card.adjust_offset_x ?? 0.0) * 100);
     dom.offsetYSlider.value = Math.round((card.adjust_offset_y ?? 0.0) * 100);
 
@@ -1544,7 +1561,7 @@ function toggleFullArtMode() {
     const isCurrentlyFullArt = state.adjustState.displayMode === 'full_art';
     const newMode = isCurrentlyFullArt ? 'default' : 'full_art';
     state.adjustState.displayMode = newMode;
-    
+
     dom.toggleFullArtBtn.classList.toggle('is-full-art', !isCurrentlyFullArt);
     dom.toggleFullArtBtn.querySelectorAll('.toggle-option').forEach(opt => {
         opt.classList.toggle('active', opt.dataset.type === newMode);
@@ -1552,7 +1569,7 @@ function toggleFullArtMode() {
 
     const sts2Card = dom.cardLargePreview.querySelector('.sts2-card');
     const isFullArt = newMode === 'full_art';
-    
+
     if (isFullArt) {
         sts2Card.classList.add('display-full-art');
     } else {
@@ -1565,9 +1582,9 @@ function toggleFullArtMode() {
     if (isFullArt) {
         dom.modalSize.textContent += ' (풀아트 효과 적용)';
     }
-    
+
     updateModalLayers(card, isFullArt);
-    
+
     state.isDirty = true;
     updateModalPreviewTransform();
 }
@@ -1922,16 +1939,20 @@ function updateModalPreviewTransform() {
         const animImg = dom.modalPreviewAnimated;
         animImg.src = state.adjustState.sourceDataUrl;
 
+        const boost = (state.adjustState.displayMode === 'full_art') ? FULL_ART_ANIMATED_ZOOM_BOOST : 1.0;
         const coverScale = Math.max(targetW / img.naturalWidth, targetH / img.naturalHeight);
-        const totalScale = coverScale * zoom;
+        const totalScale = coverScale * zoom * boost;
         const rW = img.naturalWidth * totalScale;
         const rH = img.naturalHeight * totalScale;
 
-        const cx = targetW / 2 + offsetX * (targetW / 2);
-        const cy = targetH / 2 + offsetY * (targetH / 2);
+        const extraW = Math.max(0, rW - targetW);
+        const extraH = Math.max(0, rH - targetH);
 
-        const leftPct = ((cx - rW / 2) / targetW) * 100;
-        const topPct = ((cy - rH / 2) / targetH) * 100;
+        const cropX = (extraW / 2) - (offsetX * (extraW / 2));
+        const cropY = (extraH / 2) - (offsetY * (extraH / 2));
+
+        const leftPct = (-cropX / targetW) * 100;
+        const topPct = (-cropY / targetH) * 100;
         const widthPct = (rW / targetW) * 100;
         const heightPct = (rH / targetH) * 100;
 
@@ -1960,19 +1981,23 @@ function updateModalPreviewTransform() {
         ctx.fillRect(0, 0, targetW, targetH);
     }
 
+    const boost = (state.adjustState.displayMode === 'full_art') ? FULL_ART_STATIC_ZOOM_BOOST : 1.0;
     const coverScale = Math.max(targetW / img.naturalWidth, targetH / img.naturalHeight);
-    const totalScale = coverScale * zoom;
+    const totalScale = coverScale * zoom * boost;
     const rW = img.naturalWidth * totalScale;
     const rH = img.naturalHeight * totalScale;
 
-    const cx = targetW / 2 + offsetX * (targetW / 2);
-    const cy = targetH / 2 + offsetY * (targetH / 2);
+    const extraW = Math.max(0, rW - targetW);
+    const extraH = Math.max(0, rH - targetH);
 
-    ctx.drawImage(img, cx - rW / 2, cy - rH / 2, rW, rH);
+    const cropX = (extraW / 2) - (offsetX * (extraW / 2));
+    const cropY = (extraH / 2) - (offsetY * (extraH / 2));
+
+    ctx.drawImage(img, -cropX, -cropY, rW, rH);
 
     // 풀아트 인게임 확대율을 CSS transform으로만 반영 (canvas 픽셀 데이터·내보내기 불변)
     if (state.adjustState.displayMode === 'full_art') {
-        dom.modalPreview.style.transform = `scale(${FULL_ART_GAME_SCALE})`;
+        dom.modalPreview.style.transform = `scale(${FULL_ART_STATIC_ZOOM_BOOST})`;
         dom.modalPreview.style.transformOrigin = 'center';
     } else {
         dom.modalPreview.style.transform = '';

@@ -222,8 +222,8 @@ function applyOverrideStreaming(ov) {
     target.png_base64 = fileCard.png_base64;
     target.source_png_base64 = fileCard.source_png_base64 || fileCard.png_base64;
     target.adjust_zoom = fileCard.adjust_zoom ?? 1.0;
-    target.adjust_offset_x = fileCard.adjust_offset_x ?? 0.0;
-    target.adjust_offset_y = fileCard.adjust_offset_y ?? 0.0;
+    target.adjust_offset_x = (fileCard.adjust_offset_x ?? 0.0) * -1;
+    target.adjust_offset_y = (fileCard.adjust_offset_y ?? 0.0) * -1;
     target.background_color = fileCard.background_color || 'transparent';
     target.display_mode = fileCard.display_mode || 'default';
     target.updated_at = fileCard.updated_at;
@@ -256,14 +256,19 @@ function applyOverrideStreaming(ov) {
                 ctx.fillRect(0, 0, targetW, targetH);
             }
 
+            const boost = 1.12;
             const coverScale = Math.max(targetW / img.naturalWidth, targetH / img.naturalHeight);
-            const totalScale = coverScale * zoom;
+            const totalScale = coverScale * zoom * boost;
             const rW = img.naturalWidth * totalScale;
             const rH = img.naturalHeight * totalScale;
-            const cx = targetW / 2 + offsetX * (targetW / 2);
-            const cy = targetH / 2 + offsetY * (targetH / 2);
 
-            ctx.drawImage(img, cx - rW / 2, cy - rH / 2, rW, rH);
+            const extraW = Math.max(0, rW - targetW);
+            const extraH = Math.max(0, rH - targetH);
+
+            const cropX = (extraW / 2) - (offsetX * (extraW / 2));
+            const cropY = (extraH / 2) - (offsetY * (extraH / 2));
+
+            ctx.drawImage(img, -cropX, -cropY, rW, rH);
             target.png_base64 = compressCanvasToPngBase64(canvas);
             updateCardBlobUrl(target);
             replaceCardDOM(target);
@@ -347,8 +352,8 @@ function enrichCard(raw) {
         source_png_base64: raw.edit_source_png_base64 || raw.source_png_base64 || restoredBase64 || '',
         png_base64: restoredBase64 || '',
         adjust_zoom: raw.adjust_zoom ?? 1.0,
-        adjust_offset_x: raw.adjust_offset_x ?? 0.0,
-        adjust_offset_y: raw.adjust_offset_y ?? 0.0,
+        adjust_offset_x: (raw.adjust_offset_x ?? 0.0) * -1,
+        adjust_offset_y: (raw.adjust_offset_y ?? 0.0) * -1,
         background_color: raw.background_color || 'transparent',
         display_mode: raw.display_mode || 'default',
     };
@@ -436,19 +441,25 @@ async function buildGifFrames(card) {
                     const result = await decoder.decode({ frameIndex: i });
                     const image = result.image;
 
+                    const isFullArt = card.display_mode === 'full_art';
+                    const boost = isFullArt ? 1.22 : 1.0;
                     const coverScale = Math.max(targetW / image.displayWidth, targetH / image.displayHeight);
-                    const totalScale = coverScale * zoom;
+                    const totalScale = coverScale * zoom * boost;
                     const rW = image.displayWidth * totalScale;
                     const rH = image.displayHeight * totalScale;
-                    const cx = targetW / 2 + offsetX * (targetW / 2);
-                    const cy = targetH / 2 + offsetY * (targetH / 2);
+
+                    const extraW = Math.max(0, rW - targetW);
+                    const extraH = Math.max(0, rH - targetH);
+
+                    const cropX = (extraW / 2) - (offsetX * (extraW / 2));
+                    const cropY = (extraH / 2) - (offsetY * (extraH / 2));
 
                     outCtx.clearRect(0, 0, targetW, targetH);
                     if (card.background_color && card.background_color !== 'transparent') {
                         outCtx.fillStyle = card.background_color;
                         outCtx.fillRect(0, 0, targetW, targetH);
                     }
-                    outCtx.drawImage(image, cx - rW / 2, cy - rH / 2, rW, rH);
+                    outCtx.drawImage(image, -cropX, -cropY, rW, rH);
 
                     const pngBase64 = compressCanvasToPngBase64(outCanvas);
                     const delaySec = image.duration ? image.duration / 1000000 : 0.1;
@@ -553,7 +564,7 @@ async function exportJSON(selectedOnly = false, version = 'normal') {
     const versionVal = baseData.version || 1;
     const exportedAt = new Date().toISOString().slice(0, 19);
 
-    jsonParts.push(`{\n  "count": ${modifiedCards.length},\n  "exported_at": "${exportedAt}",\n  "format": "card_art_bundle",\n  "overrides": [\n`);
+    jsonParts.push(`{\n	"count": ${modifiedCards.length},\n	"exported_at": "${exportedAt}",\n	"format": "card_art_bundle",\n	"overrides": [\n`);
 
     try {
         for (let i = 0; i < modifiedCards.length; i++) {
@@ -580,17 +591,18 @@ async function exportJSON(selectedOnly = false, version = 'normal') {
             const computedSourcePath = getBaseSourcePath(exportCard);
 
             const obj = {
+                adjust_offset_x: (c.adjust_offset_x ?? 0.0) * -1,
+                adjust_offset_y: (c.adjust_offset_y ?? 0.0) * -1,
+                adjust_zoom: c.adjust_zoom ?? 1.0,
                 display_mode: c.display_mode || 'default',
+                edit_source_png_base64: c.source_png_base64 || '',
                 height: c.height || 760,
+                png_base64: c.png_base64,
                 source_path: computedSourcePath,
                 type: 'static',
-                updated_at: (c.updated_at || new Date().toISOString().slice(0, 19)).replace(' ', 'T'),
+                updated_at: (c.updated_at || exportedAt).replace(' ', 'T'),
                 width: c.width || 1000,
-                adjust_zoom: c.adjust_zoom ?? 1.0,
-                adjust_offset_x: c.adjust_offset_x ?? 0.0,
-                adjust_offset_y: c.adjust_offset_y ?? 0.0,
-                background_color: c.background_color || 'transparent',
-                edit_source_png_base64: c.source_png_base64 || ''
+                background_color: c.background_color || 'transparent'
             };
 
             if (c.artType === 'gif') {
@@ -614,11 +626,11 @@ async function exportJSON(selectedOnly = false, version = 'normal') {
                 obj.png_base64 = c.png_base64;
             }
 
-            const objStr = JSON.stringify(obj, null, 2);
+            const objStr = JSON.stringify(obj, null, '\t');
             const lines = objStr.split('\n');
             let indentedObj = '';
             for (let j = 0; j < lines.length; j++) {
-                indentedObj += '    ' + lines[j] + (j < lines.length - 1 ? '\n' : '');
+                indentedObj += '		' + lines[j] + (j < lines.length - 1 ? '\n' : '');
             }
             jsonParts.push(indentedObj);
 
@@ -629,7 +641,7 @@ async function exportJSON(selectedOnly = false, version = 'normal') {
             obj.frames = null;
         }
 
-        jsonParts.push(`\n  ],\n  "version": ${versionVal}\n}`);
+        jsonParts.push(`\n	],\n	"version": ${versionVal}\n}`);
 
         const now = new Date();
         const dateStr = now.getFullYear().toString() +
